@@ -1,0 +1,107 @@
+<?php
+
+use App\Http\Controllers\Api\AdminController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SocialAuthController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\QuestionController;
+use App\Http\Controllers\Api\AnswerController;
+use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\OpportunityController;
+use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ConsultationController;
+use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\PodcastController;
+use App\Http\Controllers\Api\VoteController;
+
+// Public Routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Social Authentication Routes
+Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirectToProvider']);
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
+
+Route::get('/questions', [QuestionController::class, 'index']);
+Route::get('/questions/{slug}', [QuestionController::class, 'show']);
+Route::get('/tags', [TagController::class, 'index']);
+Route::get('/opportunities', [OpportunityController::class, 'index']);
+Route::get('/opportunities/{opportunity}', [OpportunityController::class, 'show']);
+
+Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{event}', [EventController::class, 'show']);
+
+Route::get('/podcasts', [PodcastController::class, 'index']);
+Route::get('/podcasts/{podcast}', [PodcastController::class, 'show']);
+
+// Protected Routes (Sanctum Authenticated)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+
+    Route::get('/admin/users', [AdminController::class, 'index']);
+    Route::post('/admin/users', [AdminController::class, 'store']);
+    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
+    Route::delete('/admin/users/{id}', [AdminController::class, 'destroy']);
+
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+
+    // Community Q&A Routes
+    Route::post('/questions', [QuestionController::class, 'store']);
+    Route::put('/questions/{slug}', [QuestionController::class, 'update']);
+    Route::delete('/questions/{slug}', [QuestionController::class, 'destroy']);
+    
+    Route::post('/questions/{slug}/answers', [AnswerController::class, 'store']);
+    Route::patch('/answers/{id}/accept', [AnswerController::class, 'markAccepted']);
+
+    // Voting
+    Route::post('/questions/{slug}/vote', [VoteController::class, 'voteQuestion']);
+    Route::post('/answers/{id}/vote', [VoteController::class, 'voteAnswer']);
+
+    // Opportunity management for employers
+    Route::post('/opportunities', [OpportunityController::class, 'store']);
+    Route::put('/opportunities/{opportunity}', [OpportunityController::class, 'update']);
+    Route::delete('/opportunities/{opportunity}', [OpportunityController::class, 'destroy']);
+
+    // Applications routes
+    Route::get('/applications', [ApplicationController::class, 'index']);
+    Route::post('/applications', [ApplicationController::class, 'store']);
+    Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus']);
+
+    // Project CRUD
+    Route::get('/projects', [ProjectController::class, 'index']);
+    Route::get('/projects/{id}', [ProjectController::class, 'show']);
+    Route::post('/projects', [ProjectController::class, 'store']);
+    Route::put('/projects/{id}', [ProjectController::class, 'update']);
+    Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
+
+    // Project Invitations & Membership
+    Route::post('/projects/{id}/invitations', [ProjectController::class, 'generateInvite']);
+    Route::post('/projects/join/{token}', [ProjectController::class, 'joinProject']);
+    Route::delete('/projects/{id}/members/{userId}', [ProjectController::class, 'removeMember']);
+
+    // File Actions
+    Route::post('/projects/{id}/files', [ProjectController::class, 'uploadFile']);
+    Route::delete('/files/{fileId}', [ProjectController::class, 'deleteFile']);
+
+    // Feedback Actions
+    Route::post('/projects/{id}/feedback', [ProjectController::class, 'addFeedback']);
+    Route::delete('/feedback/{feedbackId}', [ProjectController::class, 'deleteFeedback']);
+
+    // Events
+    Route::post('/events', [EventController::class, 'store']);
+    Route::post('/events/{event}/register', [EventController::class, 'register']);
+    Route::delete('/events/{event}/register', [EventController::class, 'unregister']);
+
+    // Podcasts
+    Route::post('/podcasts', [PodcastController::class, 'store']);
+    Route::delete('/podcasts/{podcast}', [PodcastController::class, 'destroy']);
+
+    // Advisory Consultation Routes
+    Route::get('/consultations', [ConsultationController::class, 'index']);
+    Route::post('/consultations', [ConsultationController::class, 'store']);
+});
