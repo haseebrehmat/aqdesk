@@ -41,6 +41,27 @@ Docker Compose supplies `APP_URL`, `FRONTEND_URL`, `VITE_BACKEND_URL`, and
 `VITE_API_PROXY_TARGET` directly to the containers, so Docker does not require
 local `.env` files for these URLs.
 
+## Google and GitHub sign-in
+
+The backend loads optional OAuth credentials from the ignored `server/.env`
+file. Copy the template, then set the credentials issued by each provider:
+
+```bash
+cp server/.env.example server/.env
+```
+
+For the local Docker stack, register these exact provider callback URLs:
+
+- Google: `http://localhost:8080/api/auth/google/callback`
+- GitHub: `http://localhost:8080/api/auth/github/callback`
+
+Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`,
+`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `GITHUB_REDIRECT_URI` in
+`server/.env`, then recreate the backend with `docker compose up -d backend`.
+Only fully configured providers are shown on the sign-in page. Production
+deployments must replace both callback URLs and `FRONTEND_URL` with HTTPS URLs
+on the deployed domains.
+
 For non-Docker local development, create untracked environment files from the
 templates:
 

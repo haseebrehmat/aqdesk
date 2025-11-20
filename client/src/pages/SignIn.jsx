@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import {
@@ -19,8 +19,15 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [socialProviders, setSocialProviders] = useState({});
   const navigate = useNavigate();
   const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8000").replace(/\/$/, "");
+
+  useEffect(() => {
+    api.get("/auth/providers")
+      .then(({ data }) => setSocialProviders(data.providers || {}))
+      .catch(() => setSocialProviders({}));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -217,10 +224,16 @@ export default function SignIn() {
             </button>
           </form>
 
-          <div className="mt-6 border-t border-slate-800 pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <a href={`${backendUrl}/api/auth/google/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with Google</a>
-            <a href={`${backendUrl}/api/auth/github/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with GitHub</a>
-          </div>
+          {(socialProviders.google || socialProviders.github) && (
+            <div className="mt-6 border-t border-slate-800 pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {socialProviders.google && (
+                <a href={`${backendUrl}/api/auth/google/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with Google</a>
+              )}
+              {socialProviders.github && (
+                <a href={`${backendUrl}/api/auth/github/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with GitHub</a>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

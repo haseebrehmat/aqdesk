@@ -24,6 +24,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe']);
 
 // Social Authentication Routes
+Route::get('/auth/providers', [SocialAuthController::class, 'providers']);
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirectToProvider']);
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
 Route::post('/auth/exchange', [SocialAuthController::class, 'exchange']);
