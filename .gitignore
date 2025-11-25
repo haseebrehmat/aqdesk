@@ -2,4 +2,7 @@
 graphify-out/
 
 # Locally generated document deliverables
-docs/AQDesk_Design_Document_Complete.docx
+docs/
+
+# Local Docker development environment
+docker/
