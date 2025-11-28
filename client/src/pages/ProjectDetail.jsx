@@ -20,6 +20,8 @@ import {
   Check,
 } from "lucide-react";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
 export default function ProjectDetail() {
   const { id } = useParams();
   const { addToast } = useToast();
@@ -347,7 +349,7 @@ export default function ProjectDetail() {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <a
-                        href={`http://localhost:8000/storage/${file.file_path}`}
+                        href={`${backendUrl}/storage/${file.file_path}`}
                         target="_blank"
                         rel="noreferrer"
                         className="p-1.5 bg-slate-800 text-slate-300 hover:text-white rounded-lg transition"

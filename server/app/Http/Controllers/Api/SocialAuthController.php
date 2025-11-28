@@ -47,10 +47,14 @@ class SocialAuthController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
 
             // Redirect back to frontend dashboard/handler with token
-            return redirect()->to("http://localhost:5173/auth/success?token={$token}&user=" . urlencode(json_encode($user->load(['role', 'profile']))));
+            $frontendUrl = rtrim(config('app.frontend_url'), '/');
+
+            return redirect()->to("{$frontendUrl}/auth/success?token={$token}&user=" . urlencode(json_encode($user->load(['role', 'profile']))));
 
         } catch (\Exception $e) {
-            return redirect()->to("http://localhost:5173/login?error=Social+login+failed");
+            $frontendUrl = rtrim(config('app.frontend_url'), '/');
+
+            return redirect()->to("{$frontendUrl}/login?error=Social+login+failed");
         }
     }
 }

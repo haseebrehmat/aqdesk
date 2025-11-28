@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import opportunityService from '../../services/opportunityService';
 import { FileText, Building2, Calendar, CheckCircle } from 'lucide-react';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
 export default function ApplicationManagement() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +87,7 @@ export default function ApplicationManagement() {
 
               <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
                 <a
-                  href={`http://localhost:8000/storage/${app.resume_path}`}
+                  href={`${backendUrl}/storage/${app.resume_path}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-xs font-medium text-blue-400 hover:text-blue-300 transition flex items-center gap-1.5"
