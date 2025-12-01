@@ -19,7 +19,6 @@ export default function SignUp() {
     name: "",
     email: "",
     password: "",
-    role_id: 3,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +48,7 @@ export default function SignUp() {
         navigate(`/projects/join/${pendingInvite}`);
       } else {
         // Role-based redirection after sign up
-        if (user.role_id === 1 || user.role?.role_name === "Administrator") {
+        if (user.role?.role_name?.toLowerCase() === "admin") {
           navigate("/admin/dashboard");
         } else {
           navigate("/dashboard");

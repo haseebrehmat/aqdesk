@@ -37,14 +37,16 @@ Route::get('/podcasts', [PodcastController::class, 'index']);
 Route::get('/podcasts/{podcast}', [PodcastController::class, 'show']);
 
 // Protected Routes (Sanctum Authenticated)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
-    Route::get('/admin/users', [AdminController::class, 'index']);
-    Route::post('/admin/users', [AdminController::class, 'store']);
-    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
-    Route::delete('/admin/users/{id}', [AdminController::class, 'destroy']);
+    Route::middleware('role:Admin')->prefix('admin')->group(function () {
+        Route::get('/users', [AdminController::class, 'index']);
+        Route::post('/users', [AdminController::class, 'store']);
+        Route::put('/users/{id}', [AdminController::class, 'updateUser']);
+        Route::delete('/users/{id}', [AdminController::class, 'destroy']);
+    });
 
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'show']);
@@ -63,9 +65,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/answers/{id}/vote', [VoteController::class, 'voteAnswer']);
 
     // Opportunity management for employers
-    Route::post('/opportunities', [OpportunityController::class, 'store']);
-    Route::put('/opportunities/{opportunity}', [OpportunityController::class, 'update']);
-    Route::delete('/opportunities/{opportunity}', [OpportunityController::class, 'destroy']);
+    Route::middleware('role:Expert,Admin')->group(function () {
+        Route::post('/opportunities', [OpportunityController::class, 'store']);
+        Route::put('/opportunities/{opportunity}', [OpportunityController::class, 'update']);
+        Route::delete('/opportunities/{opportunity}', [OpportunityController::class, 'destroy']);
+        Route::post('/events', [EventController::class, 'store']);
+        Route::post('/podcasts', [PodcastController::class, 'store']);
+    });
 
     // Applications routes
     Route::get('/applications', [ApplicationController::class, 'index']);
@@ -93,12 +99,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/feedback/{feedbackId}', [ProjectController::class, 'deleteFeedback']);
 
     // Events
-    Route::post('/events', [EventController::class, 'store']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::delete('/events/{event}/register', [EventController::class, 'unregister']);
 
     // Podcasts
-    Route::post('/podcasts', [PodcastController::class, 'store']);
     Route::delete('/podcasts/{podcast}', [PodcastController::class, 'destroy']);
 
     // Advisory Consultation Routes

@@ -30,7 +30,7 @@ class SocialAuthController extends Controller
                 $defaultRole = Role::where('role_name', 'Standard User')->first();
 
                 $user = User::create([
-                    'role_id' => $defaultRole ? $defaultRole->id : 4,
+                    'role_id' => $defaultRole?->id ?? Role::query()->firstOrFail()->id,
                     'name' => $socialUser->getName() ?? $socialUser->getNickname(),
                     'email' => $socialUser->getEmail(),
                     'password' => Hash::make(Str::random(24)),
@@ -42,6 +42,10 @@ class SocialAuthController extends Controller
                     'bio' => 'Imported via ' . ucfirst($provider),
                     'skills_tags' => ''
                 ]);
+            }
+
+            if (!$user->is_active) {
+                return redirect()->to(rtrim(config('app.frontend_url'), '/') . '/login?error=Account+is+inactive');
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;

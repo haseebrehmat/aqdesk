@@ -41,7 +41,7 @@ export default function SignIn() {
       } else {
         // Role-based redirection
         // Assuming role_id 1 or role_name === 'Administrator' goes to admin dashboard
-        if (user.role_id === 1 || user.role?.role_name === "Administrator") {
+        if (user.role?.role_name?.toLowerCase() === "admin") {
           navigate("/admin/dashboard");
         } else {
           navigate("/dashboard"); // Standard user dashboard
