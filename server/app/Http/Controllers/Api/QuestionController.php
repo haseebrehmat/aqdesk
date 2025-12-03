@@ -8,6 +8,7 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
 {
@@ -30,21 +31,30 @@ class QuestionController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|min:10|max:255',
             'body' => 'required|string|min:20',
-            'tags' => 'nullable|array',
+            'tags' => 'nullable|array|max:5',
+            'tags.*' => 'integer|distinct|exists:tags,id',
             'custom_tags' => 'nullable|string',
         ]);
 
-        $question = Question::create([
-            'user_id' => $request->user()->id,
-            'title' => $validated['title'],
-            'body' => $validated['body'],
-            'slug' => Str::slug($validated['title']) . '-' . time(),
-        ]);
-
         $tagIds = $this->resolveTagIds($validated['tags'] ?? [], $validated['custom_tags'] ?? null);
-        if (!empty($tagIds)) {
-            $question->tags()->sync($tagIds);
+        if (count($tagIds) > 5) {
+            throw ValidationException::withMessages([
+                'tags' => ['A question may have at most five tags.'],
+            ]);
         }
+
+        $question = DB::transaction(function () use ($request, $validated, $tagIds) {
+            $question = Question::create([
+                'user_id' => $request->user()->id,
+                'title' => $validated['title'],
+                'body' => $validated['body'],
+                'slug' => Str::slug($validated['title']) . '-' . Str::lower(Str::random(8)),
+            ]);
+
+            $question->tags()->sync($tagIds);
+
+            return $question;
+        });
 
         return response()->json([
             'message' => 'Question created successfully',
@@ -84,7 +94,8 @@ class QuestionController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|min:10|max:255',
             'body' => 'required|string|min:20',
-            'tags' => 'nullable|array',
+            'tags' => 'nullable|array|max:5',
+            'tags.*' => 'integer|distinct|exists:tags,id',
             'custom_tags' => 'nullable|string',
         ]);
 
@@ -95,6 +106,11 @@ class QuestionController extends Controller
         ]);
 
         $tagIds = $this->resolveTagIds($validated['tags'] ?? [], $validated['custom_tags'] ?? null);
+        if (count($tagIds) > 5) {
+            throw ValidationException::withMessages([
+                'tags' => ['A question may have at most five tags.'],
+            ]);
+        }
         $question->tags()->sync($tagIds);
 
         return response()->json([

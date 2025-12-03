@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\Answer;
 use App\Models\Vote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
@@ -28,20 +29,26 @@ class VoteController extends Controller
 
     private function handleVote($userId, $model, int $type)
     {
-        $existingVote = $model->votes()->where('user_id', $userId)->first();
-
-        if ($existingVote) {
-            if ($existingVote->vote_type === $type) {
-                $existingVote->delete(); // Remove vote if clicked again
-            } else {
-                $existingVote->update(['vote_type' => $type]); // Switch vote direction
-            }
-        } else {
-            $model->votes()->create([
-                'user_id' => $userId,
-                'vote_type' => $type,
-            ]);
+        if ((int) $model->user_id === (int) $userId) {
+            return response()->json(['message' => 'You cannot vote on your own content.'], 422);
         }
+
+        DB::transaction(function () use ($model, $userId, $type) {
+            $existingVote = $model->votes()->where('user_id', $userId)->lockForUpdate()->first();
+
+            if ($existingVote) {
+                if ((int) $existingVote->vote_type === $type) {
+                    $existingVote->delete();
+                } else {
+                    $existingVote->update(['vote_type' => $type]);
+                }
+            } else {
+                $model->votes()->create([
+                    'user_id' => $userId,
+                    'vote_type' => $type,
+                ]);
+            }
+        });
 
         return response()->json([
             'net_votes' => $model->votes()->sum('vote_type'),
