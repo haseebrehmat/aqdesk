@@ -10,7 +10,6 @@ export default function OpportunityForm() {
     location: '',
     job_type: 'Full-Time',
     description: '',
-    status: 'Open',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -42,7 +41,7 @@ export default function OpportunityForm() {
       {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">{error}</div>}
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-8 shadow-sm space-y-6">
-        <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>
           <input
             type="text"
@@ -55,7 +54,7 @@ export default function OpportunityForm() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
             <input
@@ -95,19 +94,11 @@ export default function OpportunityForm() {
               <option value="Contract">Contract</option>
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </div>
         </div>
+
+        <p className="text-sm text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+          New listings are reviewed by an administrator before they become public.
+        </p>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>

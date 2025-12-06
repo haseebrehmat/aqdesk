@@ -53,7 +53,7 @@ class ApplicationController extends Controller
     {
         $request->validate([
             'opportunity_id' => 'required|exists:opportunities,id',
-            'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
+            'resume' => 'required|file|mimes:pdf|max:2048',
         ]);
 
         $opportunityId = $request->opportunity_id;
@@ -91,7 +91,9 @@ class ApplicationController extends Controller
     {
         $application->load('opportunity');
 
-        if ($application->opportunity->posted_by !== Auth::id()) {
+        $user = Auth::user()->load('role');
+        $isAdmin = strtolower((string) $user->role?->role_name) === 'admin';
+        if (!$isAdmin && $application->opportunity->posted_by !== $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 

@@ -46,6 +46,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('/users', [AdminController::class, 'store']);
         Route::put('/users/{id}', [AdminController::class, 'updateUser']);
         Route::delete('/users/{id}', [AdminController::class, 'destroy']);
+        Route::patch('/opportunities/{opportunity}/status', [OpportunityController::class, 'moderate']);
     });
 
     // Profile Routes
