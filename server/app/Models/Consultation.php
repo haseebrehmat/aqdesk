@@ -8,6 +8,11 @@ class Consultation extends Model
 {
     protected $fillable = ['client_id', 'expert_id', 'booking_slot', 'status'];
 
+    protected function casts(): array
+    {
+        return ['booking_slot' => 'datetime'];
+    }
+
     public function client()
     {
         return $this->belongsTo(User::class, 'client_id');

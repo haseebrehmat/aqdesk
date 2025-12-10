@@ -5,13 +5,20 @@ import { UserCheck, Clock, CheckCircle2, Shield } from 'lucide-react';
 
 export default function Consulting() {
   const [consultations, setConsultations] = useState([]);
-  const [expertId, setExpertId] = useState('2'); // Pre-seeded Expert ID (Mr. Abdullah Qamar)
+  const [experts, setExperts] = useState([]);
+  const [expertId, setExpertId] = useState('');
   const [bookingSlot, setBookingSlot] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
 
   useEffect(() => {
     fetchConsultations();
+    api.get('/consultations/experts').then(({ data }) => {
+      setExperts(data);
+      if (data[0]) setExpertId(String(data[0].id));
+    });
   }, []);
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   const fetchConsultations = async () => {
     try {
@@ -32,8 +39,22 @@ export default function Consulting() {
       setStatusMsg('Consultation request submitted successfully!');
       fetchConsultations();
     } catch (err) {
-      console.error('Booking error', err);
+      setStatusMsg(err.response?.data?.message || 'Unable to book that consultation slot.');
     }
+  };
+
+  const updateStatus = async (id, status) => {
+    await api.patch(`/consultations/${id}/status`, { status });
+    fetchConsultations();
+  };
+
+  const saveProposal = async (id) => {
+    const terms = window.prompt('Enter the proposal terms');
+    if (!terms) return;
+    const budget = window.prompt('Enter the proposed budget', '0');
+    if (budget === null) return;
+    await api.put(`/consultations/${id}/proposal`, { terms, budget });
+    fetchConsultations();
   };
 
   return (
@@ -66,16 +87,18 @@ export default function Consulting() {
 
             <form onSubmit={handleBookConsultation} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Select Expert ID
+                <label htmlFor="consultation-expert" className="block text-xs font-medium text-slate-300 mb-1">
+                  Select Expert
                 </label>
-                <input
-                  type="number"
+                <select
+                  id="consultation-expert"
                   required
                   value={expertId}
                   onChange={(e) => setExpertId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                />
+                >
+                  {experts.map((expert) => <option key={expert.id} value={expert.id}>{expert.name}</option>)}
+                </select>
               </div>
 
               <div>
@@ -115,11 +138,22 @@ export default function Consulting() {
                       <Clock className="w-4 h-4 text-blue-400" />
                       <span>{new Date(item.booking_slot).toLocaleString()}</span>
                     </div>
-                    <span className="text-xs text-slate-400 mt-1 block">Expert ID: {item.expert_id}</span>
+                    <span className="text-xs text-slate-400 mt-1 block">
+                      Expert: {item.expert?.name || item.expert_id} · Client: {item.client?.name || item.client_id}
+                    </span>
+                    {item.proposal && <p className="text-xs text-slate-300 mt-2">Proposal: {item.proposal.terms} (${item.proposal.budget})</p>}
                   </div>
-                  <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-xs font-medium">
-                    {item.status}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-xs font-medium">{item.status}</span>
+                    {Number(item.expert_id) === Number(currentUser.id) && (
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {['Approved', 'Active', 'Completed', 'Rejected'].map((status) => (
+                          <button key={status} onClick={() => updateStatus(item.id, status)} className="text-xs px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">{status}</button>
+                        ))}
+                        <button onClick={() => saveProposal(item.id)} className="text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-500">Proposal</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))
             )}

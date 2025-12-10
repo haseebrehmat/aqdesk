@@ -108,5 +108,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Advisory Consultation Routes
     Route::get('/consultations', [ConsultationController::class, 'index']);
+    Route::get('/consultations/experts', [ConsultationController::class, 'experts']);
     Route::post('/consultations', [ConsultationController::class, 'store']);
+    Route::patch('/consultations/{consultation}/status', [ConsultationController::class, 'updateStatus']);
+    Route::put('/consultations/{consultation}/proposal', [ConsultationController::class, 'saveProposal']);
 });
