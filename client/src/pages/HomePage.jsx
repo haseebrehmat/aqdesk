@@ -344,12 +344,12 @@ export default function HomePage() {
 
           {/* Actual Platform Seed Inspector Widget */}
           <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6 border border-slate-800 font-mono">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2 min-w-0">
                 <Server className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-slate-200">database/seeders/DatabaseSeeder.php</span>
+                <span className="text-xs font-bold text-slate-200 truncate">database/seeders/DatabaseSeeder.php</span>
               </div>
-              <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
+              <span className="shrink-0 flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Seeded
               </span>
             </div>

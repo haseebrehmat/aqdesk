@@ -65,7 +65,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 flex flex-col lg:flex-row font-sans overflow-x-hidden">
+    <main className="min-h-screen w-full bg-slate-950 flex flex-col lg:flex-row font-sans overflow-x-hidden">
       {/* Left Hero Panel */}
       <div className="lg:w-1/2 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 p-6 sm:p-10 lg:p-16 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -123,9 +123,9 @@ export default function SignUp() {
       {/* Right Form Panel */}
       <div className="lg:w-1/2 p-6 sm:p-10 lg:p-16 flex flex-col justify-center bg-slate-950 relative">
         <div className="max-w-md mx-auto w-full">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
             Create Account
-          </h2>
+          </h1>
           <p className="text-sm text-slate-300 mt-2 mb-8">
             Already registered?{" "}
             <Link
@@ -240,6 +240,6 @@ export default function SignUp() {
           </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
