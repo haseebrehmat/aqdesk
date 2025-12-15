@@ -26,9 +26,16 @@ Artisan::command('mail:check {--send-to= : Send a synchronous SMTP verification 
         $missing = $missing->merge([
             'MAIL_HOST' => $smtp['host'] ?? null,
             'MAIL_PORT' => $smtp['port'] ?? null,
-            'MAIL_USERNAME' => $smtp['username'] ?? null,
-            'MAIL_PASSWORD' => $smtp['password'] ?? null,
         ]);
+
+        $usernameMissing = blank($smtp['username'] ?? null);
+        $passwordMissing = blank($smtp['password'] ?? null);
+        if ($usernameMissing !== $passwordMissing) {
+            $missing = $missing->merge([
+                'MAIL_USERNAME' => $smtp['username'] ?? null,
+                'MAIL_PASSWORD' => $smtp['password'] ?? null,
+            ]);
+        }
     }
 
     $missing = $missing->filter(fn ($value) => blank($value))->keys();
@@ -67,4 +74,4 @@ Artisan::command('mail:check {--send-to= : Send a synchronous SMTP verification 
     $this->info("SMTP verification message sent to {$recipient}.");
 
     return self::SUCCESS;
-})->purpose('Validate production SMTP configuration and delivery');
+})->purpose('Validate SMTP configuration and delivery');

@@ -35,6 +35,15 @@ class MailConfigurationTest extends TestCase
             ->assertSuccessful();
     }
 
+    public function test_mail_check_accepts_an_smtp_server_without_authentication(): void
+    {
+        $this->configureSmtp(password: null, username: null);
+
+        $this->artisan('mail:check')
+            ->expectsOutputToContain('SMTP configuration is complete')
+            ->assertSuccessful();
+    }
+
     public function test_mail_check_sends_a_synchronous_verification_message(): void
     {
         Mail::fake();
@@ -51,7 +60,7 @@ class MailConfigurationTest extends TestCase
         );
     }
 
-    private function configureSmtp(?string $password = 'smtp-password'): void
+    private function configureSmtp(?string $password = 'smtp-password', ?string $username = 'smtp-user'): void
     {
         config([
             'mail.default' => 'smtp',
@@ -60,7 +69,7 @@ class MailConfigurationTest extends TestCase
             'mail.mailers.smtp.url' => null,
             'mail.mailers.smtp.host' => 'smtp.example.com',
             'mail.mailers.smtp.port' => 587,
-            'mail.mailers.smtp.username' => 'smtp-user',
+            'mail.mailers.smtp.username' => $username,
             'mail.mailers.smtp.password' => $password,
         ]);
     }
