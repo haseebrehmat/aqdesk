@@ -2,7 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useLayout } from '../context/LayoutContext';
 import { 
   Sparkles, MessageSquare, FolderKanban, Briefcase, Calendar, 
-  Mic2, UserCheck, Shield, LayoutDashboard, LogOut, ChevronLeft, ChevronRight, PanelLeftClose
+  Mic2, UserCheck, Shield, LayoutDashboard, LogOut, ChevronLeft, ChevronRight, PanelLeftClose, Mail
 } from 'lucide-react';
 
 export default function AuthSidebar() {
@@ -38,6 +38,7 @@ export default function AuthSidebar() {
   // Dynamically add Admin User Management panel if the user is an admin
   if (isAdmin) {
     navItems.push({ label: 'User Management', path: '/admin/users', icon: Shield });
+    navItems.push({ label: 'Newsletter', path: '/admin/newsletters', icon: Mail });
   }
 
   const sidebarWidth = isSidebarExpanded ? 'w-64' : 'w-20';

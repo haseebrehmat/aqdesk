@@ -38,6 +38,7 @@ import EventCreate from './pages/Events/Create';
 import PodcastShow from './pages/Podcasts/Show';
 import PodcastCreate from './pages/Podcasts/Create';
 import PublicFooter from './components/PublicFooter';
+import NewsletterAdmin from './pages/NewsletterAdmin';
 
 // Layout for Guest (Public) Website Pages
 function PublicLayout() {
@@ -110,6 +111,7 @@ export default function App() {
             {/* Admin Control Panel */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminDashboard />} />
+            <Route path="/admin/newsletters" element={<NewsletterAdmin />} />
 
             {/* Account Settings & Workspaces */}
             <Route path="/profile" element={<Profile />} />

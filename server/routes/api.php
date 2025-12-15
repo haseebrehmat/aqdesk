@@ -15,10 +15,12 @@ use App\Http\Controllers\Api\ConsultationController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\PodcastController;
 use App\Http\Controllers\Api\VoteController;
+use App\Http\Controllers\Api\NewsletterController;
 
 // Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe']);
 
 // Social Authentication Routes
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirectToProvider']);
@@ -47,6 +49,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::put('/users/{id}', [AdminController::class, 'updateUser']);
         Route::delete('/users/{id}', [AdminController::class, 'destroy']);
         Route::patch('/opportunities/{opportunity}/status', [OpportunityController::class, 'moderate']);
+        Route::get('/newsletter/subscribers', [NewsletterController::class, 'index']);
+        Route::post('/newsletter/campaigns', [NewsletterController::class, 'broadcast']);
     });
 
     // Profile Routes

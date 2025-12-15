@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, Heart } from 'lucide-react';
+import api from '../api/axios';
 
 // Direct SVG path components for brands
 const GithubIcon = ({ size = 16, className = "" }) => (
@@ -22,6 +23,20 @@ const LinkedinIcon = ({ size = 16, className = "" }) => (
 );
 
 export default function PublicFooter() {
+  const [email, setEmail] = useState('');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
+
+  const subscribe = async (event) => {
+    event.preventDefault();
+    try {
+      const { data } = await api.post('/newsletter/subscribe', { email });
+      setNewsletterMessage(data.message);
+      setEmail('');
+    } catch (error) {
+      setNewsletterMessage(error.response?.data?.message || 'Subscription failed. Please check the email address.');
+    }
+  };
+
   return (
     <footer className="bg-white border-t border-slate-200 text-slate-600 font-sans mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
@@ -78,16 +93,22 @@ export default function PublicFooter() {
           <div className="space-y-3">
             <h4 className="text-slate-900 font-bold text-xs uppercase tracking-wider">Stay Updated</h4>
             <p className="text-slate-500 text-xs">Subscribe to our developer broadcast newsletter for weekly tech updates.</p>
-            <div className="flex flex-col gap-2">
+            <form onSubmit={subscribe} className="flex flex-col gap-2">
+              <label htmlFor="newsletter-email" className="sr-only">Email address for newsletter</label>
               <input
+                id="newsletter-email"
                 type="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="name@example.com"
                 className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600"
               />
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-xs">
+              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-xs">
                 Subscribe
               </button>
-            </div>
+              {newsletterMessage && <p role="status" className="text-xs text-slate-600">{newsletterMessage}</p>}
+            </form>
           </div>
 
         </div>
