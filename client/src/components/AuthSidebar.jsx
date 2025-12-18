@@ -73,6 +73,7 @@ export default function AuthSidebar() {
             <button 
               type="button"
               onClick={handleToggle}
+              aria-label={isSidebarExpanded ? "Collapse sidebar" : "Expand sidebar"}
               className="hidden lg:flex p-1 rounded-md text-slate-500 hover:text-white hover:bg-slate-800/80 transition shrink-0 cursor-pointer"
               title={isSidebarExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
             >
@@ -82,6 +83,7 @@ export default function AuthSidebar() {
             <button 
               type="button"
               onClick={(e) => { e.stopPropagation(); closeSidebar(); }}
+              aria-label="Close sidebar"
               className="flex lg:hidden p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-950/50 transition shrink-0"
             >
               <PanelLeftClose className="w-5 h-5" />
@@ -149,6 +151,7 @@ export default function AuthSidebar() {
             <button 
               type="button"
               onClick={handleLogout}
+              aria-label="Sign out"
               className={`p-2 text-slate-500 hover:text-red-400 hover:bg-red-950/50 rounded-lg transition shrink-0 cursor-pointer ${isSidebarExpanded ? '' : 'w-full flex justify-center'}`}
               title="Sign Out"
             >

@@ -137,7 +137,7 @@ export default function SignUp() {
           </p>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-xs sm:text-sm mb-6 flex items-start space-x-2">
+            <div role="alert" className="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-xs sm:text-sm mb-6 flex items-start space-x-2">
               <span className="font-semibold shrink-0">Error:</span>
               <span>{error}</span>
             </div>
@@ -146,7 +146,7 @@ export default function SignUp() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name Field */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
+              <label htmlFor="register-name" className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
                 Full Name
               </label>
               <div className="relative">
@@ -154,6 +154,7 @@ export default function SignUp() {
                   <User className="w-4 h-4" />
                 </div>
                 <input
+                  id="register-name"
                   type="text"
                   name="name"
                   required
@@ -167,7 +168,7 @@ export default function SignUp() {
 
             {/* Email Field */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
+              <label htmlFor="register-email" className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -175,6 +176,7 @@ export default function SignUp() {
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
+                  id="register-email"
                   type="email"
                   name="email"
                   required
@@ -188,7 +190,7 @@ export default function SignUp() {
 
             {/* Password Field */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
+              <label htmlFor="register-password" className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -196,6 +198,7 @@ export default function SignUp() {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
+                  id="register-password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   required
@@ -207,6 +210,7 @@ export default function SignUp() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition"
                 >
                   {showPassword ? (

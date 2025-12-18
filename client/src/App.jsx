@@ -44,8 +44,9 @@ import NewsletterAdmin from './pages/NewsletterAdmin';
 function PublicLayout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <PublicNavbar />
-      <main className="flex-1">
+      <main id="main-content" tabIndex="-1" className="flex-1">
         <Outlet />
       </main>
       <PublicFooter />
@@ -61,10 +62,11 @@ function ProtectedLayout() {
   return (
     <LayoutProvider>
       <div className="min-h-screen flex bg-slate-950">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <AuthSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <AuthLayoutHeader />
-          <main className="flex-1 overflow-y-auto">
+          <main id="main-content" tabIndex="-1" className="flex-1 overflow-y-auto">
             <Outlet />
           </main>
         </div>

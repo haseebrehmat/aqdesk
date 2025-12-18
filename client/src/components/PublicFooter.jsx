@@ -56,13 +56,13 @@ export default function PublicFooter() {
               AQDesk is an all-in-one collaborative learning platform unifying technical Q&A, workspace management, mentorship, and career placements for modern software developers.
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <a href="https://github.com" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
+              <a href="https://github.com" aria-label="AQDesk on GitHub" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
                 <GithubIcon size={16} />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
+              <a href="https://twitter.com" aria-label="AQDesk on X" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
                 <XIcon size={16} />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
+              <a href="https://linkedin.com" aria-label="AQDesk on LinkedIn" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
                 <LinkedinIcon size={16} />
               </a>
             </div>

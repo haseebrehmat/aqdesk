@@ -130,7 +130,7 @@ export default function SignIn() {
           </p>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-xs sm:text-sm mb-6 flex items-start space-x-2">
+            <div role="alert" className="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-xs sm:text-sm mb-6 flex items-start space-x-2">
               <span className="font-semibold shrink-0">Error:</span>
               <span>{error}</span>
             </div>
@@ -139,7 +139,7 @@ export default function SignIn() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
+              <label htmlFor="login-email" className="block text-xs sm:text-sm font-medium text-slate-200 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -147,6 +147,7 @@ export default function SignIn() {
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
+                  id="login-email"
                   type="email"
                   required
                   placeholder="name@vu.edu.pk"
@@ -160,7 +161,7 @@ export default function SignIn() {
             {/* Password Field */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs sm:text-sm font-medium text-slate-200">
+                <label htmlFor="login-password" className="block text-xs sm:text-sm font-medium text-slate-200">
                   Password
                 </label>
                 <a
@@ -175,6 +176,7 @@ export default function SignIn() {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
+                  id="login-password"
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
@@ -185,6 +187,7 @@ export default function SignIn() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition"
                 >
                   {showPassword ? (

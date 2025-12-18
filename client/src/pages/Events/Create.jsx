@@ -43,8 +43,9 @@ export default function EventCreate() {
             <h1 className="text-2xl font-bold mb-6">Create Event</h1>
             <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
                 <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Title</label>
+                    <label htmlFor="event-title" className="block text-xs font-medium text-slate-300 mb-1">Title</label>
                     <input
+                        id="event-title"
                         type="text"
                         value={form.title}
                         onChange={e => setForm({ ...form, title: e.target.value })}
@@ -54,8 +55,9 @@ export default function EventCreate() {
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Description</label>
+                    <label htmlFor="event-description" className="block text-xs font-medium text-slate-300 mb-1">Description</label>
                     <textarea
+                        id="event-description"
                         rows={4}
                         value={form.description}
                         onChange={e => setForm({ ...form, description: e.target.value })}
@@ -64,8 +66,9 @@ export default function EventCreate() {
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Webinar URL</label>
+                    <label htmlFor="event-url" className="block text-xs font-medium text-slate-300 mb-1">Webinar URL</label>
                     <input
+                        id="event-url"
                         type="url"
                         value={form.webinar_url}
                         onChange={e => setForm({ ...form, webinar_url: e.target.value })}
@@ -76,8 +79,9 @@ export default function EventCreate() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-xs font-medium text-slate-300 mb-1">Scheduled At</label>
+                        <label htmlFor="event-start" className="block text-xs font-medium text-slate-300 mb-1">Scheduled At</label>
                         <input
+                            id="event-start"
                             type="datetime-local"
                             value={form.scheduled_at}
                             onChange={e => setForm({ ...form, scheduled_at: e.target.value })}
@@ -86,8 +90,9 @@ export default function EventCreate() {
                         {errors.scheduled_at && <span className="text-red-400 text-xs mt-1 block">{errors.scheduled_at[0]}</span>}
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-slate-300 mb-1">Ends At</label>
+                        <label htmlFor="event-end" className="block text-xs font-medium text-slate-300 mb-1">Ends At</label>
                         <input
+                            id="event-end"
                             type="datetime-local"
                             value={form.ends_at}
                             onChange={e => setForm({ ...form, ends_at: e.target.value })}
