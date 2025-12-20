@@ -20,6 +20,7 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8080").replace(/\/$/, "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -215,6 +216,11 @@ export default function SignIn() {
               )}
             </button>
           </form>
+
+          <div className="mt-6 border-t border-slate-800 pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <a href={`${backendUrl}/api/auth/google/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with Google</a>
+            <a href={`${backendUrl}/api/auth/github/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with GitHub</a>
+          </div>
         </div>
       </div>
     </div>

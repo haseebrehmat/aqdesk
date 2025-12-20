@@ -8,17 +8,21 @@ use App\Models\Profile;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
     public function redirectToProvider($provider)
     {
+        abort_unless(in_array($provider, ['google', 'github'], true), 404);
         return Socialite::driver($provider)->stateless()->redirect();
     }
 
     public function handleProviderCallback($provider)
     {
+        abort_unless(in_array($provider, ['google', 'github'], true), 404);
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
             
@@ -48,17 +52,36 @@ class SocialAuthController extends Controller
                 return redirect()->to(rtrim(config('app.frontend_url'), '/') . '/login?error=Account+is+inactive');
             }
 
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            // Redirect back to frontend dashboard/handler with token
             $frontendUrl = rtrim(config('app.frontend_url'), '/');
+            $exchangeCode = Str::random(64);
+            Cache::put('social-auth:' . hash('sha256', $exchangeCode), $user->id, now()->addMinutes(2));
 
-            return redirect()->to("{$frontendUrl}/auth/success?token={$token}&user=" . urlencode(json_encode($user->load(['role', 'profile']))));
+            return redirect()->to("{$frontendUrl}/auth/success?code={$exchangeCode}");
 
         } catch (\Exception $e) {
             $frontendUrl = rtrim(config('app.frontend_url'), '/');
 
             return redirect()->to("{$frontendUrl}/login?error=Social+login+failed");
         }
+    }
+
+    public function exchange(Request $request)
+    {
+        $validated = $request->validate(['code' => 'required|string|size:64']);
+        $userId = Cache::pull('social-auth:' . hash('sha256', $validated['code']));
+        if (!$userId) {
+            return response()->json(['message' => 'This social login code is invalid or expired.'], 422);
+        }
+
+        $user = User::with(['role', 'profile'])->findOrFail($userId);
+        if (!$user->is_active) {
+            return response()->json(['message' => 'This account is inactive.'], 403);
+        }
+
+        return response()->json([
+            'access_token' => $user->createToken('auth_token')->plainTextToken,
+            'token_type' => 'Bearer',
+            'user' => $user,
+        ]);
     }
 }

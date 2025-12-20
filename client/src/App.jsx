@@ -39,6 +39,7 @@ import PodcastShow from './pages/Podcasts/Show';
 import PodcastCreate from './pages/Podcasts/Create';
 import PublicFooter from './components/PublicFooter';
 import NewsletterAdmin from './pages/NewsletterAdmin';
+import AuthSuccess from './pages/AuthSuccess';
 
 // Layout for Guest (Public) Website Pages
 function PublicLayout() {
@@ -83,6 +84,7 @@ export default function App() {
           {/* Standalone Authentication & Direct Join Pages */}
           <Route path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="/projects/join/:token" element={<JoinProject />} />
 
           {/* Public Website Routes (Wrapped in PublicNavbar) */}
