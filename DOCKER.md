@@ -33,3 +33,19 @@ docker compose down --volumes
 The backend automatically waits for MySQL, runs migrations, seeds roles and
 tags, creates the public storage link, and starts Laravel. Full demo seeders are
 not run because they create accounts with known development passwords.
+
+Docker Compose supplies `APP_URL`, `FRONTEND_URL`, `VITE_BACKEND_URL`, and
+`VITE_API_PROXY_TARGET` directly to the containers, so Docker does not require
+local `.env` files for these URLs.
+
+For non-Docker local development, create untracked environment files from the
+templates:
+
+```bash
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
+
+The templates assume Laravel runs at <http://localhost:8000> and Vite runs at
+<http://localhost:3000>. Change both URL values together if either port or host
+is different.

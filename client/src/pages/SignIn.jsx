@@ -20,7 +20,7 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8080").replace(/\/$/, "");
+  const backendUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8000").replace(/\/$/, "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
