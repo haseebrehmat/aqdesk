@@ -76,8 +76,8 @@ class QuestionController extends Controller
 
         $userId = $request->user('sanctum')?->id;
         $questionData = $question->toArray();
-        $questionData['net_votes'] = $question->votes()->sum('vote_type');
-        $questionData['user_vote'] = $userId ? ($question->votes()->where('user_id', $userId)->value('vote_type') ?? 0) : 0;
+        $questionData['net_votes'] = (int) $question->votes()->sum('vote_type');
+        $questionData['user_vote'] = $userId ? (int) ($question->votes()->where('user_id', $userId)->value('vote_type') ?? 0) : 0;
 
         return response()->json($questionData);
     }

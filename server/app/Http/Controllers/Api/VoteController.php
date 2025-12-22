@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Question;
 use App\Models\Answer;
-use App\Models\Vote;
+use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +14,7 @@ class VoteController extends Controller
     {
         $request->validate(['type' => 'required|in:1,-1']);
         $question = Question::where('slug', $slug)->firstOrFail();
-        
+
         return $this->handleVote($request->user()->id, $question, (int) $request->type);
     }
 
@@ -51,8 +50,8 @@ class VoteController extends Controller
         });
 
         return response()->json([
-            'net_votes' => $model->votes()->sum('vote_type'),
-            'user_vote' => $model->votes()->where('user_id', $userId)->value('vote_type') ?? 0,
+            'net_votes' => (int) $model->votes()->sum('vote_type'),
+            'user_vote' => (int) ($model->votes()->where('user_id', $userId)->value('vote_type') ?? 0),
         ]);
     }
 }
