@@ -9,6 +9,7 @@ export default function Profile() {
     name: "",
     email: "",
     bio: "",
+    professional_position: "",
     skills_tags: "",
     avatar_url: "",
     role: {},
@@ -28,6 +29,7 @@ export default function Profile() {
         name: user.name || "",
         email: user.email || "",
         bio: user.profile?.bio || "",
+        professional_position: user.profile?.professional_position || "",
         skills_tags: user.profile?.skills_tags || "",
         avatar_url: user.profile?.avatar_url || "",
         role: user.role || {},
@@ -47,6 +49,7 @@ export default function Profile() {
       const response = await api.put("/profile", {
         name: profile.name,
         bio: profile.bio,
+        professional_position: profile.professional_position,
         skills_tags: profile.skills_tags,
         avatar_url: profile.avatar_url,
       });
@@ -109,6 +112,26 @@ export default function Profile() {
               disabled
               value={profile.email}
               className="w-full bg-slate-950/50 border border-slate-800/50 text-slate-500 rounded-xl px-4 py-2.5 text-sm cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="professional-position"
+              className="block text-xs font-medium text-slate-300 mb-1.5"
+            >
+              Current Professional Position
+            </label>
+            <input
+              id="professional-position"
+              type="text"
+              maxLength={255}
+              value={profile.professional_position}
+              onChange={(e) =>
+                setProfile({ ...profile, professional_position: e.target.value })
+              }
+              placeholder="e.g. Software Engineering Student"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
             />
           </div>
 

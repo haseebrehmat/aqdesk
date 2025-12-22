@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Profile;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -31,7 +30,8 @@ class UserAndProfileSeeder extends Seeder
         );
         Profile::firstOrCreate(['user_id' => $admin->id], [
             'bio' => 'Platform administrator overseeing system operations and moderation.',
-            'skills_tags' => 'DevOps, Laravel, Security, MySQL'
+            'professional_position' => 'Platform Administrator',
+            'skills_tags' => 'DevOps, Laravel, Security, MySQL',
         ]);
 
         // 2. Expert Consultant User
@@ -45,7 +45,8 @@ class UserAndProfileSeeder extends Seeder
         );
         Profile::firstOrCreate(['user_id' => $expert->id], [
             'bio' => 'Senior Engineering Consultant specializing in database normalization and system architecture.',
-            'skills_tags' => 'System Design, Database Optimization, Enterprise Architecture'
+            'professional_position' => 'Senior Engineering Consultant',
+            'skills_tags' => 'System Design, Database Optimization, Enterprise Architecture',
         ]);
 
         // 3. Standard Student User
@@ -59,7 +60,8 @@ class UserAndProfileSeeder extends Seeder
         );
         Profile::firstOrCreate(['user_id' => $student->id], [
             'bio' => 'Full-stack software developer and student completing university capstone requirements.',
-            'skills_tags' => 'Laravel, React, Tailwind CSS, Inertia.js'
+            'professional_position' => 'Software Engineering Student',
+            'skills_tags' => 'Laravel, React, Tailwind CSS, Inertia.js',
         ]);
     }
 }

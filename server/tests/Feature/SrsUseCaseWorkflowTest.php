@@ -40,10 +40,17 @@ class SrsUseCaseWorkflowTest extends TestCase
             ->putJson('/api/profile', [
                 'name' => 'Updated Student',
                 'bio' => 'Student developer working on accessible learning systems.',
+                'professional_position' => 'Junior Software Developer',
                 'skills_tags' => 'Laravel, React, Accessibility',
             ])->assertOk()
             ->assertJsonPath('user.name', 'Updated Student')
+            ->assertJsonPath('user.profile.professional_position', 'Junior Software Developer')
             ->assertJsonPath('user.profile.skills_tags', 'Laravel, React, Accessibility');
+
+        $this->assertDatabaseHas('profiles', [
+            'user_id' => $user->id,
+            'professional_position' => 'Junior Software Developer',
+        ]);
     }
 
     public function test_question_answer_tag_browse_and_vote_workflow(): void

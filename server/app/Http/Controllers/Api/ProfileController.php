@@ -15,10 +15,11 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'bio' => 'nullable|string',
+            'professional_position' => 'nullable|string|max:255',
             'skills_tags' => 'nullable|string',
             'avatar_url' => 'nullable|string',
         ]);
@@ -30,9 +31,10 @@ class ProfileController extends Controller
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id],
             [
-                'bio' => $validated['bio'] ?? $user->profile->bio,
-                'skills_tags' => $validated['skills_tags'] ?? $user->profile->skills_tags,
-                'avatar_url' => $validated['avatar_url'] ?? $user->profile->avatar_url,
+                'bio' => $validated['bio'] ?? $user->profile?->bio,
+                'professional_position' => $validated['professional_position'] ?? $user->profile?->professional_position,
+                'skills_tags' => $validated['skills_tags'] ?? $user->profile?->skills_tags,
+                'avatar_url' => $validated['avatar_url'] ?? $user->profile?->avatar_url,
             ]
         );
 
