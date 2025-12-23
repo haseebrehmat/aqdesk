@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
+import MarkdownContent from "../components/MarkdownContent";
 import {
   ThumbsUp,
   ThumbsDown,
@@ -150,9 +151,9 @@ export default function QuestionDetail() {
       {/* Question Card */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
         <h1 className="text-2xl font-bold text-white">{question.title}</h1>
-        <p className="text-slate-300 text-sm whitespace-pre-line leading-relaxed">
+        <MarkdownContent className="text-slate-300 text-sm leading-relaxed">
           {question.body}
-        </p>
+        </MarkdownContent>
 
         {/* Footer Metadata & Voting Row */}
         <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 pt-4 border-t border-slate-800">
@@ -220,9 +221,9 @@ export default function QuestionDetail() {
             }`}
           >
             <div className="flex justify-between items-start gap-4">
-              <p className="text-slate-200 text-sm whitespace-pre-line flex-1 leading-relaxed">
+              <MarkdownContent className="text-slate-200 text-sm flex-1 leading-relaxed">
                 {ans.body}
-              </p>
+              </MarkdownContent>
 
               {/* Solution Badge or Accept Button */}
               <div className="shrink-0 flex items-center space-x-2">
@@ -304,11 +305,14 @@ export default function QuestionDetail() {
         <textarea
           rows={4}
           required
-          placeholder="Write your solution..."
+          placeholder="Write your solution using Markdown..."
           value={answerBody}
           onChange={(e) => setAnswerBody(e.target.value)}
           className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
         />
+        <p className="text-xs text-slate-400">
+          Markdown is supported. Raw HTML is ignored for safety.
+        </p>
         <button
           type="submit"
           disabled={submitting}

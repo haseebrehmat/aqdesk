@@ -298,12 +298,12 @@ export default function QAIndex() {
 
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Explanation Body
+                  Explanation Body (Markdown supported)
                 </label>
                 <textarea
                   rows={5}
                   required
-                  placeholder="Provide detail on your technical problem..."
+                  placeholder="Provide detail on your technical problem using Markdown..."
                   value={formData.body}
                   onChange={(e) =>
                     setFormData({ ...formData, body: e.target.value })
