@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test:auth": "playwright test --config=playwright.auth.config.js",
     "test:a11y": "playwright test --config=playwright.a11y.config.js",
     "preview": "vite preview"
   },

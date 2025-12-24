@@ -1,9 +1,24 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Sparkles, MessageSquare, Briefcase, Calendar, Mic2, Info, LogIn, Menu, X } from 'lucide-react';
+import { Sparkles, MessageSquare, Briefcase, Calendar, Mic2, Info, LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
 
 export default function PublicNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const token = localStorage.getItem('token');
+  let user = {};
+
+  try {
+    user = JSON.parse(localStorage.getItem('user') || '{}');
+  } catch {
+    user = {};
+  }
+
+  const dashboardPath = user.role?.role_name?.toLowerCase() === 'admin'
+    ? '/admin/dashboard'
+    : '/dashboard';
+  const accountLink = token ? dashboardPath : '/login';
+  const AccountIcon = token ? LayoutDashboard : LogIn;
+  const accountLabel = token ? 'Go to Dashboard' : 'Sign In';
 
   const navItems = [
     { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
@@ -53,10 +68,10 @@ export default function PublicNavbar() {
         {/* Desktop Sign In CTA & Mobile Hamburger Toggle */}
         <div className="flex items-center gap-3">
           <Link
-            to="/login"
+            to={accountLink}
             className="hidden sm:inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-md shadow-blue-600/20"
           >
-            <LogIn className="w-3.5 h-3.5" /> Sign In
+            <AccountIcon className="w-3.5 h-3.5" /> {accountLabel}
           </Link>
 
           {/* Mobile Menu Button */}
@@ -101,11 +116,11 @@ export default function PublicNavbar() {
 
         <div className="pt-3 mt-3 border-t border-slate-100">
           <Link
-            to="/login"
+            to={accountLink}
             onClick={() => setIsOpen(false)}
             className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-3 rounded-xl transition shadow-md shadow-blue-600/20"
           >
-            <LogIn className="w-4 h-4" /> Sign In to Account
+            <AccountIcon className="w-4 h-4" /> {token ? 'Go to Dashboard' : 'Sign In to Account'}
           </Link>
         </div>
       </div>

@@ -227,10 +227,10 @@ export default function SignIn() {
           {(socialProviders.google || socialProviders.github) && (
             <div className="mt-6 border-t border-slate-800 pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {socialProviders.google && (
-                <a href={`${backendUrl}/api/auth/google/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with Google</a>
+                <a href={`${backendUrl}/api/auth/google/redirect`} className="text-center text-slate-100 border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with Google</a>
               )}
               {socialProviders.github && (
-                <a href={`${backendUrl}/api/auth/github/redirect`} className="text-center border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with GitHub</a>
+                <a href={`${backendUrl}/api/auth/github/redirect`} className="text-center text-slate-100 border border-slate-700 hover:bg-slate-900 rounded-xl px-4 py-3 text-sm font-medium">Continue with GitHub</a>
               )}
             </div>
           )}

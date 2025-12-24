@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -6,8 +6,12 @@ export default function AuthSuccess() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [message, setMessage] = useState('Completing secure sign in...');
+  const exchangeStarted = useRef(false);
 
   useEffect(() => {
+    if (exchangeStarted.current) return;
+    exchangeStarted.current = true;
+
     const code = params.get('code');
     if (!code) {
       navigate('/login?error=Social+login+failed', { replace: true });
