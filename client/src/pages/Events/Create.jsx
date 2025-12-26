@@ -26,7 +26,7 @@ export default function EventCreate() {
         try {
             await api.post('/events', form);
             addToast('Event created successfully!', 'success');
-            navigate('/events');
+            navigate('/dashboard/events');
         } catch (error) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
@@ -118,7 +118,7 @@ export default function EventCreate() {
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">
-                    <Link to="/events" className="px-4 py-2.5 border border-slate-800 rounded-xl text-slate-300 text-sm hover:bg-slate-800 transition">Cancel</Link>
+                    <Link to="/dashboard/events" className="px-4 py-2.5 border border-slate-800 rounded-xl text-slate-300 text-sm hover:bg-slate-800 transition">Cancel</Link>
                     <button
                         type="submit"
                         disabled={submitting}

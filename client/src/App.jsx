@@ -24,16 +24,20 @@ import JoinProject from './pages/JoinProject';
 import Consulting from './pages/Consulting';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import QAIndex from './pages/QAIndex';
 import { ToastProvider } from './components/ToastContainer';
 
 // Opportunities Pages
+import OpportunityIndex from './pages/Opportunities/Index';
 import OpportunityDetail from './pages/Opportunities/Show';
 import OpportunityForm from './pages/Opportunities/Create';
 import ApplicationManagement from './pages/Opportunities/ApplicationManagement';
 
 // Events & Podcasts Pages
+import EventIndex from './pages/Events/Index';
 import EventShow from './pages/Events/Show';
 import EventCreate from './pages/Events/Create';
+import PodcastIndex from './pages/Podcasts/Index';
 import PodcastShow from './pages/Podcasts/Show';
 import PodcastCreate from './pages/Podcasts/Create';
 import PublicFooter from './components/PublicFooter';
@@ -122,11 +126,28 @@ export default function App() {
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/consulting" element={<Consulting />} />
 
-            {/* Creator / Management Actions */}
-            <Route path="/opportunities/create" element={<OpportunityForm />} />
-            <Route path="/applications" element={<ApplicationManagement />} />
-            <Route path="/events/create" element={<EventCreate />} />
-            <Route path="/podcasts/create" element={<PodcastCreate />} />
+            {/* Authenticated Community & Management Areas */}
+            <Route path="/dashboard/questions" element={<QAIndex />} />
+            <Route path="/dashboard/questions/:slug" element={<QuestionDetail />} />
+
+            <Route path="/dashboard/opportunities" element={<OpportunityIndex />} />
+            <Route path="/dashboard/opportunities/create" element={<OpportunityForm />} />
+            <Route path="/dashboard/opportunities/:id" element={<OpportunityDetail />} />
+            <Route path="/dashboard/applications" element={<ApplicationManagement />} />
+
+            <Route path="/dashboard/events" element={<EventIndex />} />
+            <Route path="/dashboard/events/create" element={<EventCreate />} />
+            <Route path="/dashboard/events/:id" element={<EventShow />} />
+
+            <Route path="/dashboard/podcasts" element={<PodcastIndex />} />
+            <Route path="/dashboard/podcasts/create" element={<PodcastCreate />} />
+            <Route path="/dashboard/podcasts/:id" element={<PodcastShow />} />
+
+            {/* Redirect old private action URLs to their dashboard equivalents. */}
+            <Route path="/opportunities/create" element={<Navigate to="/dashboard/opportunities/create" replace />} />
+            <Route path="/applications" element={<Navigate to="/dashboard/applications" replace />} />
+            <Route path="/events/create" element={<Navigate to="/dashboard/events/create" replace />} />
+            <Route path="/podcasts/create" element={<Navigate to="/dashboard/podcasts/create" replace />} />
           </Route>
 
           {/* Catch-all Fallback */}

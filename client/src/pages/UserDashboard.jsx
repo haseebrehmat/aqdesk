@@ -42,7 +42,7 @@ export default function UserDashboard() {
           </Link>
 
           <Link
-            to="/questions"
+            to="/dashboard/questions"
             className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-6 rounded-2xl transition group flex flex-col justify-between"
           >
             <div>
@@ -59,7 +59,7 @@ export default function UserDashboard() {
           </Link>
 
           <Link
-            to="/opportunities"
+            to="/dashboard/opportunities"
             className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-6 rounded-2xl transition group flex flex-col justify-between"
           >
             <div>

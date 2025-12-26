@@ -39,7 +39,7 @@ export default function PodcastIndex() {
                     </h1>
                 </div>
                 <Link
-                    to="/podcasts/create"
+                    to="/dashboard/podcasts/create"
                     className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2.5 rounded-xl text-sm flex items-center space-x-2 transition w-fit"
                 >
                     <span>Publish Podcast</span>
@@ -81,7 +81,7 @@ export default function PodcastIndex() {
                                             )}
                                         </div>
                                         <Link
-                                            to={`/podcasts/${podcast.id}`}
+                                            to={`/dashboard/podcasts/${podcast.id}`}
                                             className="text-lg font-semibold text-white hover:text-blue-400 transition block"
                                         >
                                             {podcast.title}

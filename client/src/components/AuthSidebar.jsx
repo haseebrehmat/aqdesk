@@ -28,11 +28,11 @@ export default function AuthSidebar() {
 
   // Base navigation items available to all users
   const navItems = [
-    { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
+    { label: 'Q&A Board', path: '/dashboard/questions', icon: MessageSquare },
     { label: 'Workspaces', path: '/projects', icon: FolderKanban },
-    { label: 'Opportunities', path: '/opportunities', icon: Briefcase },
-    { label: 'Events', path: '/events', icon: Calendar },
-    { label: 'Podcasts', path: '/podcasts', icon: Mic2 },
+    { label: 'Opportunities', path: '/dashboard/opportunities', icon: Briefcase },
+    { label: 'Events', path: '/dashboard/events', icon: Calendar },
+    { label: 'Podcasts', path: '/dashboard/podcasts', icon: Mic2 },
   ];
 
   // Dynamically add Admin User Management panel if the user is an admin

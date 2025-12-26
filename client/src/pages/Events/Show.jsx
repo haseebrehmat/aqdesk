@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import api from '../../api/axios'; // Adjust path to your custom api instance
 import { useToast } from '../../components/ToastContainer';
 
 export default function EventShow() {
     const { id } = useParams();
+    const location = useLocation();
     const { addToast } = useToast();
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -91,7 +92,7 @@ export default function EventShow() {
                     )}
                 </div>
                 <div>
-                    <Link to="/events" className="text-indigo-600 text-sm hover:underline">&larr; Back to Events</Link>
+                    <Link to={location.pathname.startsWith('/dashboard/') ? '/dashboard/events' : '/events'} className="text-indigo-600 text-sm hover:underline">&larr; Back to Events</Link>
                 </div>
             </div>
         </div>

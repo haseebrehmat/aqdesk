@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import MarkdownContent from "../components/MarkdownContent";
@@ -17,6 +17,7 @@ import {
 
 export default function QuestionDetail() {
   const { slug } = useParams();
+  const location = useLocation();
   const { addToast } = useToast();
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -142,7 +143,7 @@ export default function QuestionDetail() {
   return (
     <div className="p-6 sm:p-10 max-w-5xl mx-auto space-y-8 font-sans">
       <Link
-        to="/questions"
+        to={location.pathname.startsWith("/dashboard/") ? "/dashboard/questions" : "/questions"}
         className="text-slate-400 hover:text-white flex items-center gap-2 text-sm transition"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Q&A

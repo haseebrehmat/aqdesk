@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import opportunityService from '../../services/opportunityService';
 import { 
   Briefcase, MapPin, Building2, UploadCloud, CheckCircle2, 
@@ -9,6 +9,10 @@ import {
 export default function OpportunityDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const opportunityBasePath = location.pathname.startsWith('/dashboard/')
+    ? '/dashboard/opportunities'
+    : '/opportunities';
   const [opportunity, setOpportunity] = useState(null);
   const [otherOpportunities, setOtherOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +107,7 @@ export default function OpportunityDetail() {
         
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(opportunityBasePath)}
           className="text-blue-600 font-semibold text-xs hover:underline flex items-center gap-1.5 bg-blue-50 border border-blue-200 px-3.5 py-2 rounded-xl transition w-fit shadow-xs"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Opportunities Board
@@ -188,7 +192,7 @@ export default function OpportunityDetail() {
                   You are signed in with employer/administrator credentials. Candidate applications are managed through the dashboard.
                 </p>
                 <Link
-                  to="/applications"
+                  to="/dashboard/applications"
                   className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-md shadow-blue-600/20"
                 >
                   Manage Candidate Pipeline
@@ -267,7 +271,7 @@ export default function OpportunityDetail() {
                   {otherOpportunities.map((job) => (
                     <Link
                       key={job.id}
-                      to={`/opportunities/${job.id}`}
+                      to={`${opportunityBasePath}/${job.id}`}
                       className="block p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-300 transition space-y-1"
                     >
                       <div className="flex justify-between items-center text-[10px] font-bold text-emerald-700">

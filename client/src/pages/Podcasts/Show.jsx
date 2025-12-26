@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import api from '../../api/axios'; // Adjust path to your custom api instance
 
 export default function PodcastShow() {
     const { id } = useParams();
+    const location = useLocation();
     const [podcast, setPodcast] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -55,7 +56,7 @@ export default function PodcastShow() {
                 </div>
 
                 <div className="pt-4 border-t border-gray-100">
-                    <Link to="/podcasts" className="text-indigo-600 text-sm hover:underline">
+                    <Link to={location.pathname.startsWith('/dashboard/') ? '/dashboard/podcasts' : '/podcasts'} className="text-indigo-600 text-sm hover:underline">
                         &larr; Back to Podcasts
                     </Link>
                 </div>

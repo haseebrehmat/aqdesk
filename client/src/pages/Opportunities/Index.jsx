@@ -58,7 +58,7 @@ export default function OpportunityList() {
         </div>
         {canPost && (
           <Link
-            to="/opportunities/create"
+            to="/dashboard/opportunities/create"
             className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2.5 rounded-xl text-sm flex items-center space-x-2 transition"
           >
             <PlusCircle className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function OpportunityList() {
                 </div>
 
                 <Link
-                  to={`/opportunities/${opp.id}`}
+                  to={`/dashboard/opportunities/${opp.id}`}
                   className="text-lg font-semibold text-white hover:text-blue-400 transition block mb-1"
                 >
                   {opp.title}
@@ -133,7 +133,7 @@ export default function OpportunityList() {
               </div>
 
               <Link
-                to={`/opportunities/${opp.id}`}
+                to={`/dashboard/opportunities/${opp.id}`}
                 className="w-full text-center bg-blue-500/10 text-blue-400 py-2.5 px-4 rounded-xl font-medium text-xs border border-blue-500/20 hover:bg-blue-500/20 transition block"
               >
                 {canPost ? 'View Details & Manage' : 'View Details & Apply'}

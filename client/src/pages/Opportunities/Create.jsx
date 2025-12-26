@@ -27,7 +27,7 @@ export default function OpportunityForm() {
 
     try {
       await opportunityService.createOpportunity(formData);
-      navigate('/opportunities');
+      navigate('/dashboard/opportunities');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create opportunity.');
     } finally {
@@ -126,7 +126,7 @@ export default function OpportunityForm() {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => navigate('/opportunities')}
+            onClick={() => navigate('/dashboard/opportunities')}
             className="px-4 py-2 border rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Cancel

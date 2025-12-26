@@ -213,7 +213,7 @@ export default function QAIndex() {
             >
               <div className="space-y-3 flex-1">
                 <Link
-                  to={`/questions/${q.slug}`}
+                  to={`/dashboard/questions/${q.slug}`}
                   className="text-lg font-semibold text-white hover:text-blue-400 transition block"
                 >
                   {q.title}
@@ -254,7 +254,7 @@ export default function QAIndex() {
                   )}
                 </div>
                 <Link
-                  to={`/questions/${q.slug}`}
+                  to={`/dashboard/questions/${q.slug}`}
                   className="mt-2 bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-md border border-blue-500/20 font-medium hover:bg-blue-500/20 transition"
                 >
                   {q.answers_count ?? q.answers?.length ?? 0} answers
