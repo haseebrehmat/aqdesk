@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, ArrowUp, Tag, Search, Sparkles, Plus } from 'lucide-react';
+import { MessageSquare, ArrowUp, Tag, Search, Sparkles } from 'lucide-react';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
 
@@ -57,12 +57,6 @@ export default function PublicQA() {
             <p className="text-slate-600 text-sm">Ask technical questions, share code snippets, and solve bugs together.</p>
           </div>
 
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl transition shadow-md shadow-blue-600/20 shrink-0"
-          >
-            <Plus className="w-4 h-4" /> Start Discussion
-          </Link>
         </div>
 
         {/* Search Bar */}

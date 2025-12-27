@@ -34,12 +34,6 @@ export default function PublicOpportunities() {
             <p className="text-slate-600 text-sm">Explore verified remote and on-site software engineering roles.</p>
           </div>
 
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl transition shadow-md shadow-emerald-600/20 shrink-0"
-          >
-            Post a Listing
-          </Link>
         </div>
 
         {/* Search */}

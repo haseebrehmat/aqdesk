@@ -37,15 +37,8 @@ export default function OpportunityList() {
     fetchOpportunities();
   }, [search, jobType]);
 
-  const roleName = user?.role?.role_name || '';
-  const roleId = user?.role_id;
-
-  const canPost = user && (
-    roleName.toLowerCase() === 'employer' || 
-    roleName.toLowerCase() === 'admin' || 
-    roleName.toLowerCase() === 'administrator' || 
-    [1, 2, 3].includes(roleId)
-  );
+  const roleName = user?.role?.role_name?.toLowerCase() || '';
+  const canPost = roleName === 'expert' || roleName === 'admin';
 
   return (
     <div className="p-6 sm:p-10 max-w-7xl mx-auto space-y-8 font-sans">

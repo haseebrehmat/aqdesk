@@ -59,4 +59,36 @@ class AccessControlTest extends TestCase
             ->getJson('/api/admin/users')
             ->assertForbidden();
     }
+
+    public function test_guests_cannot_create_questions_or_opportunities(): void
+    {
+        $this->postJson('/api/questions', [
+            'title' => 'How should protected creation work?',
+            'body' => 'This request must require an authenticated account.',
+        ])->assertUnauthorized();
+
+        $this->postJson('/api/opportunities', [
+            'title' => 'Protected Opportunity',
+            'company_name' => 'AQDesk',
+            'job_type' => 'Internship',
+        ])->assertUnauthorized();
+    }
+
+    public function test_standard_users_cannot_post_opportunities(): void
+    {
+        $role = Role::create(['role_name' => 'Standard User']);
+        $user = User::create([
+            'name' => 'Standard Member',
+            'email' => 'member@example.com',
+            'password' => Hash::make('strong-password'),
+            'role_id' => $role->id,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user, 'sanctum')->postJson('/api/opportunities', [
+            'title' => 'Unauthorized Opportunity',
+            'company_name' => 'AQDesk',
+            'job_type' => 'Internship',
+        ])->assertForbidden();
+    }
 }

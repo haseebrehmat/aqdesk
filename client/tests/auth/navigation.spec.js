@@ -5,7 +5,7 @@ const signedInUser = {
   name: 'Route Tester',
   email: 'route.tester@example.com',
   role_id: 4,
-  role: { role_name: 'Standard User' },
+  role: { role_name: 'Admin' },
 };
 
 test.beforeEach(async ({ page }) => {
@@ -33,4 +33,21 @@ test('public and authenticated navigation use different URLs and layouts', async
   await expect(page).toHaveURL(/\/opportunities$/);
   await expect(page.getByRole('link', { name: 'Go to Dashboard' })).toBeVisible();
   await expect(page.locator('aside')).toHaveCount(0);
+});
+
+test('creation actions are only available in the authenticated dashboard', async ({ page }) => {
+  await page.goto('/opportunities');
+  await expect(page.getByRole('link', { name: 'Post a Listing' })).toHaveCount(0);
+
+  await page.goto('/questions');
+  await expect(page.getByRole('link', { name: 'Start Discussion' })).toHaveCount(0);
+
+  await page.goto('/dashboard/questions');
+  await expect(page.getByRole('button', { name: 'Ask Question' })).toBeVisible();
+
+  await page.goto('/dashboard/opportunities');
+  await expect(page.getByRole('link', { name: 'Post Opportunity' })).toHaveAttribute(
+    'href',
+    '/dashboard/opportunities/create',
+  );
 });
