@@ -7,19 +7,20 @@
   z-index: 100;
   transform: translateY(-200%);
   border-radius: 0.5rem;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--rs-color-background-elevation-base);
+  color: var(--rs-color-foreground-neutral);
   padding: 0.75rem 1rem;
   font-weight: 700;
-  box-shadow: 0 0 0 3px #2563eb;
+  box-shadow: 0 0 0 3px var(--rs-color-foreground-neutral);
 }
 
 .skip-link:focus {
   transform: translateY(0);
 }
 
-:focus-visible {
-  outline: 3px solid #60a5fa;
+:focus-visible:not(input):not(textarea):not(select) {
+  /* Reshaped fields draw their own focus ring on the wrapper */
+  outline: 3px solid var(--rs-color-foreground-neutral);
   outline-offset: 3px;
 }
 
