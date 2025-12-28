@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,17 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'users' => $users
+        ]);
+    }
+
+    /**
+     * List assignable roles for the admin user forms.
+     */
+    public function roles()
+    {
+        return response()->json([
+            'success' => true,
+            'roles' => Role::query()->orderBy('id')->get(['id', 'role_name']),
         ]);
     }
 

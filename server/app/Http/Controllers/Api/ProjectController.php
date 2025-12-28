@@ -249,4 +249,24 @@ class ProjectController extends Controller
 
         return response()->json(['message' => 'Member removed successfully.']);
     }
+
+    public function updateMemberRole(Request $request, $id, $userId)
+    {
+        $project = Project::findOrFail($id);
+        $this->authorize('manage', $project);
+
+        $validated = $request->validate([
+            'role' => 'required|in:Maintainer,Collaborator,Reviewer',
+        ]);
+
+        if ((int) $userId === (int) $project->owner_id) {
+            return response()->json(['message' => 'The project owner role cannot be changed.'], 422);
+        }
+
+        abort_unless($project->members()->where('user_id', $userId)->exists(), 404, 'Member not found.');
+
+        $project->members()->updateExistingPivot($userId, ['role_in_project' => $validated['role']]);
+
+        return response()->json(['message' => 'Member role updated.']);
+    }
 }

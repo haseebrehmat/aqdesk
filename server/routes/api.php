@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PodcastController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\QuestionController;
+use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\VoteController;
@@ -28,6 +29,9 @@ Route::get('/auth/providers', [SocialAuthController::class, 'providers']);
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirectToProvider']);
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback']);
 Route::post('/auth/exchange', [SocialAuthController::class, 'exchange']);
+
+Route::get('/settings', [SettingController::class, 'show']);
+Route::get('/settings/logo', [SettingController::class, 'logo']);
 
 Route::get('/questions', [QuestionController::class, 'index']);
 Route::get('/questions/{slug}', [QuestionController::class, 'show']);
@@ -47,6 +51,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::middleware('role:Admin')->prefix('admin')->group(function () {
+        Route::post('/settings', [SettingController::class, 'update']);
+        Route::get('/roles', [AdminController::class, 'roles']);
         Route::get('/users', [AdminController::class, 'index']);
         Route::post('/users', [AdminController::class, 'store']);
         Route::put('/users/{id}', [AdminController::class, 'updateUser']);
@@ -103,6 +109,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Project Invitations & Membership
     Route::post('/projects/{id}/invitations', [ProjectController::class, 'generateInvite']);
     Route::post('/projects/join/{token}', [ProjectController::class, 'joinProject']);
+    Route::put('/projects/{id}/members/{userId}', [ProjectController::class, 'updateMemberRole']);
     Route::delete('/projects/{id}/members/{userId}', [ProjectController::class, 'removeMember']);
 
     // File Actions
