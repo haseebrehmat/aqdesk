@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader, Text, View } from 'reshaped';
 import api from '../api/axios';
 
 export default function AuthSuccess() {
@@ -29,5 +30,10 @@ export default function AuthSuccess() {
     });
   }, [navigate, params]);
 
-  return <main className="min-h-screen bg-slate-950 text-white grid place-items-center"><p role="status">{message}</p></main>;
+  return (
+    <View as="main" minHeight="100vh" align="center" justify="center" gap={3} backgroundColor="page">
+      <Loader />
+      <Text attributes={{ role: 'status' }}>{message}</Text>
+    </View>
+  );
 }

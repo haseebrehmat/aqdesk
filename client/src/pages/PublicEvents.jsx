@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Video, Users, Sparkles } from 'lucide-react';
+import { Badge, Button, Card, Grid, Loader, Text, View } from 'reshaped';
+import { Video, Users } from 'lucide-react';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
+import { Page, PageHeader, EmptyState } from '../components/ui'
+import { formatDate } from '../utils/format';
 
 export default function PublicEvents() {
   const [events, setEvents] = useState([]);
@@ -26,63 +29,40 @@ export default function PublicEvents() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950 font-sans py-8 px-4 sm:px-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Header */}
-        <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-xs space-y-1">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 uppercase tracking-wider bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-            <Sparkles className="w-3.5 h-3.5" /> Virtual Meetups
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight pt-1">Live Tech Workshops & Webinars</h1>
-          <p className="text-slate-600 text-sm">Join scheduled live sessions and workshops hosted by experienced engineers.</p>
-        </div>
+    <Page width="1000px">
+      <PageHeader title="Live Tech Workshops & Webinars" description="Join scheduled live sessions and workshops hosted by experienced engineers." />
 
-        {loading ? (
-          <div className="text-center py-20 text-slate-500 text-sm">Loading events...</div>
-        ) : events.length === 0 ? (
-          <div className="p-12 text-center bg-white border border-slate-200 rounded-3xl text-slate-500 text-sm">
-            No upcoming events found.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((ev) => (
-              <div
-                key={ev.id}
-                className="bg-white border border-slate-200 hover:border-slate-300 rounded-3xl p-6 transition shadow-xs flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold">
-                      {new Date(ev.scheduled_at).toLocaleDateString()}
-                    </span>
-                    <span className="text-xs text-slate-500 flex items-center gap-1 font-semibold">
-                      <Users className="w-3.5 h-3.5 text-slate-400" /> {ev.attendees_count || 0}{ev.max_attendees ? ` / ${ev.max_attendees}` : ''} Registered
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-slate-900">{ev.title}</h3>
-                  <p className="text-slate-600 text-xs line-clamp-3 leading-relaxed">
-                    {ev.description}
-                  </p>
-                </div>
-
-                <div className="pt-4 mt-6 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-medium">Host: {ev.host?.name || 'Expert'}</span>
-                  <a
-                    href={ev.webinar_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-purple-600 hover:underline"
-                  >
-                    <Video className="w-3.5 h-3.5" /> Join Session
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+      {loading ? (
+        <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading events...</Text></View>
+      ) : events.length === 0 ? (
+        <EmptyState title="No upcoming events found" description="New sessions are announced regularly." />
+      ) : (
+        <Grid columns={{ s: 1, m: 2, l: 3 }} gap={5}>
+          {events.map((ev) => (
+            <Card key={ev.id} padding={5}>
+              <View gap={4} height="100%" justify="space-between">
+                <View gap={3}>
+                  <View direction="row" justify="space-between" align="center">
+                    <Badge color="primary" variant="faded">{formatDate(ev.scheduled_at)}</Badge>
+                    <View direction="row" align="center" gap={1}>
+                      <Users size={14} aria-hidden="true" />
+                      <Text variant="caption-1" color="neutral-faded">{ev.attendees_count || 0}{ev.max_attendees ? ` / ${ev.max_attendees}` : ''} registered</Text>
+                    </View>
+                  </View>
+                  <Text as="h2" variant="featured-5" weight="bold">{ev.title}</Text>
+                  <Text variant="body-2" color="neutral-faded" maxLines={3}>{ev.description}</Text>
+                </View>
+                <View direction="row" justify="space-between" align="center" borderTop paddingTop={3}>
+                  <Text variant="caption-1" color="neutral-faded">Host: {ev.host?.name || 'Expert'}</Text>
+                  {ev.webinar_url && (
+                    <Button variant="ghost" color="primary" size="small" icon={Video} href={ev.webinar_url} attributes={{ target: '_blank', rel: 'noreferrer' }}>Join session</Button>
+                  )}
+                </View>
+              </View>
+            </Card>
+          ))}
+        </Grid>
+      )}
+    </Page>
   );
 }

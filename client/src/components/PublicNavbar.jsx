@@ -1,129 +1,90 @@
 import { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { Sparkles, MessageSquare, Briefcase, Calendar, Mic2, Info, LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Button, Container, Divider, Hidden, View } from 'reshaped';
+import { MessageSquare, Briefcase, Calendar, Mic2, Info, LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
+import Logo from './Logo';
+import ColorModeToggle from './ColorModeToggle';
+import { routerLink } from './RouterLink';
+
+const navItems = [
+  { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
+  { label: 'Opportunities', path: '/opportunities', icon: Briefcase },
+  { label: 'Events', path: '/events', icon: Calendar },
+  { label: 'Podcasts', path: '/podcasts', icon: Mic2 },
+  { label: 'About Us', path: '/about', icon: Info },
+];
+
+function NavButton({ item, onNavigate }) {
+  return (
+    <NavLink to={item.path} onClick={onNavigate} style={{ textDecoration: 'none' }}>
+      {({ isActive }) => (
+        <Button
+          as="span"
+          variant={isActive ? 'faded' : 'ghost'}
+          color={isActive ? 'primary' : 'neutral'}
+          icon={item.icon}
+          attributes={{ tabIndex: -1 }}
+        >
+          {item.label}
+        </Button>
+      )}
+    </NavLink>
+  );
+}
 
 export default function PublicNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const token = localStorage.getItem('token');
   let user = {};
+  try { user = JSON.parse(localStorage.getItem('user') || '{}'); } catch { user = {}; }
 
-  try {
-    user = JSON.parse(localStorage.getItem('user') || '{}');
-  } catch {
-    user = {};
-  }
-
-  const dashboardPath = user.role?.role_name?.toLowerCase() === 'admin'
-    ? '/admin/dashboard'
-    : '/dashboard';
+  const dashboardPath = user.role?.role_name?.toLowerCase() === 'admin' ? '/admin/dashboard' : '/dashboard';
   const accountLink = token ? dashboardPath : '/login';
-  const AccountIcon = token ? LayoutDashboard : LogIn;
   const accountLabel = token ? 'Go to Dashboard' : 'Sign In';
 
-  const navItems = [
-    { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
-    { label: 'Opportunities', path: '/opportunities', icon: Briefcase },
-    { label: 'Events', path: '/events', icon: Calendar },
-    { label: 'Podcasts', path: '/podcasts', icon: Mic2 },
-    { label: 'About Us', path: '/about', icon: Info },
-  ];
-
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-50 font-sans shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-        
-        {/* Brand Logo */}
-        <Link to="/" className="flex items-center space-x-2.5">
-          <div className="h-9 w-9 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-extrabold tracking-tight text-slate-900">
-            AQ<span className="text-blue-600">Desk</span>
-          </span>
-        </Link>
+    <View as="header" backgroundColor="elevation-base" borderBottom position="sticky" insetTop={0} zIndex={50}>
+      <Container width="1200px" padding={{ s: 4, m: 6 }}>
+        <View direction="row" align="center" justify="space-between" height="64px">
+          <Logo />
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4" />
-                {item.label}
-              </NavLink>
-            );
-          })}
-        </nav>
+          <Hidden hide={{ s: true, m: false }}>
+            <View as="nav" direction="row" gap={1} attributes={{ 'aria-label': 'Primary' }}>
+              {navItems.map((item) => <NavButton key={item.path} item={item} />)}
+            </View>
+          </Hidden>
 
-        {/* Desktop Sign In CTA & Mobile Hamburger Toggle */}
-        <div className="flex items-center gap-3">
-          <Link
-            to={accountLink}
-            className="hidden sm:inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition shadow-md shadow-blue-600/20"
-          >
-            <AccountIcon className="w-3.5 h-3.5" /> {accountLabel}
-          </Link>
+          <View direction="row" align="center" gap={2}>
+            <ColorModeToggle />
+            <Hidden hide={{ s: true, m: false }}>
+              <Button color="primary" icon={token ? LayoutDashboard : LogIn} {...routerLink(accountLink)}>
+                {accountLabel}
+              </Button>
+            </Hidden>
+            <Hidden hide={{ s: false, m: true }}>
+              <Button
+                variant="ghost"
+                icon={isOpen ? X : Menu}
+                onClick={() => setIsOpen((v) => !v)}
+                attributes={{ 'aria-label': 'Toggle menu', 'aria-expanded': isOpen }}
+              />
+            </Hidden>
+          </View>
+        </View>
+      </Container>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition focus:outline-none"
-            aria-label="Toggle Menu"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Smooth Expanding Mobile Navigation Drawer */}
-      <div 
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white border-b border-slate-200 ${
-          isOpen ? 'max-h-96 opacity-100 py-4 px-4' : 'max-h-0 opacity-0 py-0 px-4'
-        }`}
-      >
-        <nav className="flex flex-col space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={() => setIsOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4 text-slate-500" />
-                {item.label}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        <div className="pt-3 mt-3 border-t border-slate-100">
-          <Link
-            to={accountLink}
-            onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-3 rounded-xl transition shadow-md shadow-blue-600/20"
-          >
-            <AccountIcon className="w-4 h-4" /> {token ? 'Go to Dashboard' : 'Sign In to Account'}
-          </Link>
-        </div>
-      </div>
-    </header>
+      {isOpen && (
+        <Hidden hide={{ m: true }}>
+          <Divider />
+          <View as="nav" padding={4} gap={1} attributes={{ 'aria-label': 'Mobile' }}>
+            {navItems.map((item) => <NavButton key={item.path} item={item} onNavigate={() => setIsOpen(false)} />)}
+            <Divider />
+            <Button color="primary" fullWidth icon={token ? LayoutDashboard : LogIn} {...routerLink(accountLink, { onClick: () => setIsOpen(false) })}>
+              {accountLabel}
+            </Button>
+          </View>
+        </Hidden>
+      )}
+    </View>
   );
 }

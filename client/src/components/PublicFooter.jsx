@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Heart } from 'lucide-react';
+import { Button, Container, Divider, Grid, Link as RLink, Text, TextField, View } from 'reshaped';
+import { Heart } from 'lucide-react';
+import Logo from './Logo';
+import { NativeSelect } from './ui';
+import { useBranding } from '../context/BrandingContext';
 import api from '../api/axios';
 
 // Direct SVG path components for brands
@@ -22,7 +26,12 @@ const LinkedinIcon = ({ size = 16, className = "" }) => (
   </svg>
 );
 
+function FooterLink({ to, children }) {
+  return <RLink color="inherit" variant="plain" render={(attrs) => <Link {...attrs} to={to} />}>{children}</RLink>;
+}
+
 export default function PublicFooter() {
+  const { appName } = useBranding();
   const [email, setEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
   const [cohort, setCohort] = useState('General');
@@ -38,98 +47,85 @@ export default function PublicFooter() {
     }
   };
 
+  const social = [
+    { href: 'https://github.com', label: 'GitHub', Icon: GithubIcon },
+    { href: 'https://twitter.com', label: 'X', Icon: XIcon },
+    { href: 'https://linkedin.com', label: 'LinkedIn', Icon: LinkedinIcon },
+  ];
+
   return (
-    <footer className="bg-white border-t border-slate-200 text-slate-600 font-sans mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
-          
-          {/* Brand Info */}
-          <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center space-x-2.5">
-              <div className="h-9 w-9 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900">
-                AQ<span className="text-blue-600">Desk</span>
-              </span>
-            </Link>
-            <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-sm">
-              AQDesk is an all-in-one collaborative learning platform unifying technical Q&A, workspace management, mentorship, and career placements for modern software developers.
-            </p>
-            <div className="flex items-center gap-3 pt-2">
-              <a href="https://github.com" aria-label="AQDesk on GitHub" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
-                <GithubIcon size={16} />
-              </a>
-              <a href="https://twitter.com" aria-label="AQDesk on X" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
-                <XIcon size={16} />
-              </a>
-              <a href="https://linkedin.com" aria-label="AQDesk on LinkedIn" target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition flex items-center justify-center">
-                <LinkedinIcon size={16} />
-              </a>
-            </div>
-          </div>
+    <View as="footer" backgroundColor="elevation-base" borderTop>
+      <Container width="1200px" padding={{ s: 4, m: 6 }}>
+        <View paddingBlock={12} gap={10}>
+          <Grid columns={{ s: 1, m: 2, l: '2fr 1fr 1fr 1.5fr' }} gap={8}>
+            <View gap={4}>
+              <Logo />
+              <View maxWidth="380px">
+                <Text variant="body-2" color="neutral-faded">
+                  {appName} is an all-in-one collaborative learning platform unifying technical Q&amp;A, workspace management, mentorship, and career placements for modern software developers.
+                </Text>
+              </View>
+              <View direction="row" gap={2}>
+                {social.map(({ href, label, Icon }) => (
+                  <Button key={label} variant="faded" color="neutral" href={href} attributes={{ target: '_blank', rel: 'noreferrer', 'aria-label': `${appName} on ${label}` }}>
+                    <Icon size={16} />
+                  </Button>
+                ))}
+              </View>
+            </View>
 
-          {/* Quick Links */}
-          <div className="space-y-3">
-            <h4 className="text-slate-900 font-bold text-xs uppercase tracking-wider">Platform Hub</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link to="/questions" className="hover:text-blue-600 transition">Community Q&A</Link></li>
-              <li><Link to="/opportunities" className="hover:text-blue-600 transition">Job Opportunities</Link></li>
-              <li><Link to="/events" className="hover:text-blue-600 transition">Live Tech Events</Link></li>
-              <li><Link to="/podcasts" className="hover:text-blue-600 transition">Audio Podcasts</Link></li>
-            </ul>
-          </div>
+            <View gap={3}>
+              <Text variant="caption-1" weight="bold" color="neutral-faded">PLATFORM HUB</Text>
+              <FooterLink to="/questions">Community Q&amp;A</FooterLink>
+              <FooterLink to="/opportunities">Job Opportunities</FooterLink>
+              <FooterLink to="/events">Live Tech Events</FooterLink>
+              <FooterLink to="/podcasts">Audio Podcasts</FooterLink>
+            </View>
 
-          {/* Company */}
-          <div className="space-y-3">
-            <h4 className="text-slate-900 font-bold text-xs uppercase tracking-wider">Company</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link to="/about" className="hover:text-blue-600 transition">About Us</Link></li>
-              <li><Link to="/login" className="hover:text-blue-600 transition">Sign In</Link></li>
-              <li><Link to="/register" className="hover:text-blue-600 transition">Create Account</Link></li>
-            </ul>
-          </div>
+            <View gap={3}>
+              <Text variant="caption-1" weight="bold" color="neutral-faded">COMPANY</Text>
+              <FooterLink to="/about">About Us</FooterLink>
+              <FooterLink to="/login">Sign In</FooterLink>
+              <FooterLink to="/register">Create Account</FooterLink>
+            </View>
 
-          {/* Newsletter Box */}
-          <div className="space-y-3">
-            <h4 className="text-slate-900 font-bold text-xs uppercase tracking-wider">Stay Updated</h4>
-            <p className="text-slate-500 text-xs">Subscribe to our developer broadcast newsletter for weekly tech updates.</p>
-            <form onSubmit={subscribe} className="flex flex-col gap-2">
-              <label htmlFor="newsletter-email" className="sr-only">Email address for newsletter</label>
-              <input
-                id="newsletter-email"
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="name@example.com"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600"
-              />
-              <label htmlFor="newsletter-cohort" className="sr-only">Newsletter topic</label>
-              <select id="newsletter-cohort" value={cohort} onChange={(event) => setCohort(event.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900">
-                <option>General</option>
-                <option>AI</option>
-                <option>Web Development</option>
-                <option>EdTech</option>
-                <option>Internet Governance</option>
-              </select>
-              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-xs">
-                Subscribe
-              </button>
-              {newsletterMessage && <p role="status" className="text-xs text-slate-600">{newsletterMessage}</p>}
-            </form>
-          </div>
+            <View gap={3}>
+              <Text variant="caption-1" weight="bold" color="neutral-faded">STAY UPDATED</Text>
+              <Text variant="body-2" color="neutral-faded">Subscribe to our developer newsletter for weekly tech updates.</Text>
+              <form onSubmit={subscribe}>
+                <View gap={2}>
+                  <TextField
+                    name="newsletter-email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={({ value }) => setEmail(value)}
+                    inputAttributes={{ type: 'email', required: true, 'aria-label': 'Email address for newsletter' }}
+                  />
+                  <NativeSelect
+                    name="newsletter-cohort"
+                    value={cohort}
+                    onChange={({ value }) => setCohort(value)}
+                    inputAttributes={{ 'aria-label': 'Newsletter topic' }}
+                    options={['General', 'AI', 'Web Development', 'EdTech', 'Internet Governance'].map((v) => ({ value: v, label: v }))}
+                  />
+                  <Button type="submit" color="primary" fullWidth>Subscribe</Button>
+                  {newsletterMessage && <Text variant="caption-1" attributes={{ role: 'status' }}>{newsletterMessage}</Text>}
+                </View>
+              </form>
+            </View>
+          </Grid>
 
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} AQDesk Platform. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Engineered with <Heart className="w-3.5 h-3.5 text-rose-500 fill-current" /> for Software Engineers
-          </p>
-        </div>
-      </div>
-    </footer>
+          <Divider />
+          <View direction={{ s: 'column', m: 'row' }} justify="space-between" align="center" gap={2}>
+            <Text variant="caption-1" color="neutral-faded">© {new Date().getFullYear()} {appName} Platform. All rights reserved.</Text>
+            <View direction="row" align="center" gap={1}>
+              <Text variant="caption-1" color="neutral-faded">Engineered with</Text>
+              <Heart size={14} color="#e11d48" fill="#e11d48" />
+              <Text variant="caption-1" color="neutral-faded">for Software Engineers</Text>
+            </View>
+          </View>
+        </View>
+      </Container>
+    </View>
   );
 }
