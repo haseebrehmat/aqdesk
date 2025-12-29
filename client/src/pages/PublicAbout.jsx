@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sparkles, Users, Briefcase, Calendar, MessageSquare } from 'lucide-react';
 
 export default function PublicAbout() {

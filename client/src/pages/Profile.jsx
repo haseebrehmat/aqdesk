@@ -32,7 +32,7 @@ export default function Profile() {
         avatar_url: user.profile?.avatar_url || "",
         role: user.role || {},
       });
-    } catch (err) {
+    } catch {
       addToast("Failed to load profile details.", "error");
     } finally {
       setLoading(false);

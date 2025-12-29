@@ -1,17 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../api/axios";
-import { LayoutDashboard, FolderKanban, HelpCircle, Briefcase, User, Sparkles, ArrowRight } from "lucide-react";
+import { FolderKanban, HelpCircle, Briefcase, User, ArrowRight } from "lucide-react";
 
 export default function UserDashboard() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const user = JSON.parse(localStorage.getItem("user") || "null");
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans p-6 lg:p-12">

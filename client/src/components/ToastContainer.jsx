@@ -28,6 +28,8 @@ export function ToastProvider({ children }) {
   );
 }
 
+// This hook intentionally shares the provider module with its context.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => useContext(ToastContext);
 
 function ToastItem({ toast, onClose }) {

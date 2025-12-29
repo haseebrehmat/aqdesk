@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 // import Navbar from '../components/Navbar';
 import api from '../api/axios';
-import { UserCheck, Clock, CheckCircle2, Shield } from 'lucide-react';
+import { UserCheck, Clock } from 'lucide-react';
 
 export default function Consulting() {
   const [consultations, setConsultations] = useState([]);

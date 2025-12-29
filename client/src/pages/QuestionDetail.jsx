@@ -47,7 +47,7 @@ export default function QuestionDetail() {
         net_votes: res.data.net_votes,
         user_vote: res.data.user_vote,
       });
-    } catch (err) {
+    } catch {
       addToast("Please sign in to vote.", "error");
     }
   };
@@ -63,7 +63,7 @@ export default function QuestionDetail() {
             : ans
         ),
       });
-    } catch (err) {
+    } catch {
       addToast("Please sign in to vote.", "error");
     }
   };
@@ -104,7 +104,7 @@ export default function QuestionDetail() {
       });
       setAnswerBody("");
       addToast("Answer posted successfully!", "success");
-    } catch (err) {
+    } catch {
       addToast("Failed to post answer.", "error");
     } finally {
       setSubmitting(false);

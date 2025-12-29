@@ -1,5 +1,5 @@
 import { useLayout } from '../context/LayoutContext';
-import { Menu, Search, User } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AuthLayoutHeader() {

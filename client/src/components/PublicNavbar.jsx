@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Sparkles, MessageSquare, Briefcase, Calendar, Mic2, Info, LogIn, Menu, X } from 'lucide-react';
 

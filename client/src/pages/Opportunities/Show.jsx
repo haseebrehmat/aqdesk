@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import opportunityService from '../../services/opportunityService';
 import { 
   Briefcase, MapPin, Building2, UploadCloud, CheckCircle2, 
-  AlertCircle, ArrowLeft, Clock, DollarSign, ShieldCheck, FileText, Sparkles 
+  AlertCircle, ArrowLeft, Clock, ShieldCheck, FileText, Sparkles
 } from 'lucide-react';
 
 export default function OpportunityDetail() {
@@ -23,7 +23,7 @@ export default function OpportunityDetail() {
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (e) {
+      } catch {
         setUser(null);
       }
     }

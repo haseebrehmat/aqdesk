@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
-  Users,
   Shield,
   Trash2,
   Edit,
@@ -14,7 +13,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -34,8 +33,6 @@ export default function AdminDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const navigate = useNavigate();
-
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isAdmin =
     currentUser.role?.role_name?.toLowerCase() === "admin" ||
@@ -45,7 +42,7 @@ export default function AdminDashboard() {
     try {
       const response = await api.get("/admin/users");
       setUsers(response.data.users);
-    } catch (err) {
+    } catch {
       setError(
         "Unauthorized access or failed to fetch users. Ensure you have administrator privileges.",
       );
@@ -66,7 +63,7 @@ export default function AdminDashboard() {
           u.id === id ? { ...u, is_active: !currentStatus } : u,
         ),
       );
-    } catch (err) {
+    } catch {
       alert("Failed to update user status.");
     }
   };

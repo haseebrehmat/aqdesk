@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import opportunityService from '../../services/opportunityService';
-import { FileText, Building2, Calendar, CheckCircle } from 'lucide-react';
+import { FileText, Building2, Calendar } from 'lucide-react';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -20,19 +20,6 @@ export default function ApplicationManagement() {
       console.error('Failed to load applications', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleStatusUpdate = async (id, newStatus) => {
-    try {
-      await opportunityService.updateApplicationStatus(id, newStatus);
-      setApplications(
-        applications.map((app) =>
-          app.id === id ? { ...app, status: newStatus } : app,
-        ),
-      );
-    } catch (err) {
-      alert('Failed to update status.');
     }
   };
 

@@ -50,7 +50,7 @@ export default function ProjectDetail() {
     try {
       const res = await api.get(`/projects/${id}`);
       setProject(res.data);
-    } catch (err) {
+    } catch {
       addToast("Failed to load project workspace.", "error");
     } finally {
       setLoading(false);

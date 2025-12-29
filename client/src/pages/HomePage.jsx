@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, MessageSquare, Briefcase, Calendar, Mic2, 
-  ArrowRight, ShieldCheck, Users, CheckCircle2, Flame, Hash, ChevronRight,
-  Star, Database, Server, RefreshCw
+  ArrowRight, CheckCircle2, Flame, Hash, ChevronRight,
+  Star, Database, Server
 } from 'lucide-react';
 import api from '../api/axios';
 
 export default function HomePage() {
   const [recentQuestions, setRecentQuestions] = useState([]);
   const [featuredJobs, setFeaturedJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch real seeded content from backend APIs
@@ -24,7 +23,7 @@ export default function HomePage() {
       if (jRes.status === 'fulfilled') {
         setFeaturedJobs(jRes.value.data.data || jRes.value.data || []);
       }
-    }).finally(() => setLoading(false));
+    });
   }, []);
 
   // Fallback to actual seed data if API is loading or empty

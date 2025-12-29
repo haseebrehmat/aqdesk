@@ -39,7 +39,7 @@ export default function Projects() {
     try {
       const res = await api.get("/projects");
       setProjects(res.data);
-    } catch (err) {
+    } catch {
       addToast("Failed to fetch projects.", "error");
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export default function Projects() {
       setFormData({ title: "", description: "", visibility: "Public" });
       setIsModalOpen(false);
       addToast("Project created successfully!", "success");
-    } catch (err) {
+    } catch {
       addToast("Failed to create project.", "error");
     } finally {
       setSubmitting(false);
@@ -70,7 +70,7 @@ export default function Projects() {
       await api.delete(`/projects/${projectId}`);
       setProjects(projects.filter((p) => p.id !== projectId));
       addToast("Project deleted.", "success");
-    } catch (err) {
+    } catch {
       addToast("Failed to delete project.", "error");
     }
   };

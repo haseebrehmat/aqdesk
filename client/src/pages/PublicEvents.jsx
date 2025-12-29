@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Video, Users, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Video, Users, Sparkles } from 'lucide-react';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
 

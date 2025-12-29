@@ -17,7 +17,6 @@ import PublicPodcasts from './pages/PublicPodcasts';
 import PublicAbout from './pages/PublicAbout';
 
 // Protected / Workspace Pages
-import QAIndex from './pages/QAIndex';
 import QuestionDetail from './pages/QuestionDetail';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';

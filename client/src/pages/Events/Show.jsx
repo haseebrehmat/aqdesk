@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../api/axios'; // Adjust path to your custom api instance
 
@@ -27,7 +27,7 @@ export default function EventShow() {
         try {
             await api.delete(`/events/${id}/register`);
             alert('Unregistered successfully!');
-        } catch (error) {
+        } catch {
             alert('Error unregistering');
         }
     };

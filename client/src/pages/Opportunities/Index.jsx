@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import opportunityService from '../../services/opportunityService';
 import { Briefcase, MapPin, Search, PlusCircle, Building2 } from 'lucide-react';
@@ -15,7 +15,7 @@ export default function OpportunityList() {
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (e) {
+      } catch {
         setUser(null);
       }
     }

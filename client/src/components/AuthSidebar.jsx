@@ -2,7 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useLayout } from '../context/LayoutContext';
 import { 
   Sparkles, MessageSquare, FolderKanban, Briefcase, Calendar, 
-  Mic2, UserCheck, Shield, LayoutDashboard, LogOut, ChevronLeft, ChevronRight, PanelLeftClose, Mail
+  Mic2, Shield, LayoutDashboard, LogOut, ChevronLeft, ChevronRight, PanelLeftClose, Mail
 } from 'lucide-react';
 
 export default function AuthSidebar() {

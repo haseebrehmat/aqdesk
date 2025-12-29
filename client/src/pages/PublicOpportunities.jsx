@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Building2, MapPin, Search, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Building2, MapPin, Search, ArrowUpRight, Sparkles } from 'lucide-react';
 import api from '../api/axios';
 
 export default function PublicOpportunities() {

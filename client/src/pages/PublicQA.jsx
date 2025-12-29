@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, ArrowUp, Tag, Search, Sparkles, Plus, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, ArrowUp, Tag, Search, Sparkles, Plus } from 'lucide-react';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
 
