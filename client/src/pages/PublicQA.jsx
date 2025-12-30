@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { Answers, Search, VoteUp } from '../components/icons';
-import { Avatar, Badge, Button, Card, Grid, Loader, Text, TextField, View } from 'reshaped';
+import { Avatar, Badge, Button, Card, Checkbox, Grid, Loader, Radio, RadioGroup, Text, TextField, View } from 'reshaped';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
 import { Page, PageHeader, EmptyState, LinkCard } from '../components/ui'
@@ -86,39 +86,46 @@ export default function PublicQA() {
       />
 
       <Grid columns={{ s: 1, l: '220px minmax(0, 1fr) 240px' }} gap={5} align="start">
-        <Card padding={4}>
-          <View gap={5}>
-            <View gap={2}>
-              <Text as="h2" variant="body-2" weight="bold">Sort discussions</Text>
-              {[
-                ['newest', 'Newest'],
-                ['votes', 'Most voted'],
-                ['answers', 'Most answered'],
-              ].map(([value, label]) => (
-                <Button key={value} fullWidth variant={sort === value ? 'faded' : 'ghost'} color={sort === value ? 'primary' : 'neutral'} onClick={() => setSort(value)}>
-                  {label}
+        <View className="public-qa-sidebar" attributes={{ 'data-testid': 'discussion-filters' }}>
+          <Card padding={4}>
+            <View gap={5}>
+              <View gap={3}>
+                <Text as="h2" variant="body-2" weight="bold">Sort discussions</Text>
+                <RadioGroup name="discussion-sort" value={sort} onChange={({ value }) => setSort(value)}>
+                  <View gap={3}>
+                    <Radio value="newest">Newest</Radio>
+                    <Radio value="votes">Most voted</Radio>
+                    <Radio value="answers">Most answered</Radio>
+                  </View>
+                </RadioGroup>
+              </View>
+              <View gap={3}>
+                <Text as="h2" variant="body-2" weight="bold">Answer status</Text>
+                <Checkbox
+                  name="answer-status-answered"
+                  value="answered"
+                  checked={status === 'answered'}
+                  onChange={({ checked }) => setStatus(checked ? 'answered' : 'all')}
+                >
+                  Answered
+                </Checkbox>
+                <Checkbox
+                  name="answer-status-unanswered"
+                  value="unanswered"
+                  checked={status === 'unanswered'}
+                  onChange={({ checked }) => setStatus(checked ? 'unanswered' : 'all')}
+                >
+                  Unanswered
+                </Checkbox>
+              </View>
+              {(sort !== 'newest' || status !== 'all' || selectedTag || searchTerm) && (
+                <Button variant="outline" fullWidth onClick={() => { setSort('newest'); setStatus('all'); setSelectedTag(null); setSearchTerm(''); }}>
+                  Clear filters
                 </Button>
-              ))}
+              )}
             </View>
-            <View gap={2}>
-              <Text as="h2" variant="body-2" weight="bold">Answer status</Text>
-              {[
-                ['all', 'All discussions'],
-                ['answered', 'Answered'],
-                ['unanswered', 'Unanswered'],
-              ].map(([value, label]) => (
-                <Button key={value} fullWidth variant={status === value ? 'faded' : 'ghost'} color={status === value ? 'primary' : 'neutral'} onClick={() => setStatus(value)}>
-                  {label}
-                </Button>
-              ))}
-            </View>
-            {(sort !== 'newest' || status !== 'all' || selectedTag || searchTerm) && (
-              <Button variant="outline" fullWidth onClick={() => { setSort('newest'); setStatus('all'); setSelectedTag(null); setSearchTerm(''); }}>
-                Clear filters
-              </Button>
-            )}
-          </View>
-        </Card>
+          </Card>
+        </View>
 
         <View gap={4}>
           {!loading && <Text variant="caption-1" color="neutral-faded">{pagination.total} discussions found</Text>}
@@ -169,22 +176,36 @@ export default function PublicQA() {
           )}
         </View>
 
-        <Card padding={4}>
-          <View gap={3}>
-            <Text as="h2" variant="body-2" weight="bold">Popular tags</Text>
-            <Button fullWidth variant={selectedTag === null ? 'faded' : 'ghost'} color={selectedTag === null ? 'primary' : 'neutral'} onClick={() => setSelectedTag(null)}>
-              All tags
-            </Button>
-            {tags.map((tag) => (
-              <Button key={tag.id} fullWidth variant={selectedTag === tag.id ? 'faded' : 'ghost'} color={selectedTag === tag.id ? 'primary' : 'neutral'} onClick={() => setSelectedTag(tag.id)}>
-                <View direction="row" justify="space-between" width="100%">
-                  <span>{tag.tag_name}</span>
-                  <Badge>{tag.questions_count || 0}</Badge>
-                </View>
-              </Button>
-            ))}
-          </View>
-        </Card>
+        <View className="public-qa-sidebar" attributes={{ 'data-testid': 'popular-tags' }}>
+          <Card padding={4}>
+            <View gap={3}>
+              <Text as="h2" variant="body-2" weight="bold">Popular tags</Text>
+              <View direction="row" gap={2} wrap>
+                <Badge
+                  size="large"
+                  color={selectedTag === null ? 'primary' : 'neutral'}
+                  variant="faded"
+                  highlighted={selectedTag === null}
+                  onClick={() => setSelectedTag(null)}
+                >
+                  All tags
+                </Badge>
+                {tags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    size="large"
+                    color={selectedTag === tag.id ? 'primary' : 'neutral'}
+                    variant="faded"
+                    highlighted={selectedTag === tag.id}
+                    onClick={() => setSelectedTag(tag.id)}
+                  >
+                    {tag.tag_name} · {tag.questions_count || 0}
+                  </Badge>
+                ))}
+              </View>
+            </View>
+          </Card>
+        </View>
       </Grid>
     </Page>
   );

@@ -115,6 +115,14 @@ test('public Q&A exposes counts, answers, voting, and answer posting', async ({ 
 
   await expect(page.getByRole('heading', { name: 'Sort discussions' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Popular tags' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Newest' })).toBeChecked();
+  await page.getByRole('radio', { name: 'Most voted' }).check();
+  await expect(page.getByRole('radio', { name: 'Most voted' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Answered', exact: true })).toBeVisible();
+  await page.getByText('Answered', { exact: true }).click();
+  await expect(page.getByRole('checkbox', { name: 'Answered', exact: true })).toBeChecked();
+  await expect(page.getByTestId('discussion-filters')).toHaveCSS('position', 'sticky');
+  await expect(page.getByTestId('popular-tags')).toHaveCSS('position', 'sticky');
   await expect(page.getByRole('button', { name: /API Design/ })).toBeVisible();
   await expect(page.getByText('3', { exact: true })).toBeVisible();
   const answersLink = page.getByRole('link', { name: '1 Answers' });

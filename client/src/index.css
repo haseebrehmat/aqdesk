@@ -60,6 +60,20 @@ button:hover .material-icon,
   outline-offset: 3px;
 }
 
+.public-qa-sidebar {
+  align-self: start;
+}
+
+@media (min-width: 1024px) {
+  .public-qa-sidebar {
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
