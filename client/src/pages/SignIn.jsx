@@ -8,8 +8,8 @@ import AuthShell from "../components/AuthShell";
 import { routerLink } from "../components/RouterLink";
 
 export default function SignIn() {
-  const [email, setEmail] = useState("student@vu.edu.pk");
-  const [password, setPassword] = useState("ValidPassword123!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
