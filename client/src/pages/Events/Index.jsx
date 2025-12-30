@@ -99,6 +99,10 @@ export default function EventIndex() {
                                         {event.ends_at && (
                                             <p><span className="font-medium text-slate-300">Ends At:</span> {new Date(event.ends_at).toLocaleString()}</p>
                                         )}
+                                        <p>
+                                            <span className="font-medium text-slate-300">Attendance:</span>{' '}
+                                            {event.attendees_count || 0}{event.max_attendees ? ` / ${event.max_attendees}` : ''}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -121,6 +125,10 @@ export default function EventIndex() {
                                         ) : isRegistered ? (
                                             <span className="text-slate-400 font-medium text-xs px-3 py-1.5 bg-slate-800 rounded-xl">
                                                 Registered
+                                            </span>
+                                        ) : event.is_full ? (
+                                            <span className="text-amber-300 font-medium text-xs px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                                                Fully Booked
                                             </span>
                                         ) : (
                                             <button

@@ -14,6 +14,7 @@ export default function EventCreate() {
         webinar_url: '',
         scheduled_at: '',
         ends_at: '',
+        max_attendees: '',
     });
     const [errors, setErrors] = useState({});
 
@@ -100,6 +101,20 @@ export default function EventCreate() {
                         />
                         {errors.ends_at && <span className="text-red-400 text-xs mt-1 block">{errors.ends_at[0]}</span>}
                     </div>
+                </div>
+
+                <div>
+                    <label htmlFor="event-capacity" className="block text-xs font-medium text-slate-300 mb-1">Maximum Attendees</label>
+                    <input
+                        id="event-capacity"
+                        type="number"
+                        min="1"
+                        value={form.max_attendees}
+                        onChange={e => setForm({ ...form, max_attendees: e.target.value })}
+                        placeholder="Leave blank for unlimited"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    />
+                    {errors.max_attendees && <span className="text-red-400 text-xs mt-1 block">{errors.max_attendees[0]}</span>}
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">

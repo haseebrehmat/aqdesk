@@ -7,13 +7,15 @@ use App\Http\Requests\StoreEventRequest;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
         $events = Event::with(['host', 'attendees'])
-            ->when($request->status, fn($q, $status) => $q->where('status', $status))
+            ->withCount('attendees')
+            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
             ->orderBy('scheduled_at', 'asc')
             ->paginate(10);
 
@@ -23,7 +25,7 @@ class EventController extends Controller
     public function store(StoreEventRequest $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Create the event
         $event = $user->hostedEvents()->create($request->validated());
 
@@ -32,26 +34,37 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event created successfully.',
-            'data' => $event->load(['host', 'attendees']),
+            'data' => $event->load(['host', 'attendees'])->loadCount('attendees'),
         ], 201);
     }
 
     public function show(Event $event): JsonResponse
     {
-        return response()->json($event->load(['host', 'attendees']));
+        return response()->json($event->load(['host', 'attendees'])->loadCount('attendees'));
     }
 
     public function register(Request $request, Event $event): JsonResponse
     {
-        $user = $request->user();
+        return DB::transaction(function () use ($request, $event) {
+            $user = $request->user();
+            $lockedEvent = Event::query()->lockForUpdate()->findOrFail($event->id);
 
-        if ($event->attendees()->where('user_id', $user->id)->exists()) {
-            return response()->json(['message' => 'You are already registered for this event.'], 422);
-        }
+            if ($lockedEvent->attendees()->where('user_id', $user->id)->exists()) {
+                return response()->json(['message' => 'You are already registered for this event.'], 422);
+            }
 
-        $event->attendees()->attach($user->id);
+            if ($lockedEvent->max_attendees !== null
+                && $lockedEvent->attendees()->count() >= $lockedEvent->max_attendees) {
+                return response()->json(['message' => 'This event is fully booked.'], 422);
+            }
 
-        return response()->json(['message' => 'Successfully registered for the event.']);
+            $lockedEvent->attendees()->attach($user->id);
+
+            return response()->json([
+                'message' => 'Successfully registered for the event.',
+                'data' => $lockedEvent->load(['host', 'attendees'])->loadCount('attendees'),
+            ]);
+        });
     }
 
     public function unregister(Request $request, Event $event): JsonResponse

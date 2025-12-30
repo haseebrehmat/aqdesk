@@ -57,7 +57,7 @@ export default function PublicEvents() {
                       {new Date(ev.scheduled_at).toLocaleDateString()}
                     </span>
                     <span className="text-xs text-slate-500 flex items-center gap-1 font-semibold">
-                      <Users className="w-3.5 h-3.5 text-slate-400" /> {ev.attendees_count || 0} Registered
+                      <Users className="w-3.5 h-3.5 text-slate-400" /> {ev.attendees_count || 0}{ev.max_attendees ? ` / ${ev.max_attendees}` : ''} Registered
                     </span>
                   </div>
 

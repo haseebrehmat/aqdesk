@@ -19,6 +19,7 @@ class StoreEventRequest extends FormRequest
             'webinar_url' => ['required', 'url'],
             'scheduled_at' => ['required', 'date', 'after:now'],
             'ends_at' => ['nullable', 'date', 'after:scheduled_at'],
+            'max_attendees' => ['nullable', 'integer', 'min:1', 'max:100000'],
         ];
     }
 }
