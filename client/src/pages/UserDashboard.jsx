@@ -1,98 +1,49 @@
-import { Link } from "react-router-dom";
+import { Card, Badge, Grid, Text, View } from "reshaped";
 import { FolderKanban, HelpCircle, Briefcase, User, ArrowRight } from "lucide-react";
+import { Page } from "../components/ui";
+import { routerLink } from "../components/RouterLink";
+
+const links = [
+  { to: "/projects", icon: FolderKanban, title: "Workspaces", text: "Collaborate on team project files and share feedback.", cta: "View projects" },
+  { to: "/dashboard/questions", icon: HelpCircle, title: "Community Q&A", text: "Ask technical questions and share solutions with peers.", cta: "Browse discussions" },
+  { to: "/dashboard/opportunities", icon: Briefcase, title: "Opportunities", text: "Explore verified internships, jobs, and academic openings.", cta: "View listings" },
+  { to: "/profile", icon: User, title: "Profile Settings", text: "Update your personal bio, developer skills, and tags.", cta: "Edit profile" },
+];
 
 export default function UserDashboard() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans p-6 lg:p-12">
-      <div className="max-w-6xl mx-auto">
-        {/* Welcome Header */}
-        <div className="bg-gradient-to-r from-blue-900/40 via-slate-900 to-slate-900 border border-slate-800 rounded-3xl p-8 mb-8 shadow-xl">
-          <div className="flex items-center space-x-3 mb-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              {user?.role?.role_name || "Standard User"}
-            </span>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, {user?.name || "Collaborator"}! 👋
-          </h1>
-          <p className="text-slate-400 text-sm mt-2">
-            Here is your AQDesk activity hub. Manage your workspaces, explore community questions, and track career opportunities.
-          </p>
-        </div>
+    <Page>
+      <Card padding={8}>
+        <View gap={2}>
+          <View direction="row"><Badge color="primary" variant="faded">{user?.role?.role_name || "Standard User"}</Badge></View>
+          <Text as="h1" variant="featured-2" weight="bold">Welcome back, {user?.name || "Collaborator"}!</Text>
+          <Text color="neutral-faded">
+            Here is your activity hub. Manage your workspaces, explore community questions, and track career opportunities.
+          </Text>
+        </View>
+      </Card>
 
-        {/* Quick Links Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link
-            to="/projects"
-            className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-6 rounded-2xl transition group flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition">
-                <FolderKanban className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-lg text-white">Workspaces</h3>
-              <p className="text-slate-400 text-xs mt-1">Collaborate on team project files and share feedback.</p>
-            </div>
-            <div className="mt-6 flex items-center text-xs text-blue-400 font-medium">
-              <span>View projects</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition" />
-            </div>
-          </Link>
-
-          <Link
-            to="/dashboard/questions"
-            className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-6 rounded-2xl transition group flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
-                <HelpCircle className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-lg text-white">Community Q&A</h3>
-              <p className="text-slate-400 text-xs mt-1">Ask technical questions and share solutions with peers.</p>
-            </div>
-            <div className="mt-6 flex items-center text-xs text-indigo-400 font-medium">
-              <span>Browse discussions</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition" />
-            </div>
-          </Link>
-
-          <Link
-            to="/dashboard/opportunities"
-            className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-6 rounded-2xl transition group flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition">
-                <Briefcase className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-lg text-white">Opportunities</h3>
-              <p className="text-slate-400 text-xs mt-1">Explore verified internships, jobs, and academic openings.</p>
-            </div>
-            <div className="mt-6 flex items-center text-xs text-emerald-400 font-medium">
-              <span>View listings</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition" />
-            </div>
-          </Link>
-
-          <Link
-            to="/profile"
-            className="bg-slate-900 border border-slate-800 hover:border-slate-700 p-6 rounded-2xl transition group flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
-                <User className="w-5 h-5" />
-              </div>
-              <h3 className="font-semibold text-lg text-white">Profile Settings</h3>
-              <p className="text-slate-400 text-xs mt-1">Update your personal bio, developer skills, and tags.</p>
-            </div>
-            <div className="mt-6 flex items-center text-xs text-purple-400 font-medium">
-              <span>Edit profile</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition" />
-            </div>
-          </Link>
-        </div>
-      </div>
-    </div>
+      <Grid columns={{ s: 1, m: 2, l: 4 }} gap={5}>
+        {links.map(({ to, icon: Icon, title, text, cta }) => (
+          <Card key={to} padding={6} height="100%" {...routerLink(to)}>
+            <View gap={4} height="100%" justify="space-between">
+              <View gap={3}>
+                <View width="40px" height="40px" borderRadius="medium" backgroundColor="primary-faded" align="center" justify="center">
+                  <Icon size={20} color="var(--rs-color-foreground-primary)" aria-hidden="true" />
+                </View>
+                <Text as="h2" variant="featured-5" weight="bold">{title}</Text>
+                <Text variant="body-2" color="neutral-faded">{text}</Text>
+              </View>
+              <View direction="row" align="center" gap={1}>
+                <Text variant="caption-1" weight="medium" color="primary">{cta}</Text>
+                <ArrowRight size={14} color="var(--rs-color-foreground-primary)" aria-hidden="true" />
+              </View>
+            </View>
+          </Card>
+        ))}
+      </Grid>
+    </Page>
   );
 }

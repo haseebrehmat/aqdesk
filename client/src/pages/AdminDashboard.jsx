@@ -1,73 +1,73 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Badge, Button, Card, Loader, Modal, Table, Text, TextField, View } from "reshaped";
+import { Plus, Trash2, Edit, Search } from "lucide-react";
 import api from "../api/axios";
-import {
-  Shield,
-  Trash2,
-  Edit,
-  Plus,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  ArrowLeft,
-  Search,
-  AlertCircle,
-  X,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { useToast } from "../components/ToastContainer";
+import { Page, PageHeader, FormField, EmptyState } from "../components/ui";
+import { routerLink } from "../components/RouterLink";
+
+const emptyForm = { name: "", email: "", password: "", role_id: "", is_active: true };
 
 export default function AdminDashboard() {
+  const { addToast } = useToast();
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [reports, setReports] = useState([]);
 
-  // Modal & Form State for Creating a User
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role_id: "1", // Adjust default role ID depending on your DB
-    is_active: true,
-  });
+  // Create / edit dialog. `editing` holds the user being edited (null = creating).
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [formData, setFormData] = useState(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const isAdmin =
-    currentUser.role?.role_name?.toLowerCase() === "admin" ||
-    currentUser.role === "admin";
-
-  const fetchUsers = async () => {
-    try {
-      const response = await api.get("/admin/users");
-      setUsers(response.data.users);
-      const reportResponse = await api.get("/admin/content-reports");
-      setReports(reportResponse.data.data || []);
-    } catch {
-      setError(
-        "Unauthorized access or failed to fetch users. Ensure you have administrator privileges.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const standardRoleId = useMemo(
+    () => String(roles.find((r) => r.role_name === "Standard User")?.id ?? roles[0]?.id ?? ""),
+    [roles],
+  );
 
   useEffect(() => {
-    fetchUsers();
+    (async () => {
+      try {
+        const [userRes, roleRes, reportRes] = await Promise.all([
+          api.get("/admin/users"),
+          api.get("/admin/roles"),
+          api.get("/admin/content-reports"),
+        ]);
+        setUsers(userRes.data.users);
+        setRoles(roleRes.data.roles);
+        setReports(reportRes.data.data || []);
+      } catch {
+        setError("Unauthorized access or failed to fetch users. Ensure you have administrator privileges.");
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, []);
 
-  const handleToggleStatus = async (id, currentStatus) => {
+  const openCreate = () => {
+    setEditing(null);
+    setFormError("");
+    setFormData({ ...emptyForm, role_id: standardRoleId });
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (user) => {
+    setEditing(user);
+    setFormError("");
+    setFormData({ ...emptyForm, name: user.name, email: user.email, role_id: String(user.role_id), is_active: !!user.is_active });
+    setIsModalOpen(true);
+  };
+
+  const handleToggleStatus = async (user) => {
     try {
-      await api.put(`/admin/users/${id}`, { is_active: !currentStatus });
-      setUsers(
-        users.map((u) =>
-          u.id === id ? { ...u, is_active: !currentStatus } : u,
-        ),
-      );
+      await api.put(`/admin/users/${user.id}`, { is_active: !user.is_active });
+      setUsers((list) => list.map((u) => (u.id === user.id ? { ...u, is_active: !user.is_active } : u)));
     } catch {
-      alert("Failed to update user status.");
+      addToast("Failed to update user status.", "error");
     }
   };
 
@@ -75,369 +75,184 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       await api.delete(`/admin/users/${id}`);
-      setUsers(users.filter((u) => u.id !== id));
+      setUsers((list) => list.filter((u) => u.id !== id));
+      addToast("User deleted.", "success");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete user.");
+      addToast(err.response?.data?.message || "Failed to delete user.", "error");
     }
   };
 
-  const handleCreateUserSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setFormError("");
-
     try {
-      const response = await api.post("/admin/users", formData);
-      setUsers([response.data.user, ...users]);
-      setIsCreateModalOpen(false);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        role_id: "1",
-        is_active: true,
-      });
+      if (editing) {
+        const { data } = await api.put(`/admin/users/${editing.id}`, {
+          role_id: Number(formData.role_id),
+          is_active: formData.is_active,
+        });
+        setUsers((list) => list.map((u) => (u.id === editing.id ? data.user : u)));
+        addToast("User updated.", "success");
+      } else {
+        const { data } = await api.post("/admin/users", { ...formData, role_id: Number(formData.role_id) });
+        setUsers((list) => [data.user, ...list]);
+        addToast("User created.", "success");
+      }
+      setIsModalOpen(false);
     } catch (err) {
       setFormError(
-        err.response?.data?.message ||
-          "Failed to create user. Please check your inputs.",
+        Object.values(err.response?.data?.errors || {})[0]?.[0] ||
+          err.response?.data?.message ||
+          "Failed to save user. Please check your inputs.",
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleEditUser = (user) => {
-    alert(`Trigger Edit User for: ${user.name}`);
-  };
-
   const moderateReport = async (report, action, status = "Resolved") => {
     try {
       const { data } = await api.patch(`/admin/content-reports/${report.id}`, { action, status });
-      setReports((items) => items.map((item) => item.id === report.id ? data.report : item));
+      setReports((items) => items.map((item) => (item.id === report.id ? data.report : item)));
     } catch (requestError) {
-      alert(requestError.response?.data?.message || "Unable to review this report.");
+      addToast(requestError.response?.data?.message || "Unable to review this report.", "error");
     }
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const term = searchTerm.toLowerCase();
+  const filteredUsers = users.filter((u) => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+  const pendingReports = reports.filter((r) => r.status === "Pending");
+  const roleOptions = roles.map((r) => ({ value: String(r.id), label: r.role_name }));
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
+  if (isLoading) return <View align="center" padding={12}><Loader /></View>;
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 lg:p-12 text-white font-sans relative">
-      <div className="max-w-6xl mx-auto">
-        {/* Top Navigation & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center space-x-2 text-xs font-semibold text-blue-400 mb-1">
-              <Shield className="w-4 h-4" />
-              <span>ADMINISTRATION CONTROL PANEL</span>
-            </div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
-              User Management Ecosystem
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Supervise platform accounts, toggle account access, and manage
-              security settings.
-            </p>
-          </div>
+    <Page>
+      <PageHeader
+        title="User Management"
+        description="Supervise platform accounts, toggle account access, and review community reports."
+        actions={
+          <>
+            <Button color="primary" icon={Plus} onClick={openCreate}>Create User</Button>
+            <Button variant="outline" {...routerLink("/admin/settings")}>Site Settings</Button>
+          </>
+        }
+      />
 
-          <div className="flex items-center gap-3">
-            {/* Create User Button */}
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm transition shadow-lg shadow-blue-600/20 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create User</span>
-            </button>
+      {error && <Alert color="critical" attributes={{ role: "alert" }}>{error}</Alert>}
 
-            {/* Dynamic Back Dashboard Button */}
-            <Link
-              to={isAdmin ? "/dashboard" : "/dashboard"}
-              className="inline-flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 px-4 py-2.5 rounded-xl text-sm transition"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Dashboard</span>
-            </Link>
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-sm mb-6 flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Search and Stats Bar */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
+      <Card padding={4}>
+        <View direction={{ s: "column", m: "row" }} justify="space-between" align={{ s: "stretch", m: "center" }} gap={3}>
+          <View width={{ s: "100%", m: "320px" }}>
+            <TextField
+              name="user-search"
+              icon={Search}
               placeholder="Search by name or email..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+              onChange={({ value }) => setSearchTerm(value)}
+              inputAttributes={{ type: "search", "aria-label": "Search users" }}
             />
-          </div>
-          <div className="text-xs text-slate-400 font-medium">
-            Total Registered Accounts:{" "}
-            <span className="text-white font-bold">{users.length}</span>
-          </div>
-        </div>
+          </View>
+          <Text variant="caption-1" color="neutral-faded">Total registered accounts: <strong>{users.length}</strong></Text>
+        </View>
+      </Card>
 
-        {/* Users Table */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-900/50">
-                  <th className="p-4">User Name</th>
-                  <th className="p-4">Email Address</th>
-                  <th className="p-4">Assigned Role</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800 text-sm">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
-                    <tr
-                      key={user.id}
-                      className="hover:bg-slate-800/40 transition"
-                    >
-                      <td className="p-4 font-medium text-white">
-                        {user.name}
-                      </td>
-                      <td className="p-4 text-slate-300">{user.email}</td>
-                      <td className="p-4">
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                          {user.role?.role_name || "Standard User"}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(user.id, user.is_active)
-                          }
-                          className="flex items-center space-x-1.5 cursor-pointer hover:opacity-80 transition"
-                          title="Click to toggle status"
-                        >
-                          {user.is_active ? (
-                            <span className="flex items-center text-emerald-400 text-xs font-medium bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                              <CheckCircle className="w-3.5 h-3.5 mr-1" />{" "}
-                              Active
-                            </span>
-                          ) : (
-                            <span className="flex items-center text-red-400 text-xs font-medium bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
-                              <XCircle className="w-3.5 h-3.5 mr-1" /> Inactive
-                            </span>
-                          )}
-                        </button>
-                      </td>
-                      <td className="p-4 text-right space-x-2">
-                        <button
-                          onClick={() => handleEditUser(user)}
-                          className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition inline-flex items-center cursor-pointer"
-                          title="Edit User"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition inline-flex items-center cursor-pointer"
-                          title="Delete User"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="p-8 text-center text-slate-500 text-sm"
-                    >
-                      No matching user accounts found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <section className="mt-8 bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4">Community Moderation Queue</h2>
-          <div className="space-y-3">
-            {reports.filter((report) => report.status === "Pending").length === 0 && (
-              <p className="text-sm text-slate-400">No pending community reports.</p>
+      <Card padding={0}>
+        <View overflow="auto">
+          <Table>
+            <Table.Row>
+              <Table.Heading>User</Table.Heading>
+              <Table.Heading>Email</Table.Heading>
+              <Table.Heading>Role</Table.Heading>
+              <Table.Heading>Status</Table.Heading>
+              <Table.Heading>Actions</Table.Heading>
+            </Table.Row>
+            {filteredUsers.length > 0 ? filteredUsers.map((user) => (
+              <Table.Row key={user.id}>
+                <Table.Cell><Text weight="medium">{user.name}</Text></Table.Cell>
+                <Table.Cell><Text color="neutral-faded">{user.email}</Text></Table.Cell>
+                <Table.Cell><Badge variant="faded" color="primary">{user.role?.role_name || "Standard User"}</Badge></Table.Cell>
+                <Table.Cell>
+                  <Button
+                    size="small"
+                    variant="faded"
+                    color={user.is_active ? "positive" : "critical"}
+                    onClick={() => handleToggleStatus(user)}
+                    attributes={{ title: "Click to toggle status", "aria-label": `${user.name} is ${user.is_active ? "active" : "inactive"}. Toggle status` }}
+                  >
+                    {user.is_active ? "Active" : "Inactive"}
+                  </Button>
+                </Table.Cell>
+                <Table.Cell>
+                  <View direction="row" gap={1}>
+                    <Button variant="ghost" size="small" icon={Edit} onClick={() => openEdit(user)} attributes={{ "aria-label": `Edit ${user.name}`, title: "Edit User" }} />
+                    <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDeleteUser(user.id)} attributes={{ "aria-label": `Delete ${user.name}`, title: "Delete User" }} />
+                  </View>
+                </Table.Cell>
+              </Table.Row>
+            )) : (
+              <Table.Row>
+                <Table.Cell colSpan={5}><View padding={6} align="center"><Text color="neutral-faded">No matching user accounts found.</Text></View></Table.Cell>
+              </Table.Row>
             )}
-            {reports.filter((report) => report.status === "Pending").map((report) => (
-              <article key={report.id} className="border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold capitalize">{report.reportable_type} #{report.reportable_id}</p>
-                  <p className="text-sm text-slate-300 mt-1">{report.reason}</p>
-                  <p className="text-xs text-slate-500 mt-1">Reported by {report.reporter?.name || "Unknown"}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => moderateReport(report, "hide")} className="px-3 py-2 text-xs rounded-lg bg-amber-700 hover:bg-amber-600">Hide</button>
-                  <button onClick={() => moderateReport(report, "delete")} className="px-3 py-2 text-xs rounded-lg bg-red-700 hover:bg-red-600">Delete</button>
-                  <button onClick={() => moderateReport(report, "none", "Dismissed")} className="px-3 py-2 text-xs rounded-lg bg-slate-700 hover:bg-slate-600">Dismiss</button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      </div>
+          </Table>
+        </View>
+      </Card>
 
-      {/* CREATE USER MODAL */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-slate-800">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-blue-500" /> Create New User
-                Account
-              </h3>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <View gap={3}>
+        <Text as="h2" variant="featured-5" weight="bold">Community Moderation Queue</Text>
+        {pendingReports.length === 0 ? (
+          <EmptyState title="No pending community reports." />
+        ) : pendingReports.map((report) => (
+          <Card key={report.id} padding={4}>
+            <View direction={{ s: "column", m: "row" }} justify="space-between" align={{ s: "start", m: "center" }} gap={3}>
+              <View gap={1}>
+                <Text weight="bold" attributes={{ style: { textTransform: "capitalize" } }}>{report.reportable_type} #{report.reportable_id}</Text>
+                <Text variant="body-2">{report.reason}</Text>
+                <Text variant="caption-1" color="neutral-faded">Reported by {report.reporter?.name || "Unknown"}</Text>
+              </View>
+              <View direction="row" gap={2} wrap>
+                <Button size="small" color="warning" onClick={() => moderateReport(report, "hide")}>Hide</Button>
+                <Button size="small" color="critical" onClick={() => moderateReport(report, "delete")}>Delete</Button>
+                <Button size="small" variant="outline" onClick={() => moderateReport(report, "none", "Dismissed")}>Dismiss</Button>
+              </View>
+            </View>
+          </Card>
+        ))}
+      </View>
 
-            <form onSubmit={handleCreateUserSubmit} className="p-6 space-y-4">
-              {formError && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-sm flex items-center space-x-2">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <span>{formError}</span>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Enter full name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition"
+      <Modal active={isModalOpen} onClose={() => setIsModalOpen(false)} size="520px" padding={6}>
+        <Modal.Title>{editing ? `Edit ${editing.name}` : "Create New User Account"}</Modal.Title>
+        <form onSubmit={handleSubmit}>
+          <View gap={4} paddingTop={4}>
+            {formError && <Alert color="critical" attributes={{ role: "alert" }}>{formError}</Alert>}
+            {!editing && (
+              <>
+                <FormField label="Full Name" name="name" required placeholder="Enter full name" value={formData.name} onChange={(v) => setFormData({ ...formData, name: v })} />
+                <FormField label="Email Address" name="email" type="email" required placeholder="name@example.com" value={formData.email} onChange={(v) => setFormData({ ...formData, email: v })} />
+                <FormField label="Password" name="password" type="password" required placeholder="At least 6 characters" value={formData.password} onChange={(v) => setFormData({ ...formData, password: v })} />
+              </>
+            )}
+            <View direction="row" gap={4}>
+              <View grow><FormField label="User Role" name="role_id" value={formData.role_id} onChange={(v) => setFormData({ ...formData, role_id: v })} options={roleOptions} /></View>
+              <View grow>
+                <FormField
+                  label="Account Status"
+                  name="is_active"
+                  value={formData.is_active ? "true" : "false"}
+                  onChange={(v) => setFormData({ ...formData, is_active: v === "true" })}
+                  options={[{ value: "true", label: "Active" }, { value: "false", label: "Inactive" }]}
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="At least 6 characters"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    User Role
-                  </label>
-                  <select
-                    value={formData.role_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, role_id: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition cursor-pointer"
-                  >
-                    <option value="1">Admin</option>
-                    <option value="2">Expert</option>
-                    <option value="3">Employer</option>
-                    <option value="4">Standard User</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Account Status
-                  </label>
-                  <select
-                    value={formData.is_active ? "true" : "false"}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        is_active: e.target.value === "true",
-                      })
-                    }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition cursor-pointer"
-                  >
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="inline-flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-blue-600/20 disabled:opacity-50 cursor-pointer"
-                >
-                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  <span>Save Account</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+              </View>
+            </View>
+            <View direction="row" justify="end" gap={2} borderTop paddingTop={4}>
+              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" color="primary" loading={isSubmitting}>{editing ? "Save Changes" : "Save Account"}</Button>
+            </View>
+          </View>
+        </form>
+      </Modal>
+    </Page>
   );
 }

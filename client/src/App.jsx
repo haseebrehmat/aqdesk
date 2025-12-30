@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import PublicNavbar from './components/PublicNavbar';
 import AuthSidebar from './components/AuthSidebar';
 import AuthLayoutHeader from './components/AuthLayoutHeader';
+import { View } from 'reshaped';
 import { LayoutProvider } from './context/LayoutContext';
 
 import SignIn from './pages/SignIn';
@@ -43,18 +44,19 @@ import PodcastCreate from './pages/Podcasts/Create';
 import PublicFooter from './components/PublicFooter';
 import NewsletterAdmin from './pages/NewsletterAdmin';
 import AuthSuccess from './pages/AuthSuccess';
+import SiteSettings from './pages/SiteSettings';
 
 // Layout for Guest (Public) Website Pages
 function PublicLayout() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+    <View minHeight="100vh" backgroundColor="page">
       <a href="#main-content" className="skip-link">Skip to main content</a>
       <PublicNavbar />
-      <main id="main-content" tabIndex="-1" className="flex-1">
+      <View as="main" grow attributes={{ id: 'main-content', tabIndex: -1 }}>
         <Outlet />
-      </main>
+      </View>
       <PublicFooter />
-    </div>
+    </View>
   );
 }
 
@@ -64,18 +66,20 @@ function ProtectedLayout() {
   if (!token) return <Navigate to="/login" replace />;
 
   return (
-    <LayoutProvider>
-      <div className="min-h-screen flex bg-slate-950">
-        <a href="#main-content" className="skip-link">Skip to main content</a>
-        <AuthSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <AuthLayoutHeader />
-          <main id="main-content" tabIndex="-1" className="flex-1 overflow-y-auto">
-            <Outlet />
-          </main>
-        </div>
-      </div>
-    </LayoutProvider>
+    <>
+      <LayoutProvider>
+        <View direction="row" align="stretch" minHeight="100vh" backgroundColor="page">
+          <a href="#main-content" className="skip-link">Skip to main content</a>
+          <AuthSidebar />
+          <View grow attributes={{ style: { minWidth: 0 } }}>
+            <AuthLayoutHeader />
+            <View as="main" grow attributes={{ id: 'main-content', tabIndex: -1, style: { overflowY: 'auto' } }}>
+              <Outlet />
+            </View>
+          </View>
+        </View>
+      </LayoutProvider>
+    </>
   );
 }
 
@@ -119,6 +123,7 @@ export default function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminDashboard />} />
             <Route path="/admin/newsletters" element={<NewsletterAdmin />} />
+            <Route path="/admin/settings" element={<SiteSettings />} />
 
             {/* Account Settings & Workspaces */}
             <Route path="/profile" element={<Profile />} />
