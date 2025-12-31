@@ -40,6 +40,7 @@ function CardSkeletons() {
 
 export default function HomePage() {
   const { appName } = useBranding();
+  const isSignedIn = !!localStorage.getItem('token');
   const [questions, setQuestions] = useState(null);
   const [jobs, setJobs] = useState(null);
 
@@ -102,7 +103,7 @@ export default function HomePage() {
                     </LinkCard>
                   ))}
                   {questions === null && <CardSkeletons />}
-                  <Button color="primary" fullWidth {...routerLink('/register')}>Join the Community</Button>
+                  <Button color="primary" fullWidth {...routerLink(isSignedIn ? '/dashboard' : '/register')}>{isSignedIn ? 'Go to Dashboard' : 'Join the Community'}</Button>
                 </View>
               </Card>
             </View>
@@ -242,11 +243,17 @@ export default function HomePage() {
       <View backgroundColor="primary" attributes={{ style: { color: 'var(--rs-color-on-background-primary)' } }}>
         <Container width="1000px" padding={{ s: 4, m: 6, l: 8 }}>
           <View gap={5} align="center" paddingBlock={14} textAlign="center">
-            <Text as="h2" variant="featured-2" weight="bold" color="inherit">Ready to Join the {appName} Community?</Text>
-            <Text color="inherit">Create your account today to join Q&amp;A discussions, form team workspaces, and apply to tech opportunities.</Text>
+            <Text as="h2" variant="featured-2" weight="bold" color="inherit">{isSignedIn ? `Welcome back to ${appName}` : `Ready to Join the ${appName} Community?`}</Text>
+            <Text color="inherit">{isSignedIn ? 'Pick up where you left off in your workspaces, discussions and applications.' : 'Create your account today to join Q&A discussions, form team workspaces, and apply to tech opportunities.'}</Text>
             <View direction="row" gap={3} wrap justify="center">
-              <Button color="primary" {...routerLink('/register')}>Sign Up Now</Button>
-              <Button variant="outline" color="neutral" {...routerLink('/login')}>Sign In to Account</Button>
+              {isSignedIn ? (
+                <Button color="primary" {...routerLink('/dashboard')}>Go to Dashboard</Button>
+              ) : (
+                <>
+                  <Button color="primary" {...routerLink('/register')}>Sign Up Now</Button>
+                  <Button variant="outline" color="neutral" {...routerLink('/login')}>Sign In to Account</Button>
+                </>
+              )}
             </View>
           </View>
         </Container>

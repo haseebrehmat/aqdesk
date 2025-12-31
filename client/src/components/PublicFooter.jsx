@@ -85,8 +85,14 @@ export default function PublicFooter() {
             <View gap={3}>
               <Text variant="caption-1" weight="bold" color="neutral-faded">COMPANY</Text>
               <FooterLink to="/about">About Us</FooterLink>
-              <FooterLink to="/login">Sign In</FooterLink>
-              <FooterLink to="/register">Create Account</FooterLink>
+              {localStorage.getItem('token') ? (
+                <FooterLink to="/dashboard">Dashboard</FooterLink>
+              ) : (
+                <>
+                  <FooterLink to="/login">Sign In</FooterLink>
+                  <FooterLink to="/register">Create Account</FooterLink>
+                </>
+              )}
             </View>
 
             <View gap={3}>

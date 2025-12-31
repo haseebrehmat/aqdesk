@@ -49,6 +49,11 @@ import NewsletterAdmin from './pages/NewsletterAdmin';
 import AuthSuccess from './pages/AuthSuccess';
 import SiteSettings from './pages/SiteSettings';
 
+// Sign in / register are for signed-out visitors only.
+function GuestRoute({ children }) {
+  return localStorage.getItem('token') ? <Navigate to="/dashboard" replace /> : children;
+}
+
 // Layout for Guest (Public) Website Pages
 function PublicLayout() {
   return (
@@ -93,8 +98,8 @@ export default function App() {
       <Router>
         <Routes>
           {/* Standalone Authentication & Direct Join Pages */}
-          <Route path="/login" element={<SignIn />} />
-          <Route path="/register" element={<SignUp />} />
+          <Route path="/login" element={<GuestRoute><SignIn /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
           <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="/projects/join/:token" element={<JoinProject />} />
 
