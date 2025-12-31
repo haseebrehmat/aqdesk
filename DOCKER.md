@@ -1,9 +1,10 @@
 # Docker development setup
 
-The Docker stack runs three services:
+The Docker stack runs four services:
 
 - React/Vite frontend at <http://localhost:3000>
 - Laravel API at <http://localhost:8080>
+- Laravel database-backed queue worker
 - MySQL 8.4 on the internal Docker network
 
 Start the stack:
@@ -15,7 +16,7 @@ docker compose up --build -d
 Follow startup logs:
 
 ```bash
-docker compose logs -f backend frontend
+docker compose logs -f backend worker frontend
 ```
 
 Stop the stack while keeping database data:
@@ -31,8 +32,10 @@ docker compose down --volumes
 ```
 
 The backend automatically waits for MySQL, runs migrations, seeds roles and
-tags, creates the public storage link, and starts Laravel. Full demo seeders are
-not run because they create accounts with known development passwords.
+tags, creates the public storage link, and starts Laravel. The worker starts
+after the API is healthy and continuously processes the database queue with
+three attempts per job. Full demo seeders are not run because they create
+accounts with known development passwords.
 
 Docker Compose supplies `APP_URL`, `FRONTEND_URL`, `VITE_BACKEND_URL`, and
 `VITE_API_PROXY_TARGET` directly to the containers, so Docker does not require

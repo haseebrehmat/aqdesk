@@ -22,4 +22,4 @@ php artisan db:seed --class='Database\Seeders\RoleSeeder' --force
 php artisan db:seed --class='Database\Seeders\TagSeeder' --force
 php artisan storage:link || true
 
-exec php artisan serve --host=0.0.0.0 --port=8000
+exec "$@"

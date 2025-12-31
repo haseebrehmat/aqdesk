@@ -36,3 +36,4 @@ RUN composer dump-autoload --no-dev --optimize \
 EXPOSE 8000
 
 ENTRYPOINT ["docker/entrypoint.sh"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
