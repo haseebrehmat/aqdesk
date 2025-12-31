@@ -1,12 +1,23 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Avatar, Button, Divider, Text, View } from 'reshaped';
-import {
-  MessageSquare, FolderKanban, Briefcase, Calendar, Mic2, Shield, LayoutDashboard,
-  LogOut, ChevronLeft, ChevronRight, X, Mail, Settings,
-} from 'lucide-react';
 import { useLayout } from '../context/LayoutContext';
 import { useBranding } from '../context/BrandingContext';
 import Logo from './Logo';
+import { materialIcon } from './MaterialIcon';
+
+const MessageSquare = materialIcon('forum');
+const Folder = materialIcon('folder');
+const Briefcase = materialIcon('work');
+const Calendar = materialIcon('calendar_month');
+const Podcast = materialIcon('podcast');
+const Shield = materialIcon('admin_panel_settings');
+const LayoutDashboard = materialIcon('dashboard');
+const LogOut = materialIcon('logout');
+const ChevronLeft = materialIcon('chevron_left');
+const ChevronRight = materialIcon('chevron_right');
+const Close = materialIcon('close');
+const Mail = materialIcon('mail');
+const Settings = materialIcon('settings');
 
 function SidebarLink({ to, icon: Icon, label, expanded, onNavigate }) {
   return (
@@ -21,7 +32,7 @@ function SidebarLink({ to, icon: Icon, label, expanded, onNavigate }) {
           backgroundColor={isActive ? 'primary-faded' : undefined}
           justify={expanded ? 'start' : 'center'}
         >
-          <Icon size={20} aria-hidden="true" color={isActive ? 'var(--rs-color-foreground-primary)' : 'var(--rs-color-foreground-neutral-faded)'} style={{ flexShrink: 0 }} />
+          <Icon size={20} filled={isActive} aria-hidden="true" color={isActive ? 'var(--rs-color-foreground-primary)' : 'var(--rs-color-foreground-neutral-faded)'} />
           {expanded && (
             <Text variant="body-2" weight="medium" color={isActive ? 'primary' : 'neutral'}>{label}</Text>
           )}
@@ -49,10 +60,10 @@ export default function AuthSidebar() {
 
   const navItems = [
     { label: 'Q&A Board', path: '/dashboard/questions', icon: MessageSquare },
-    { label: 'Workspaces', path: '/projects', icon: FolderKanban },
+    { label: 'Workspaces', path: '/projects', icon: Folder },
     { label: 'Opportunities', path: '/dashboard/opportunities', icon: Briefcase },
     { label: 'Events', path: '/dashboard/events', icon: Calendar },
-    { label: 'Podcasts', path: '/dashboard/podcasts', icon: Mic2 },
+    { label: 'Podcasts', path: '/dashboard/podcasts', icon: Podcast },
   ];
   if (isAdmin) {
     navItems.push({ label: 'User Management', path: '/admin/users', icon: Shield });
@@ -87,7 +98,7 @@ export default function AuthSidebar() {
             />
           </View>
           <View className="lg:hidden">
-            <Button variant="ghost" size="small" icon={X} onClick={closeSidebar} attributes={{ 'aria-label': 'Close sidebar' }} />
+            <Button variant="ghost" size="small" icon={Close} onClick={closeSidebar} attributes={{ 'aria-label': 'Close sidebar' }} />
           </View>
         </View>
 

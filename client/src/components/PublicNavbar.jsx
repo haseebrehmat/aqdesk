@@ -1,20 +1,31 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Button, Container, Divider, Hidden, View } from 'reshaped';
-import { MessageSquare, Briefcase, Calendar, Mic2, Info, LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
 import Logo from './Logo';
 import ColorModeToggle from './ColorModeToggle';
 import { routerLink } from './RouterLink';
+import { materialIcon } from './MaterialIcon';
+
+const MessageSquare = materialIcon('forum');
+const Briefcase = materialIcon('work');
+const Calendar = materialIcon('calendar_month');
+const Podcast = materialIcon('podcast');
+const Info = materialIcon('info');
+const LayoutDashboard = materialIcon('dashboard');
+const LogIn = materialIcon('login');
+const Menu = materialIcon('menu');
+const Close = materialIcon('close');
 
 const navItems = [
   { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
   { label: 'Opportunities', path: '/opportunities', icon: Briefcase },
   { label: 'Events', path: '/events', icon: Calendar },
-  { label: 'Podcasts', path: '/podcasts', icon: Mic2 },
+  { label: 'Podcasts', path: '/podcasts', icon: Podcast },
   { label: 'About Us', path: '/about', icon: Info },
 ];
 
 function NavButton({ item, onNavigate }) {
+  const Icon = item.icon;
   return (
     <NavLink to={item.path} onClick={onNavigate} style={{ textDecoration: 'none' }}>
       {({ isActive }) => (
@@ -22,7 +33,7 @@ function NavButton({ item, onNavigate }) {
           as="span"
           variant={isActive ? 'faded' : 'ghost'}
           color={isActive ? 'primary' : 'neutral'}
-          icon={item.icon}
+          startSlot={<Icon size={20} filled={isActive} aria-hidden="true" />}
           attributes={{ tabIndex: -1 }}
         >
           {item.label}
@@ -64,7 +75,7 @@ export default function PublicNavbar() {
             <Hidden hide={{ s: false, m: true }}>
               <Button
                 variant="ghost"
-                icon={isOpen ? X : Menu}
+                icon={isOpen ? Close : Menu}
                 onClick={() => setIsOpen((v) => !v)}
                 attributes={{ 'aria-label': 'Toggle menu', 'aria-expanded': isOpen }}
               />

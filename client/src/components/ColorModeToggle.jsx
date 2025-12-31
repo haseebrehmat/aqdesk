@@ -1,5 +1,8 @@
 import { Button, useTheme } from 'reshaped';
-import { Moon, Sun } from 'lucide-react';
+import { materialIcon } from './MaterialIcon';
+
+const DarkMode = materialIcon('dark_mode');
+const LightMode = materialIcon('light_mode');
 
 export default function ColorModeToggle() {
   const { colorMode, setColorMode } = useTheme();
@@ -13,7 +16,7 @@ export default function ColorModeToggle() {
   return (
     <Button
       variant="ghost"
-      icon={colorMode === 'dark' ? Sun : Moon}
+      icon={colorMode === 'dark' ? LightMode : DarkMode}
       onClick={toggle}
       attributes={{ 'aria-label': `Switch to ${next} mode`, title: `Switch to ${next} mode` }}
     />

@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+.material-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "liga";
+  font-variation-settings: "FILL" 0;
+  transition: transform 180ms ease, font-variation-settings 180ms ease;
+}
+
+.material-icon--filled,
+a:hover .material-icon,
+button:hover .material-icon,
+[role="button"]:hover .material-icon {
+  font-variation-settings: "FILL" 1;
+}
+
+a:hover .material-icon,
+button:hover .material-icon,
+[role="button"]:hover .material-icon {
+  transform: translateY(-1px) scale(1.08);
+}
+
 .skip-link {
   position: fixed;
   left: 1rem;
