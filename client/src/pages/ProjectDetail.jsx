@@ -11,7 +11,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const { addToast } = useToast();
+  const { addToast, confirm } = useToast();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -79,7 +79,7 @@ export default function ProjectDetail() {
   };
 
   const handleDeleteFile = async (fileId) => {
-    if (!window.confirm("Delete this file?")) return;
+    if (!(await confirm("Delete this file?", { title: "Confirm deletion", confirmLabel: "Delete" }))) return;
     try {
       await api.delete(`/files/${fileId}`);
       setProject((prev) => ({
@@ -168,7 +168,7 @@ export default function ProjectDetail() {
   };
 
   const handleRemoveMember = async (memberId) => {
-    if (!window.confirm("Remove this member from project?")) return;
+    if (!(await confirm("Remove this member from project?", { title: "Confirm deletion", confirmLabel: "Delete" }))) return;
     try {
       await api.delete(`/projects/${id}/members/${memberId}`);
       setProject((prev) => ({

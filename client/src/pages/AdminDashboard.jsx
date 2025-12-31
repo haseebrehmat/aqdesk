@@ -9,7 +9,7 @@ import { routerLink } from "../components/RouterLink";
 const emptyForm = { name: "", email: "", password: "", role_id: "", is_active: true };
 
 export default function AdminDashboard() {
-  const { addToast } = useToast();
+  const { addToast, confirm } = useToast();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [reports, setReports] = useState([]);
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    if (!(await confirm("Are you sure you want to delete this user?", { title: "Confirm deletion", confirmLabel: "Delete" }))) return;
     try {
       await api.delete(`/admin/users/${id}`);
       setUsers((list) => list.filter((u) => u.id !== id));

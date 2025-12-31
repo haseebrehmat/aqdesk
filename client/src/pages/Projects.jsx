@@ -7,7 +7,7 @@ import { Page, PageHeader, EmptyState, FormField } from "../components/ui";
 import { routerLink } from "../components/RouterLink";
 
 export default function Projects() {
-  const { addToast } = useToast();
+  const { addToast, confirm } = useToast();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +54,7 @@ export default function Projects() {
   };
 
   const handleDeleteProject = async (projectId) => {
-    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    if (!(await confirm("Are you sure you want to delete this project?", { title: "Confirm deletion", confirmLabel: "Delete" }))) return;
 
     try {
       await api.delete(`/projects/${projectId}`);

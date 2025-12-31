@@ -7,7 +7,7 @@ import { Page, PageHeader, EmptyState, NativeSelect } from "../components/ui";
 import { routerLink } from "../components/RouterLink";
 
 export default function QAIndex() {
-  const { addToast } = useToast();
+  const { addToast, confirm } = useToast();
   const [questions, setQuestions] = useState([]);
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -110,8 +110,7 @@ export default function QAIndex() {
   };
 
   const handleDelete = async (slug) => {
-    if (!window.confirm("Are you sure you want to delete this question?"))
-      return;
+    if (!(await confirm("Are you sure you want to delete this question?", { title: "Confirm deletion", confirmLabel: "Delete" }))) return;
 
     try {
       await api.delete(`/questions/${slug}`);
