@@ -10,6 +10,7 @@ export default function OpportunityForm() {
     location: '',
     job_type: 'Full-Time',
     description: '',
+    application_deadline: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -76,6 +77,16 @@ export default function OpportunityForm() {
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               placeholder="e.g. Lahore / Remote"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Application Deadline</label>
+            <input
+              type="datetime-local"
+              name="application_deadline"
+              value={formData.application_deadline}
+              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
           </div>
         </div>

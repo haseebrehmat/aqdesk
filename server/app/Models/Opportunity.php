@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Opportunity extends Model
 {
+    protected $appends = [
+        'accepts_applications',
+    ];
+
     protected $fillable = [
         'posted_by',
         'title',
@@ -13,7 +17,12 @@ class Opportunity extends Model
         'location',
         'job_type',
         'description',
+        'application_deadline',
         'status',
+    ];
+
+    protected $casts = [
+        'application_deadline' => 'datetime',
     ];
 
     public function employer()
@@ -24,5 +33,11 @@ class Opportunity extends Model
     public function applications()
     {
         return $this->hasMany(Application::class);
+    }
+
+    public function getAcceptsApplicationsAttribute(): bool
+    {
+        return $this->status === 'Published'
+            && ($this->application_deadline === null || $this->application_deadline->isFuture());
     }
 }

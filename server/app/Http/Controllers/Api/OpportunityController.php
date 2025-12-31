@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Opportunity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class OpportunityController extends Controller
 {
@@ -29,9 +28,10 @@ class OpportunityController extends Controller
             })
             ->latest()
             ->get();
+
         return response()->json([
             'success' => true,
-            'data' => $opportunities
+            'data' => $opportunities,
         ]);
     }
 
@@ -45,9 +45,9 @@ class OpportunityController extends Controller
         // Determine role name safely (checking relation or string attribute)
         $roleName = $user->role->role_name ?? $user->role ?? '';
 
-        if (!in_array(strtolower($roleName), ['expert', 'admin'], true)) {
+        if (! in_array(strtolower($roleName), ['expert', 'admin'], true)) {
             return response()->json([
-                'message' => 'Unauthorized. Only employers and admins can post opportunities.'
+                'message' => 'Unauthorized. Only employers and admins can post opportunities.',
             ], 403);
         }
 
@@ -57,7 +57,8 @@ class OpportunityController extends Controller
             'location' => 'nullable|string|max:255',
             'job_type' => 'required|string|max:50',
             'description' => 'nullable|string',
-            'posted_by' => 'sometimes|exists:users,id'
+            'application_deadline' => 'nullable|date|after:now',
+            'posted_by' => 'sometimes|exists:users,id',
         ]);
 
         if (strtolower($roleName) === 'admin' && $request->filled('posted_by')) {
@@ -71,7 +72,7 @@ class OpportunityController extends Controller
 
         return response()->json([
             'message' => 'Opportunity created successfully.',
-            'data' => $opportunity->load('employer:id,name')
+            'data' => $opportunity->load('employer:id,name'),
         ], 201);
     }
 
@@ -82,13 +83,13 @@ class OpportunityController extends Controller
     {
         $user = $request->user('sanctum')?->load('role');
         $isAdmin = strtolower((string) $user?->role?->role_name) === 'admin';
-        if ($opportunity->status !== 'Published' && !$isAdmin && $opportunity->posted_by !== $user?->id) {
+        if ($opportunity->status !== 'Published' && ! $isAdmin && $opportunity->posted_by !== $user?->id) {
             abort(404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $opportunity->load('employer:id,name')
+            'data' => $opportunity->load('employer:id,name'),
         ]);
     }
 
@@ -110,13 +111,14 @@ class OpportunityController extends Controller
             'location' => 'nullable|string|max:255',
             'job_type' => 'sometimes|required|string|max:50',
             'description' => 'nullable|string',
+            'application_deadline' => 'nullable|date|after:now',
         ]);
 
         $opportunity->update($validated);
 
         return response()->json([
             'message' => 'Opportunity updated successfully.',
-            'data' => $opportunity->load('employer:id,name')
+            'data' => $opportunity->load('employer:id,name'),
         ]);
     }
 

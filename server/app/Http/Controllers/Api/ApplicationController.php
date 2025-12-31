@@ -7,7 +7,6 @@ use App\Models\Application;
 use App\Models\Opportunity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
 {
@@ -24,7 +23,7 @@ class ApplicationController extends Controller
         // If an explicit opportunity_id filter is passed
         if ($request->has('opportunity_id')) {
             $opportunity = Opportunity::findOrFail($request->opportunity_id);
-            if (!in_array(strtolower($roleName), ['administrator', 'admin']) && $opportunity->posted_by !== $user->id) {
+            if (! in_array(strtolower($roleName), ['administrator', 'admin']) && $opportunity->posted_by !== $user->id) {
                 return response()->json(['message' => 'Unauthorized.'], 403);
             }
             $query->where('opportunity_id', $opportunity->id);
@@ -32,7 +31,7 @@ class ApplicationController extends Controller
         // If user is an Employer or Admin, show all applications for opportunities they posted
         elseif (in_array(strtolower($roleName), ['employer', 'administrator', 'admin'])) {
             $query->whereHas('opportunity', function ($q) use ($user, $roleName) {
-                if (!in_array(strtolower($roleName), ['administrator', 'admin'])) {
+                if (! in_array(strtolower($roleName), ['administrator', 'admin'])) {
                     $q->where('posted_by', $user->id);
                 }
             });
@@ -56,7 +55,14 @@ class ApplicationController extends Controller
             'resume' => 'required|file|mimes:pdf|max:2048',
         ]);
 
-        $opportunityId = $request->opportunity_id;
+        $opportunity = Opportunity::findOrFail($request->opportunity_id);
+        if (! $opportunity->accepts_applications) {
+            return response()->json([
+                'message' => 'This opportunity is not accepting applications.',
+            ], 422);
+        }
+
+        $opportunityId = $opportunity->id;
         $userId = Auth::id();
 
         // Check if already applied
@@ -80,7 +86,7 @@ class ApplicationController extends Controller
 
         return response()->json([
             'message' => 'Application submitted successfully.',
-            'data' => $application->load('opportunity')
+            'data' => $application->load('opportunity'),
         ], 201);
     }
 
@@ -93,7 +99,7 @@ class ApplicationController extends Controller
 
         $user = Auth::user()->load('role');
         $isAdmin = strtolower((string) $user->role?->role_name) === 'admin';
-        if (!$isAdmin && $application->opportunity->posted_by !== $user->id) {
+        if (! $isAdmin && $application->opportunity->posted_by !== $user->id) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
@@ -105,7 +111,7 @@ class ApplicationController extends Controller
 
         return response()->json([
             'message' => 'Application status updated successfully.',
-            'data' => $application
+            'data' => $application,
         ]);
     }
 }

@@ -61,7 +61,7 @@ export default function OpportunityDetail() {
   const handleApply = async (e) => {
     e.preventDefault();
     if (!resume) {
-      setError('Please select a resume file (.pdf, .doc, .docx).');
+      setError('Please select a PDF resume file.');
       return;
     }
 
@@ -151,6 +151,14 @@ export default function OpportunityDetail() {
                     <Sparkles className="w-3.5 h-3.5" /> Software & Tech
                   </p>
                 </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Application Deadline</p>
+                  <p className="text-xs font-bold text-slate-800 mt-0.5">
+                    {opportunity.application_deadline
+                      ? new Date(opportunity.application_deadline).toLocaleString()
+                      : 'Open until filled'}
+                  </p>
+                </div>
               </div>
 
               {/* Description Section */}
@@ -186,6 +194,12 @@ export default function OpportunityDetail() {
                   Manage Candidate Pipeline
                 </Link>
               </div>
+            ) : !opportunity.accepts_applications ? (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs text-center">
+                <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-slate-900">Applications Closed</h3>
+                <p className="text-xs text-slate-500 mt-2">This listing is no longer accepting applications.</p>
+              </div>
             ) : (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 sticky top-20">
                 <div className="space-y-1">
@@ -214,11 +228,11 @@ export default function OpportunityDetail() {
                     <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-slate-50 transition bg-slate-50/50">
                       <input
                         type="file"
-                        accept=".pdf,.doc,.docx"
+                        accept="application/pdf,.pdf"
                         onChange={(e) => setResume(e.target.files[0])}
                         className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                       />
-                      <p className="text-[10px] text-slate-400 mt-2">PDF, DOC, or DOCX (Max 2MB)</p>
+                      <p className="text-[10px] text-slate-400 mt-2">PDF only (Max 2MB)</p>
                     </div>
                     {resume && (
                       <p className="text-xs font-semibold text-blue-600 flex items-center gap-1 mt-1">
