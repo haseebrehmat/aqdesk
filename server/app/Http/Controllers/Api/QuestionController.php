@@ -15,15 +15,47 @@ use Illuminate\Validation\ValidationException;
 class QuestionController extends Controller
 {
     // Index with Pagination
-    public function index()
+    public function index(Request $request)
     {
-        $questions = Question::with(['user', 'tags'])
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:100',
+            'tag' => 'nullable|integer|exists:tags,id',
+            'filter' => 'nullable|in:all,answered,unanswered',
+            'sort' => 'nullable|in:newest,votes,answers',
+            'per_page' => 'nullable|integer|min:1|max:50',
+        ]);
+
+        $questions = Question::query()
+            ->with(['user', 'tags'])
             ->where('is_hidden', false)
             ->withCount(['answers', 'votes as net_votes' => function ($q) {
                 $q->select(DB::raw('COALESCE(SUM(vote_type), 0)'));
-            }])
-            ->latest()
-            ->paginate(10);
+            }]);
+
+        if ($search = $validated['search'] ?? null) {
+            $questions->where(function ($query) use ($search) {
+                $query->where('title', 'like', "%{$search}%")
+                    ->orWhere('body', 'like', "%{$search}%");
+            });
+        }
+
+        if ($tagId = $validated['tag'] ?? null) {
+            $questions->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+        }
+
+        match ($validated['filter'] ?? 'all') {
+            'answered' => $questions->has('answers'),
+            'unanswered' => $questions->doesntHave('answers'),
+            default => null,
+        };
+
+        match ($validated['sort'] ?? 'newest') {
+            'votes' => $questions->orderByDesc('net_votes')->latest('id'),
+            'answers' => $questions->orderByDesc('answers_count')->latest('id'),
+            default => $questions->latest(),
+        };
+
+        $questions = $questions->paginate($validated['per_page'] ?? 12)->withQueryString();
 
         return response()->json($questions);
     }

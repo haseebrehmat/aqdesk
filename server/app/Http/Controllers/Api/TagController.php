@@ -9,6 +9,10 @@ class TagController extends Controller
 {
     public function index()
     {
-        return response()->json(Tag::all());
+        return response()->json(
+            Tag::withCount([
+                'questions' => fn ($query) => $query->where('is_hidden', false),
+            ])->orderByDesc('questions_count')->orderBy('tag_name')->get()
+        );
     }
 }

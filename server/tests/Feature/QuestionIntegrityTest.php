@@ -107,4 +107,47 @@ class QuestionIntegrityTest extends TestCase
             ->assertJsonPath('answers.0.net_votes', -1)
             ->assertJsonPath('answers.0.user_vote', -1);
     }
+
+    public function test_public_questions_support_search_tag_status_and_sort_filters(): void
+    {
+        $author = $this->member();
+        $voter = $this->member();
+        $laravel = Tag::create(['tag_name' => 'Laravel']);
+        $react = Tag::create(['tag_name' => 'React']);
+        $answered = Question::create([
+            'user_id' => $author->id,
+            'title' => 'Laravel queue processing patterns',
+            'body' => 'How should queue processing be tested in production?',
+            'slug' => 'laravel-queue-patterns',
+        ]);
+        $unanswered = Question::create([
+            'user_id' => $author->id,
+            'title' => 'React state synchronization patterns',
+            'body' => 'How should client state be synchronized after a request?',
+            'slug' => 'react-state-patterns',
+        ]);
+        $answered->tags()->attach($laravel);
+        $unanswered->tags()->attach($react);
+        Answer::create([
+            'question_id' => $answered->id,
+            'user_id' => $voter->id,
+            'body' => 'Use a dedicated queue worker and integration tests.',
+        ]);
+        $answered->votes()->create(['user_id' => $voter->id, 'vote_type' => 1]);
+
+        $this->getJson('/api/questions?search=queue&tag='.$laravel->id.'&filter=answered&sort=votes')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'laravel-queue-patterns')
+            ->assertJsonPath('data.0.net_votes', 1);
+
+        $this->getJson('/api/questions?filter=unanswered')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'react-state-patterns');
+
+        $this->getJson('/api/tags')
+            ->assertOk()
+            ->assertJsonPath('0.questions_count', 1);
+    }
 }

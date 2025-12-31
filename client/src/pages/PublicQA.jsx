@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Answers, Search, VoteUp } from '../components/icons';
-import { Avatar, Badge, Loader, Text, TextField, View } from 'reshaped';
+import { Avatar, Badge, Button, Card, Grid, Loader, Text, TextField, View } from 'reshaped';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
 import { Page, PageHeader, EmptyState, LinkCard } from '../components/ui'
@@ -9,10 +9,52 @@ import { formatDate } from '../utils/format';
 export default function PublicQA() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sort, setSort] = useState('newest');
+  const [status, setStatus] = useState('all');
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [tags, setTags] = useState([]);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
+
+  const fetchQuestions = useCallback(async (page = 1, append = false) => {
+    append ? setLoadingMore(true) : setLoading(true);
+    try {
+      const res = await api.get('/questions', {
+        params: {
+          search: searchTerm || undefined,
+          sort,
+          filter: status,
+          tag: selectedTag || undefined,
+          page,
+          per_page: 12,
+        },
+      });
+      const data = res.data.data || res.data || [];
+      setQuestions((previous) => append ? [...previous, ...data] : data);
+      setPagination({
+        current_page: res.data.current_page || page,
+        last_page: res.data.last_page || 1,
+        total: res.data.total ?? data.length,
+      });
+    } catch (err) {
+      console.error(err);
+      if (!append) setQuestions([]);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [searchTerm, selectedTag, sort, status]);
 
   useEffect(() => {
-    fetchQuestions();
+    const timer = window.setTimeout(() => fetchQuestions(), 250);
+    return () => window.clearTimeout(timer);
+  }, [fetchQuestions]);
+
+  useEffect(() => {
+    api.get('/tags')
+      .then((res) => setTags(res.data || []))
+      .catch((err) => console.error(err));
 
     const channel = echo.channel('public-qa');
     channel.listen('.QuestionCreated', (e) => {
@@ -29,24 +71,8 @@ export default function PublicQA() {
     };
   }, []);
 
-  const fetchQuestions = async () => {
-    try {
-      const res = await api.get('/questions');
-      setQuestions(res.data.data || res.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filtered = questions.filter(q =>
-    q.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.body?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <Page width="1000px">
+    <Page width="1400px">
       <PageHeader title="Developer Knowledge Feed" description="Ask technical questions, share code snippets, and solve bugs together." />
 
       <TextField
@@ -59,42 +85,107 @@ export default function PublicQA() {
         inputAttributes={{ type: 'search', 'aria-label': 'Search discussions' }}
       />
 
-      {loading ? (
-        <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading community feed...</Text></View>
-      ) : filtered.length === 0 ? (
-        <EmptyState title="No discussions found" description="Nothing matches your search." />
-      ) : (
+      <Grid columns={{ s: 1, l: '220px minmax(0, 1fr) 240px' }} gap={5} align="start">
+        <Card padding={4}>
+          <View gap={5}>
+            <View gap={2}>
+              <Text as="h2" variant="body-2" weight="bold">Sort discussions</Text>
+              {[
+                ['newest', 'Newest'],
+                ['votes', 'Most voted'],
+                ['answers', 'Most answered'],
+              ].map(([value, label]) => (
+                <Button key={value} fullWidth variant={sort === value ? 'faded' : 'ghost'} color={sort === value ? 'primary' : 'neutral'} onClick={() => setSort(value)}>
+                  {label}
+                </Button>
+              ))}
+            </View>
+            <View gap={2}>
+              <Text as="h2" variant="body-2" weight="bold">Answer status</Text>
+              {[
+                ['all', 'All discussions'],
+                ['answered', 'Answered'],
+                ['unanswered', 'Unanswered'],
+              ].map(([value, label]) => (
+                <Button key={value} fullWidth variant={status === value ? 'faded' : 'ghost'} color={status === value ? 'primary' : 'neutral'} onClick={() => setStatus(value)}>
+                  {label}
+                </Button>
+              ))}
+            </View>
+            {(sort !== 'newest' || status !== 'all' || selectedTag || searchTerm) && (
+              <Button variant="outline" fullWidth onClick={() => { setSort('newest'); setStatus('all'); setSelectedTag(null); setSearchTerm(''); }}>
+                Clear filters
+              </Button>
+            )}
+          </View>
+        </Card>
+
         <View gap={4}>
-          {filtered.map((q) => (
-            <LinkCard key={q.id || q.slug} to={`/questions/${q.slug}`}>
-              <View direction={{ s: 'column', m: 'row' }} gap={5}>
-                <View align="center" justify="center" gap={0} width={{ s: '100%', m: '64px' }} direction={{ s: 'row', m: 'column' }} borderRadius="medium" backgroundColor="neutral-faded" padding={3}>
-                  <VoteUp size={28} filled color="var(--rs-color-foreground-positive)" aria-hidden="true" />
-                  <Text variant="body-2" weight="bold">{q.net_votes ?? 0}</Text>
-                  <Text variant="caption-2" color="neutral-faded">Votes</Text>
-                </View>
-                <View gap={3} grow attributes={{ style: { minWidth: 0 } }}>
-                  <View direction="row" align="center" gap={2}>
-                    <Avatar size={6} initials={(q.user?.name || 'D').charAt(0)} />
-                    <Text variant="caption-1" weight="bold">{q.user?.name || 'Anonymous Peer'}</Text>
-                    <Text variant="caption-1" color="neutral-faded">• {formatDate(q.created_at)}</Text>
-                  </View>
-                  <Text as="h2" variant="featured-5" weight="bold">{q.title}</Text>
-                  <Text variant="body-2" color="neutral-faded" maxLines={2}>{q.body}</Text>
-                  <View direction="row" align="center" gap={2} wrap>
-                    {(q.tags || []).map((tag, idx) => <Badge key={idx} variant="faded">{tag.tag_name || tag}</Badge>)}
-                    <View gapBefore="auto">
-                      <Badge variant="faded" color="primary" icon={Answers}>
-                        {q.answers_count || q.answers?.length || 0} Answers
-                      </Badge>
+          {!loading && <Text variant="caption-1" color="neutral-faded">{pagination.total} discussions found</Text>}
+          {loading ? (
+            <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading community feed...</Text></View>
+          ) : questions.length === 0 ? (
+            <EmptyState title="No discussions found" description="Nothing matches the selected filters." />
+          ) : (
+            <>
+              <View gap={4}>
+                {questions.map((q) => (
+                  <LinkCard key={q.id || q.slug} to={`/questions/${q.slug}`}>
+                    <View direction={{ s: 'column', m: 'row' }} gap={5}>
+                      <View align="center" justify="center" gap={0} width={{ s: '100%', m: '64px' }} direction={{ s: 'row', m: 'column' }} borderRadius="medium" backgroundColor="neutral-faded" padding={3}>
+                        <VoteUp size={28} filled color="var(--rs-color-foreground-positive)" aria-hidden="true" />
+                        <Text variant="body-2" weight="bold">{q.net_votes ?? 0}</Text>
+                        <Text variant="caption-2" color="neutral-faded">Votes</Text>
+                      </View>
+                      <View gap={3} grow attributes={{ style: { minWidth: 0 } }}>
+                        <View direction="row" align="center" gap={2}>
+                          <Avatar size={6} initials={(q.user?.name || 'D').charAt(0)} />
+                          <Text variant="caption-1" weight="bold">{q.user?.name || 'Anonymous Peer'}</Text>
+                          <Text variant="caption-1" color="neutral-faded">• {formatDate(q.created_at)}</Text>
+                        </View>
+                        <Text as="h2" variant="featured-5" weight="bold">{q.title}</Text>
+                        <Text variant="body-2" color="neutral-faded" maxLines={2}>{q.body}</Text>
+                        <View direction="row" align="center" gap={2} wrap>
+                          {(q.tags || []).map((tag) => <Badge key={tag.id || tag.tag_name || tag} variant="faded">{tag.tag_name || tag}</Badge>)}
+                          <View gapBefore="auto">
+                            <Badge variant="faded" color="primary" icon={Answers}>
+                              {q.answers_count || q.answers?.length || 0} Answers
+                            </Badge>
+                          </View>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                </View>
+                  </LinkCard>
+                ))}
               </View>
-            </LinkCard>
-          ))}
+              {pagination.current_page < pagination.last_page && (
+                <View align="center">
+                  <Button variant="outline" loading={loadingMore} onClick={() => fetchQuestions(pagination.current_page + 1, true)}>
+                    Load more discussions
+                  </Button>
+                </View>
+              )}
+            </>
+          )}
         </View>
-      )}
+
+        <Card padding={4}>
+          <View gap={3}>
+            <Text as="h2" variant="body-2" weight="bold">Popular tags</Text>
+            <Button fullWidth variant={selectedTag === null ? 'faded' : 'ghost'} color={selectedTag === null ? 'primary' : 'neutral'} onClick={() => setSelectedTag(null)}>
+              All tags
+            </Button>
+            {tags.map((tag) => (
+              <Button key={tag.id} fullWidth variant={selectedTag === tag.id ? 'faded' : 'ghost'} color={selectedTag === tag.id ? 'primary' : 'neutral'} onClick={() => setSelectedTag(tag.id)}>
+                <View direction="row" justify="space-between" width="100%">
+                  <span>{tag.tag_name}</span>
+                  <Badge>{tag.questions_count || 0}</Badge>
+                </View>
+              </Button>
+            ))}
+          </View>
+        </Card>
+      </Grid>
     </Page>
   );
 }

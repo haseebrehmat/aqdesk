@@ -50,7 +50,18 @@ test.beforeEach(async ({ page }, testInfo) => {
     const url = new URL(request.url());
 
     if (request.method() === 'GET' && url.pathname === '/api/questions') {
-      await route.fulfill({ json: { data: [{ ...question, net_votes: publicVoteCount }] } });
+      await route.fulfill({
+        json: {
+          data: [{ ...question, net_votes: publicVoteCount }],
+          current_page: 1,
+          last_page: 1,
+          total: 1,
+        },
+      });
+      return;
+    }
+    if (request.method() === 'GET' && url.pathname === '/api/tags') {
+      await route.fulfill({ json: [{ id: 3, tag_name: 'API Design', questions_count: 8 }] });
       return;
     }
     if (request.method() === 'GET' && url.pathname === '/api/questions/api-testing') {
@@ -102,6 +113,9 @@ test('public Q&A exposes counts, answers, voting, and answer posting', async ({ 
 
   await page.goto('/questions');
 
+  await expect(page.getByRole('heading', { name: 'Sort discussions' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Popular tags' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /API Design/ })).toBeVisible();
   await expect(page.getByText('3', { exact: true })).toBeVisible();
   const answersLink = page.getByRole('link', { name: '1 Answers' });
   await expect(answersLink).toHaveAttribute('href', '/questions/api-testing');
