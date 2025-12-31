@@ -1,11 +1,65 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Alert, Badge, Button, Card, Divider, Grid, Loader, Text, View } from 'reshaped';
+import { Alert, Badge, Button, Card, Divider, FormControl, Grid, Loader, Text, TextField, View } from 'reshaped';
 import opportunityService from '../../services/opportunityService';
 import { MapPin, Building2, UploadCloud, ArrowLeft, FileText } from '../../components/icons';
-import { Page, EmptyState } from '../../components/ui'
+import { Page, EmptyState, NativeSelect } from '../../components/ui'
 import { formatDate } from '../../utils/format';
+import ResumeButton from '../../components/ResumeModal';
 import { routerLink } from '../../components/RouterLink';
+
+const STATUSES = ['Submitted', 'Reviewed', 'Shortlisted', 'Rejected', 'Accepted'];
+
+// Employer/admin view of the candidates who applied to one opportunity.
+function CandidatePipeline({ opportunityId }) {
+  const [applications, setApplications] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    opportunityService.getApplications({ opportunity_id: opportunityId })
+      .then((res) => setApplications(res.data.data || []))
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load candidates.'));
+  }, [opportunityId]);
+
+  const changeStatus = async (application, status) => {
+    try {
+      await opportunityService.updateApplicationStatus(application.id, status);
+      setApplications((list) => list.map((a) => (a.id === application.id ? { ...a, status } : a)));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update status.');
+    }
+  };
+
+  return (
+    <View gap={3}>
+      <Text as="h3" variant="body-2" weight="bold">Candidate Pipeline{applications ? ` (${applications.length})` : ''}</Text>
+      {error && <Alert color="critical" attributes={{ role: 'alert' }}>{error}</Alert>}
+      {!applications && !error && <Loader />}
+      {applications?.length === 0 && <Text variant="caption-1" color="neutral-faded">No applications yet.</Text>}
+      {applications?.map((app) => (
+        <Card key={app.id} padding={3}>
+          <View gap={2}>
+            <View gap={0.5}>
+              <Text variant="body-2" weight="bold">{app.applicant_name || app.applicant?.name || 'Applicant'}</Text>
+              <Text variant="caption-1" color="neutral-faded">{app.applicant_email || app.applicant?.email}</Text>
+              <Text variant="caption-1" color="neutral-faded">{formatDate(app.created_at)}</Text>
+            </View>
+            <NativeSelect
+              name={`status-${app.id}`}
+              value={app.status}
+              onChange={({ value }) => changeStatus(app, value)}
+              inputAttributes={{ 'aria-label': `Status for ${app.applicant_name || app.applicant?.name || 'applicant'}` }}
+              options={STATUSES.map((st) => ({ value: st, label: st }))}
+            />
+            <View direction="row">
+              <ResumeButton application={app} size="small" />
+            </View>
+          </View>
+        </Card>
+      ))}
+    </View>
+  );
+}
 
 export default function OpportunityDetail() {
   const { id } = useParams();
@@ -18,6 +72,8 @@ export default function OpportunityDetail() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [resume, setResume] = useState(null);
+  const [applicantName, setApplicantName] = useState('');
+  const [applicantEmail, setApplicantEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -72,6 +128,10 @@ export default function OpportunityDetail() {
     const formData = new FormData();
     formData.append('opportunity_id', id);
     formData.append('resume', resume);
+    if (!user) {
+      formData.append('applicant_name', applicantName);
+      formData.append('applicant_email', applicantEmail);
+    }
 
     setSubmitting(true);
     setError(null);
@@ -81,6 +141,8 @@ export default function OpportunityDetail() {
       await opportunityService.applyToOpportunity(formData);
       setMessage('Application submitted successfully!');
       setResume(null);
+      setApplicantName('');
+      setApplicantEmail('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit application.');
     } finally {
@@ -88,14 +150,11 @@ export default function OpportunityDetail() {
     }
   };
 
-  const roleName = user?.role?.role_name || '';
-  const roleId = user?.role_id;
-  const isEmployer = user && (
-    roleName.toLowerCase() === 'employer' || 
-    roleName.toLowerCase() === 'admin' || 
-    roleName.toLowerCase() === 'administrator' || 
-    [1, 2, 3].includes(roleId)
-  );
+  const roleName = (user?.role?.role_name || '').toLowerCase();
+  const isAdminUser = roleName === 'admin' || roleName === 'administrator';
+  const isManager = opportunityBasePath.startsWith('/dashboard')
+    && !!user && !!opportunity
+    && (isAdminUser || Number(opportunity.posted_by) === Number(user.id));
 
   if (loading) return <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading opportunity details...</Text></View>;
   if (error && !opportunity) return <Page width="800px"><Alert color="critical">{error}</Alert></Page>;
@@ -145,14 +204,18 @@ export default function OpportunityDetail() {
         </Card>
 
         <View gap={5}>
-          {isEmployer ? (
+          {isManager ? (
             <Card padding={6}>
-              <View gap={3} align="center" textAlign="center">
-                <Text as="h2" variant="featured-5" weight="bold">Employer Management View</Text>
-                <Text variant="body-2" color="neutral-faded">
-                  You are signed in with employer/administrator credentials. Candidate applications are managed through the dashboard.
-                </Text>
+              <View gap={4}>
+                <View gap={1}>
+                  <Text as="h2" variant="featured-5" weight="bold">Employer Management View</Text>
+                  <Text variant="body-2" color="neutral-faded">
+                    You are signed in with employer/administrator credentials. Candidate applications are managed through the dashboard.
+                  </Text>
+                </View>
                 <Button color="primary" fullWidth {...routerLink('/dashboard/applications')}>Manage Candidate Pipeline</Button>
+                <Divider />
+                <CandidatePipeline opportunityId={id} />
               </View>
             </Card>
           ) : !opportunity.accepts_applications ? (
@@ -173,6 +236,18 @@ export default function OpportunityDetail() {
                 {error && <Alert color="critical" attributes={{ role: 'alert' }}>{error}</Alert>}
                 <form onSubmit={handleApply}>
                   <View gap={4}>
+                    {!user && (
+                      <>
+                        <FormControl>
+                          <FormControl.Label>Full Name</FormControl.Label>
+                          <TextField name="applicant_name" value={applicantName} onChange={({ value }) => setApplicantName(value)} inputAttributes={{ required: true, autoComplete: 'name' }} />
+                        </FormControl>
+                        <FormControl>
+                          <FormControl.Label>Email Address</FormControl.Label>
+                          <TextField name="applicant_email" value={applicantEmail} onChange={({ value }) => setApplicantEmail(value)} inputAttributes={{ type: 'email', required: true, autoComplete: 'email' }} />
+                        </FormControl>
+                      </>
+                    )}
                     <View gap={2}>
                       <Text as="label" variant="body-2" weight="medium" attributes={{ htmlFor: 'resume-upload' }}>Upload Resume Document</Text>
                       <input

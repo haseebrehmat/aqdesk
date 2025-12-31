@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Badge, Button, Card, Grid, Loader, Text, View } from 'reshaped';
-import { FileText, Building2, Calendar } from '../../components/icons';
+import { Badge, Card, Grid, Loader, Text, View } from 'reshaped';
+import { Building2, Calendar } from '../../components/icons';
 import opportunityService from '../../services/opportunityService';
 import { Page, PageHeader, EmptyState } from '../../components/ui'
 import { formatDate } from '../../utils/format';
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+import ResumeButton from '../../components/ResumeModal';
 
 export default function ApplicationManagement() {
   const [applications, setApplications] = useState([]);
@@ -45,10 +45,11 @@ export default function ApplicationManagement() {
                     <View direction="row" align="center" gap={1}><Calendar size={14} aria-hidden="true" /><Text variant="caption-1" color="neutral-faded">{formatDate(app.created_at)}</Text></View>
                   </View>
                   <Text as="h2" variant="featured-5" weight="bold">{app.opportunity?.title || 'N/A'}</Text>
+                  {(app.applicant_name || app.applicant?.name) && <Text variant="caption-1" color="neutral-faded">Applicant: {app.applicant_name || app.applicant?.name} ({app.applicant_email || app.applicant?.email})</Text>}
                   <View direction="row" align="center" gap={1}><Building2 size={14} aria-hidden="true" /><Text variant="body-2">{app.opportunity?.company_name || 'N/A'}</Text></View>
                 </View>
                 <View borderTop paddingTop={3} direction="row">
-                  <Button variant="ghost" color="primary" icon={FileText} href={`${backendUrl}/storage/${app.resume_path}`} attributes={{ target: '_blank', rel: 'noreferrer' }}>View Resume</Button>
+                  <ResumeButton application={app} />
                 </View>
               </View>
             </Card>
