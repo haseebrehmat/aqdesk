@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Answer;
 use App\Models\Question;
 use App\Models\Tag;
+use App\Models\Vote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -75,6 +77,18 @@ class QuestionController extends Controller
         ]);
 
         $userId = $request->user('sanctum')?->id;
+        $answerUserVotes = $userId
+            ? Vote::query()
+                ->where('user_id', $userId)
+                ->where('votable_type', Answer::class)
+                ->whereIn('votable_id', $question->answers->pluck('id'))
+                ->pluck('vote_type', 'votable_id')
+            : collect();
+
+        $question->answers->each(function (Answer $answer) use ($answerUserVotes): void {
+            $answer->setAttribute('user_vote', (int) ($answerUserVotes[$answer->id] ?? 0));
+        });
+
         $questionData = $question->toArray();
         $questionData['net_votes'] = (int) $question->votes()->sum('vote_type');
         $questionData['user_vote'] = $userId ? (int) ($question->votes()->where('user_id', $userId)->value('vote_type') ?? 0) : 0;

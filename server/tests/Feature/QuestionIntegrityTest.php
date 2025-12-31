@@ -66,4 +66,37 @@ class QuestionIntegrityTest extends TestCase
 
         $this->assertDatabaseCount('questions', 0);
     }
+
+    public function test_public_question_responses_include_vote_and_answer_counts(): void
+    {
+        $author = $this->member();
+        $responder = $this->member();
+        $voter = $this->member();
+        $question = Question::create([
+            'user_id' => $author->id,
+            'title' => 'A public question with voting information',
+            'body' => 'The public feed and detail page should expose canonical counts.',
+            'slug' => 'public-vote-counts',
+        ]);
+        $answer = Answer::create([
+            'question_id' => $question->id,
+            'user_id' => $responder->id,
+            'body' => 'A publicly visible answer.',
+        ]);
+
+        $question->votes()->create(['user_id' => $voter->id, 'vote_type' => 1]);
+        $answer->votes()->create(['user_id' => $voter->id, 'vote_type' => -1]);
+
+        $this->getJson('/api/questions')
+            ->assertOk()
+            ->assertJsonPath('data.0.net_votes', 1)
+            ->assertJsonPath('data.0.answers_count', 1);
+
+        $this->actingAs($voter, 'sanctum')
+            ->getJson('/api/questions/public-vote-counts')
+            ->assertOk()
+            ->assertJsonPath('answers.0.body', 'A publicly visible answer.')
+            ->assertJsonPath('answers.0.net_votes', -1)
+            ->assertJsonPath('answers.0.user_vote', -1);
+    }
 }
