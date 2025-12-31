@@ -25,11 +25,12 @@ const LinkedinIcon = ({ size = 16, className = "" }) => (
 export default function PublicFooter() {
   const [email, setEmail] = useState('');
   const [newsletterMessage, setNewsletterMessage] = useState('');
+  const [cohort, setCohort] = useState('General');
 
   const subscribe = async (event) => {
     event.preventDefault();
     try {
-      const { data } = await api.post('/newsletter/subscribe', { email });
+      const { data } = await api.post('/newsletter/subscribe', { email, cohort });
       setNewsletterMessage(data.message);
       setEmail('');
     } catch (error) {
@@ -104,6 +105,14 @@ export default function PublicFooter() {
                 placeholder="name@example.com"
                 className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600"
               />
+              <label htmlFor="newsletter-cohort" className="sr-only">Newsletter topic</label>
+              <select id="newsletter-cohort" value={cohort} onChange={(event) => setCohort(event.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900">
+                <option>General</option>
+                <option>AI</option>
+                <option>Web Development</option>
+                <option>EdTech</option>
+                <option>Internet Governance</option>
+              </select>
               <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-xs">
                 Subscribe
               </button>

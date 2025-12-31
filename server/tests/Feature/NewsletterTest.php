@@ -44,4 +44,25 @@ class NewsletterTest extends TestCase
         Mail::assertQueued(CommunityUpdate::class, 1);
         Mail::assertQueued(CommunityUpdate::class, fn ($mail) => $mail->hasTo('active@example.com'));
     }
+
+    public function test_admin_can_target_a_newsletter_cohort(): void
+    {
+        Mail::fake();
+        Newsletter::create(['email' => 'ai@example.com', 'is_active' => true, 'cohort' => 'AI']);
+        Newsletter::create(['email' => 'web@example.com', 'is_active' => true, 'cohort' => 'Web Development']);
+        $role = Role::create(['role_name' => 'Admin']);
+        $admin = User::create([
+            'name' => 'Admin', 'email' => 'cohort-admin@example.com', 'password' => 'password',
+            'role_id' => $role->id, 'is_active' => true,
+        ]);
+
+        $this->actingAs($admin, 'sanctum')->postJson('/api/admin/newsletter/campaigns', [
+            'subject' => 'AI community update',
+            'body' => 'This update is only for the AI subscriber cohort.',
+            'cohort' => 'AI',
+        ])->assertOk()->assertJsonPath('queued_recipients', 1)->assertJsonPath('cohort', 'AI');
+
+        Mail::assertQueued(CommunityUpdate::class, 1);
+        Mail::assertQueued(CommunityUpdate::class, fn ($mail) => $mail->hasTo('ai@example.com'));
+    }
 }

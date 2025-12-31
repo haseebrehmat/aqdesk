@@ -6,6 +6,7 @@ export default function NewsletterAdmin() {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [message, setMessage] = useState('');
+  const [cohort, setCohort] = useState('All');
 
   useEffect(() => {
     api.get('/admin/newsletter/subscribers').then(({ data }) => setSubscribers(data.data || []));
@@ -13,7 +14,7 @@ export default function NewsletterAdmin() {
 
   const sendCampaign = async (event) => {
     event.preventDefault();
-    const { data } = await api.post('/admin/newsletter/campaigns', { subject, body });
+    const { data } = await api.post('/admin/newsletter/campaigns', { subject, body, cohort });
     setMessage(`${data.message} ${data.queued_recipients} recipient(s).`);
     setSubject('');
     setBody('');
@@ -28,6 +29,17 @@ export default function NewsletterAdmin() {
         </header>
 
         <form onSubmit={sendCampaign} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div>
+            <label htmlFor="campaign-cohort" className="block text-sm text-slate-300 mb-1">Recipient cohort</label>
+            <select id="campaign-cohort" value={cohort} onChange={(event) => setCohort(event.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3">
+              <option>All</option>
+              <option>General</option>
+              <option>AI</option>
+              <option>Web Development</option>
+              <option>EdTech</option>
+              <option>Internet Governance</option>
+            </select>
+          </div>
           <div>
             <label htmlFor="campaign-subject" className="block text-sm text-slate-300 mb-1">Subject</label>
             <input id="campaign-subject" required value={subject} onChange={(event) => setSubject(event.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3" />
