@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [reports, setReports] = useState([]);
 
   // Modal & Form State for Creating a User
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -42,6 +43,8 @@ export default function AdminDashboard() {
     try {
       const response = await api.get("/admin/users");
       setUsers(response.data.users);
+      const reportResponse = await api.get("/admin/content-reports");
+      setReports(reportResponse.data.data || []);
     } catch {
       setError(
         "Unauthorized access or failed to fetch users. Ensure you have administrator privileges.",
@@ -106,6 +109,15 @@ export default function AdminDashboard() {
 
   const handleEditUser = (user) => {
     alert(`Trigger Edit User for: ${user.name}`);
+  };
+
+  const moderateReport = async (report, action, status = "Resolved") => {
+    try {
+      const { data } = await api.patch(`/admin/content-reports/${report.id}`, { action, status });
+      setReports((items) => items.map((item) => item.id === report.id ? data.report : item));
+    } catch (requestError) {
+      alert(requestError.response?.data?.message || "Unable to review this report.");
+    }
   };
 
   const filteredUsers = users.filter(
@@ -268,6 +280,29 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
+
+        <section className="mt-8 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 className="text-xl font-bold mb-4">Community Moderation Queue</h2>
+          <div className="space-y-3">
+            {reports.filter((report) => report.status === "Pending").length === 0 && (
+              <p className="text-sm text-slate-400">No pending community reports.</p>
+            )}
+            {reports.filter((report) => report.status === "Pending").map((report) => (
+              <article key={report.id} className="border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold capitalize">{report.reportable_type} #{report.reportable_id}</p>
+                  <p className="text-sm text-slate-300 mt-1">{report.reason}</p>
+                  <p className="text-xs text-slate-500 mt-1">Reported by {report.reporter?.name || "Unknown"}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => moderateReport(report, "hide")} className="px-3 py-2 text-xs rounded-lg bg-amber-700 hover:bg-amber-600">Hide</button>
+                  <button onClick={() => moderateReport(report, "delete")} className="px-3 py-2 text-xs rounded-lg bg-red-700 hover:bg-red-600">Delete</button>
+                  <button onClick={() => moderateReport(report, "none", "Dismissed")} className="px-3 py-2 text-xs rounded-lg bg-slate-700 hover:bg-slate-600">Dismiss</button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
 
       {/* CREATE USER MODAL */}

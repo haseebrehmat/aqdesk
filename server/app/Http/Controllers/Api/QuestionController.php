@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
@@ -16,6 +16,7 @@ class QuestionController extends Controller
     public function index()
     {
         $questions = Question::with(['user', 'tags'])
+            ->where('is_hidden', false)
             ->withCount(['answers', 'votes as net_votes' => function ($q) {
                 $q->select(DB::raw('COALESCE(SUM(vote_type), 0)'));
             }])
@@ -24,7 +25,6 @@ class QuestionController extends Controller
 
         return response()->json($questions);
     }
-
 
     public function store(Request $request)
     {
@@ -48,7 +48,7 @@ class QuestionController extends Controller
                 'user_id' => $request->user()->id,
                 'title' => $validated['title'],
                 'body' => $validated['body'],
-                'slug' => Str::slug($validated['title']) . '-' . Str::lower(Str::random(8)),
+                'slug' => Str::slug($validated['title']).'-'.Str::lower(Str::random(8)),
             ]);
 
             $question->tags()->sync($tagIds);
@@ -65,13 +65,13 @@ class QuestionController extends Controller
     // Show with View Count Increment
     public function show(Request $request, $slug)
     {
-        $question = Question::where('slug', $slug)->firstOrFail();
+        $question = Question::where('slug', $slug)->where('is_hidden', false)->firstOrFail();
         $question->increment('views');
 
         $question->load([
             'user',
             'tags',
-            'answers' => fn($q) => $q->with('user')->withCount(['votes as net_votes' => fn($v) => $v->select(DB::raw('COALESCE(SUM(vote_type), 0)'))]),
+            'answers' => fn ($q) => $q->where('is_hidden', false)->with('user')->withCount(['votes as net_votes' => fn ($v) => $v->select(DB::raw('COALESCE(SUM(vote_type), 0)'))]),
         ]);
 
         $userId = $request->user('sanctum')?->id;
@@ -102,7 +102,7 @@ class QuestionController extends Controller
         $question->update([
             'title' => $validated['title'],
             'body' => $validated['body'],
-            'slug' => Str::slug($validated['title']) . '-' . time(),
+            'slug' => Str::slug($validated['title']).'-'.time(),
         ]);
 
         $tagIds = $this->resolveTagIds($validated['tags'] ?? [], $validated['custom_tags'] ?? null);
@@ -140,7 +140,7 @@ class QuestionController extends Controller
         if ($customTags) {
             $rawTags = array_map('trim', explode(',', $customTags));
             foreach ($rawTags as $tagName) {
-                if (!empty($tagName)) {
+                if (! empty($tagName)) {
                     $tag = Tag::firstOrCreate(['tag_name' => $tagName]);
                     $tagIds[] = $tag->id;
                 }

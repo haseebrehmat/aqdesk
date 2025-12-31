@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ConsultationController;
+use App\Http\Controllers\Api\ContentReportController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\NewsletterController;
 use App\Http\Controllers\Api\OpportunityController;
@@ -52,6 +53,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::patch('/opportunities/{opportunity}/status', [OpportunityController::class, 'moderate']);
         Route::get('/newsletter/subscribers', [NewsletterController::class, 'index']);
         Route::post('/newsletter/campaigns', [NewsletterController::class, 'broadcast']);
+        Route::get('/content-reports', [ContentReportController::class, 'index']);
+        Route::patch('/content-reports/{report}', [ContentReportController::class, 'moderate']);
     });
 
     // Profile Routes
@@ -69,6 +72,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Voting
     Route::post('/questions/{slug}/vote', [VoteController::class, 'voteQuestion']);
     Route::post('/answers/{id}/vote', [VoteController::class, 'voteAnswer']);
+    Route::post('/content-reports', [ContentReportController::class, 'store']);
 
     // Opportunity management for employers
     Route::middleware('role:Expert,Admin')->group(function () {

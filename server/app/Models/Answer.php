@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Answer extends Model
 {
-    protected $fillable = ['question_id', 'user_id', 'body', 'is_accepted'];
+    protected $fillable = ['question_id', 'user_id', 'body', 'is_accepted', 'is_hidden'];
+
+    protected function casts(): array
+    {
+        return ['is_accepted' => 'boolean', 'is_hidden' => 'boolean'];
+    }
 
     public function question()
     {

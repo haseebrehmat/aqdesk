@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Loader2,
   Check,
+  Flag,
 } from "lucide-react";
 
 export default function QuestionDetail() {
@@ -111,6 +112,21 @@ export default function QuestionDetail() {
     }
   };
 
+  const reportContent = async (type, id) => {
+    const reason = window.prompt("Explain why this content should be reviewed");
+    if (!reason) return;
+    try {
+      const { data } = await api.post("/content-reports", {
+        reportable_type: type,
+        reportable_id: id,
+        reason,
+      });
+      addToast(data.message, "success");
+    } catch (error) {
+      addToast(error.response?.data?.message || "Unable to submit the report.", "error");
+    }
+  };
+
   if (loading)
     return (
       <div className="p-10 text-center text-white">
@@ -148,6 +164,11 @@ export default function QuestionDetail() {
           </span>
 
           <div className="flex items-center gap-6">
+            {currentUser.id && !isQuestionOwner && (
+              <button onClick={() => reportContent("question", question.id)} className="flex items-center gap-1 text-amber-300 hover:text-amber-200">
+                <Flag className="w-4 h-4" /> Report
+              </button>
+            )}
             <div className="flex items-center bg-slate-950/60 border border-slate-800 rounded-xl px-2 py-1 space-x-1">
               <button
                 onClick={() => handleVoteQuestion(1)}
@@ -264,6 +285,11 @@ export default function QuestionDetail() {
                   <ThumbsDown className="w-3.5 h-3.5" />
                 </button>
               </div>
+              {currentUser.id && Number(currentUser.id) !== Number(ans.user_id) && (
+                <button onClick={() => reportContent("answer", ans.id)} className="flex items-center gap-1 text-amber-300 hover:text-amber-200">
+                  <Flag className="w-3.5 h-3.5" /> Report
+                </button>
+              )}
             </div>
           </div>
         ))}

@@ -12,7 +12,7 @@ class AnswerController extends Controller
 {
     public function store(Request $request, $slug)
     {
-        $question = Question::where('slug', $slug)->firstOrFail();
+        $question = Question::where('slug', $slug)->where('is_hidden', false)->firstOrFail();
 
         $validated = $request->validate([
             'body' => 'required|string|min:5',
@@ -30,31 +30,31 @@ class AnswerController extends Controller
     }
 
     public function markAccepted(Request $request, $id)
-{
-    $answer = Answer::with('question')->findOrFail($id);
+    {
+        $answer = Answer::with('question')->findOrFail($id);
 
-    if ($answer->question->user_id !== $request->user()->id) {
-        return response()->json(['message' => 'Unauthorized action.'], 403);
-    }
-
-    $willBeAccepted = !$answer->is_accepted;
-
-    DB::transaction(function () use ($answer, $willBeAccepted) {
-        // Unmark all answers for this question
-        Answer::where('question_id', $answer->question_id)->update(['is_accepted' => false]);
-
-        // Toggle state for target answer
-        if ($willBeAccepted) {
-            $answer->update(['is_accepted' => true]);
+        if ($answer->question->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
         }
-    });
 
-    $answer->refresh();
+        $willBeAccepted = ! $answer->is_accepted;
 
-    return response()->json([
-        'message' => $willBeAccepted ? 'Marked as accepted solution' : 'Solution unmarked',
-        'is_accepted' => $answer->is_accepted,
-        'answer' => $answer,
-    ]);
-}
+        DB::transaction(function () use ($answer, $willBeAccepted) {
+            // Unmark all answers for this question
+            Answer::where('question_id', $answer->question_id)->update(['is_accepted' => false]);
+
+            // Toggle state for target answer
+            if ($willBeAccepted) {
+                $answer->update(['is_accepted' => true]);
+            }
+        });
+
+        $answer->refresh();
+
+        return response()->json([
+            'message' => $willBeAccepted ? 'Marked as accepted solution' : 'Solution unmarked',
+            'is_accepted' => $answer->is_accepted,
+            'answer' => $answer,
+        ]);
+    }
 }
