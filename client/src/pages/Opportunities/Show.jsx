@@ -8,6 +8,8 @@ import { MAX_RESUME_MB, validateUpload } from '../../utils/limits';
 import { formatDate } from '../../utils/format';
 import ResumeButton from '../../components/ResumeModal';
 import { routerLink } from '../../components/RouterLink';
+import { useToast } from '../../components/ToastContainer';
+import { STATUS_COLORS, statusLabel } from '../../utils/opportunity';
 
 const STATUSES = ['Submitted', 'Reviewed', 'Shortlisted', 'Rejected', 'Accepted'];
 
@@ -57,6 +59,51 @@ function CandidatePipeline({ opportunityId }) {
             </View>
           </View>
         </Card>
+      ))}
+    </View>
+  );
+}
+
+const LIFECYCLE_ACTIONS = {
+  Published: [
+    { status: 'Hired', label: 'Mark as Hired', confirm: 'Mark this opportunity as hired? It will stop accepting applications.', color: 'primary' },
+    { status: 'Completed', label: 'Mark as Completed', confirm: 'Mark this opportunity as completed? It will stop accepting applications.', color: 'neutral' },
+    { status: 'Cancelled', label: 'Cancel Opportunity', confirm: 'Cancel this opportunity? It will no longer be listed publicly.', color: 'critical' },
+  ],
+  Completed: [{ status: 'Published', label: 'Reopen', confirm: 'Reopen this opportunity for applications?', color: 'primary' }],
+  Hired: [{ status: 'Published', label: 'Reopen', confirm: 'Reopen this opportunity for applications?', color: 'primary' }],
+  Cancelled: [{ status: 'Published', label: 'Reopen', confirm: 'Reopen this opportunity for applications?', color: 'primary' }],
+};
+
+// Owner/admin controls to finish, cancel or reopen a posting.
+function LifecycleControls({ opportunity, onChange }) {
+  const { addToast, confirm } = useToast();
+  const [busy, setBusy] = useState(false);
+  const actions = LIFECYCLE_ACTIONS[opportunity.status] || [];
+
+  const apply = async (action) => {
+    if (!(await confirm(action.confirm, { title: action.label, confirmLabel: action.label, color: action.color === 'critical' ? 'critical' : 'primary' }))) return;
+    setBusy(true);
+    try {
+      const res = await opportunityService.updateLifecycle(opportunity.id, action.status);
+      onChange(res.data.data);
+      addToast(`Opportunity is now ${statusLabel(action.status).toLowerCase()}.`, 'success');
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Failed to update the opportunity.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <View gap={2}>
+      <View direction="row" align="center" gap={2}>
+        <Text variant="body-2" weight="medium">Status</Text>
+        <Badge color={STATUS_COLORS[opportunity.status] || 'neutral'} variant="faded">{statusLabel(opportunity.status)}</Badge>
+      </View>
+      {actions.length === 0 && <Text variant="caption-1" color="neutral-faded">This posting is awaiting moderation.</Text>}
+      {actions.map((action) => (
+        <Button key={action.status + action.label} variant="outline" color={action.color} fullWidth loading={busy} onClick={() => apply(action)}>{action.label}</Button>
       ))}
     </View>
   );
@@ -214,6 +261,7 @@ export default function OpportunityDetail() {
                     You are signed in with employer/administrator credentials. Candidate applications are managed through the dashboard.
                   </Text>
                 </View>
+                <LifecycleControls opportunity={opportunity} onChange={setOpportunity} />
                 <Button color="primary" fullWidth {...routerLink('/dashboard/applications')}>Manage Candidate Pipeline</Button>
                 <Divider />
                 <CandidatePipeline opportunityId={id} />

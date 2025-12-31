@@ -94,6 +94,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('/opportunities', [OpportunityController::class, 'store']);
         Route::put('/opportunities/{opportunity}', [OpportunityController::class, 'update']);
         Route::delete('/opportunities/{opportunity}', [OpportunityController::class, 'destroy']);
+        Route::patch('/opportunities/{opportunity}/lifecycle', [OpportunityController::class, 'updateLifecycle']);
         Route::post('/events', [EventController::class, 'store']);
         Route::post('/podcasts', [PodcastController::class, 'store']);
     });

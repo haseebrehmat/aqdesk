@@ -152,4 +152,33 @@ class OpportunityController extends Controller
             'data' => $opportunity->load('employer:id,name'),
         ]);
     }
+
+    /**
+     * Let the owner (or an admin) complete, cancel, mark as hired or reopen a posting.
+     */
+    public function updateLifecycle(Request $request, Opportunity $opportunity)
+    {
+        $user = Auth::user()->load('role');
+        $isAdmin = strtolower((string) $user->role?->role_name) === 'admin';
+
+        if (! $isAdmin && $opportunity->posted_by !== $user->id) {
+            return response()->json(['message' => 'Unauthorized to manage this posting.'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:Published,Completed,Hired,Cancelled',
+        ]);
+
+        // Postings still awaiting or failing moderation can't be reopened by their owner.
+        if (! $isAdmin && ! in_array($opportunity->status, ['Published', 'Completed', 'Hired', 'Cancelled'], true)) {
+            return response()->json(['message' => 'This posting is not live yet.'], 422);
+        }
+
+        $opportunity->update($validated);
+
+        return response()->json([
+            'message' => 'Opportunity status updated.',
+            'data' => $opportunity->load('employer:id,name'),
+        ]);
+    }
 }

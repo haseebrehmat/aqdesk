@@ -24,6 +24,9 @@ export default {
   getApplications(params) {
     return api.get('/applications', { params });
   },
+  updateLifecycle(id, status) {
+    return api.patch(`/opportunities/${id}/lifecycle`, { status });
+  },
   getResume(id) {
     return api.get(`/applications/${id}/resume`, { responseType: 'blob' });
   },
