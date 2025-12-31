@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             QuestionAndAnswerSeeder::class,
             ProjectAndWorkspaceSeeder::class,
             OpportunityAndEventSeeder::class,
+            DemoContentSeeder::class,
         ]);
     }
 }
