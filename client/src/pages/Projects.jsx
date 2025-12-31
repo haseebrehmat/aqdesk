@@ -1,19 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Badge, Button, Card, Grid, Loader, Modal, View, Text } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
-import {
-  FolderPlus,
-  Folder,
-  Lock,
-  Globe,
-  FileText,
-  MessageSquare,
-  Users,
-  Loader2,
-  X,
-  Trash2,
-} from "lucide-react";
+import { FolderPlus, Folder, Lock, Globe, FileText, MessageSquare, Users, Trash2 } from "lucide-react";
+import { Page, PageHeader, EmptyState, FormField } from "../components/ui";
+import { routerLink } from "../components/RouterLink";
 
 export default function Projects() {
   const { addToast } = useToast();
@@ -62,8 +53,7 @@ export default function Projects() {
     }
   };
 
-  const handleDeleteProject = async (e, projectId) => {
-    e.preventDefault();
+  const handleDeleteProject = async (projectId) => {
     if (!window.confirm("Are you sure you want to delete this project?")) return;
 
     try {
@@ -76,185 +66,83 @@ export default function Projects() {
   };
 
   if (loading) {
-    return (
-      <div className="p-10 text-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-      </div>
-    );
+    return <View align="center" padding={12}><Loader /></View>;
   }
 
+  const set = (key) => (value) => setFormData((prev) => ({ ...prev, [key]: value }));
+
   return (
-    <div className="p-6 sm:p-10 max-w-6xl mx-auto space-y-8 font-sans">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Project Workspaces</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Collaborate on open projects, upload assets, and share technical feedback.
-          </p>
-        </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition"
-        >
-          <FolderPlus className="w-4 h-4" /> Create Workspace
-        </button>
-      </div>
+    <Page>
+      <PageHeader
+        title="Project Workspaces"
+        description="Collaborate on open projects, upload assets, and share technical feedback."
+        actions={<Button color="primary" icon={FolderPlus} onClick={() => setIsModalOpen(true)}>Create Workspace</Button>}
+      />
 
-      {/* Projects Grid */}
       {projects.length === 0 ? (
-        <div className="p-10 text-center text-slate-400 bg-slate-900 border border-slate-800 rounded-2xl">
-          No projects created yet. Start a workspace above!
-        </div>
+        <EmptyState title="No projects created yet" description="Start a workspace to collaborate with your team." />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Grid columns={{ s: 1, m: 2, l: 3 }} gap={5}>
           {projects.map((project) => (
-            <div
-              key={project.id}
-              className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 flex flex-col justify-between space-y-4 transition group"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300">
-                    {project.visibility === "Public" ? (
-                      <Globe className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <Card key={project.id} padding={5}>
+              <View gap={4} height="100%" justify="space-between">
+                <View gap={3}>
+                  <View direction="row" justify="space-between" align="center">
+                    <Badge variant="faded" color={project.visibility === "Public" ? "positive" : "warning"} icon={project.visibility === "Public" ? Globe : Lock}>
+                      {project.visibility}
+                    </Badge>
+                    {currentUser?.id === project.owner_id && (
+                      <Button variant="ghost" color="critical" size="small" icon={Trash2} onClick={() => handleDeleteProject(project.id)} attributes={{ "aria-label": "Delete project", title: "Delete Project" }} />
                     )}
-                    {project.visibility}
-                  </span>
-
-                  {currentUser?.id === project.owner_id && (
-                    <button
-                      onClick={(e) => handleDeleteProject(e, project.id)}
-                      className="text-slate-500 hover:text-red-400 p-1 transition"
-                      title="Delete Project"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-
-                <Link to={`/projects/${project.id}`} className="block space-y-1">
-                  <h2 className="text-lg font-bold text-white group-hover:text-blue-400 transition flex items-center gap-2">
-                    <Folder className="w-5 h-5 text-blue-500 shrink-0" />
-                    <span className="truncate">{project.title}</span>
-                  </h2>
-                  <p className="text-slate-400 text-xs line-clamp-2 leading-relaxed">
-                    {project.description || "No description provided."}
-                  </p>
-                </Link>
-              </div>
-
-              {/* Card Footer */}
-              <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                <span>By {project.owner?.name || "Anonymous"}</span>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1" title="Files">
-                    <FileText className="w-3.5 h-3.5 text-slate-400" />
-                    {project.files_count ?? 0}
-                  </span>
-                  <span className="flex items-center gap-1" title="Feedback">
-                    <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
-                    {project.feedback_count ?? 0}
-                  </span>
-                  <span className="flex items-center gap-1" title="Members">
-                    <Users className="w-3.5 h-3.5 text-slate-400" />
-                    {project.members?.length ?? 1}
-                  </span>
-                </div>
-              </div>
-            </div>
+                  </View>
+                  <View gap={1}>
+                    <View direction="row" align="center" gap={2}>
+                      <Folder size={18} color="var(--rs-color-foreground-primary)" aria-hidden="true" />
+                      <Button variant="ghost" color="primary" {...routerLink(`/projects/${project.id}`)}>{project.title}</Button>
+                    </View>
+                    <Text variant="body-2" color="neutral-faded" maxLines={2}>{project.description || "No description provided."}</Text>
+                  </View>
+                </View>
+                <View direction="row" justify="space-between" align="center" borderTop paddingTop={3}>
+                  <Text variant="caption-1" color="neutral-faded">By {project.owner?.name || "Anonymous"}</Text>
+                  <View direction="row" gap={3}>
+                    {[[FileText, project.files_count ?? 0, "Files"], [MessageSquare, project.feedback_count ?? 0, "Feedback"], [Users, project.members?.length ?? 1, "Members"]].map(([Icon, n, label]) => (
+                      <View key={label} direction="row" align="center" gap={1} attributes={{ title: label }}>
+                        <Icon size={14} aria-hidden="true" /><Text variant="caption-1" color="neutral-faded">{n}</Text>
+                        <span className="sr-only" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>{label}</span>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            </Card>
           ))}
-        </div>
+        </Grid>
       )}
 
-      {/* Create Project Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Create Workspace Project</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateProject} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Project Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. AI-Powered Code Reviewer"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Describe your workspace goals and requirements..."
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Visibility
-                </label>
-                <select
-                  value={formData.visibility}
-                  onChange={(e) =>
-                    setFormData({ ...formData, visibility: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-                >
-                  <option value="Public">Public (Visible to community)</option>
-                  <option value="Private">Private (Members only)</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2 rounded-xl text-sm flex items-center gap-2 transition disabled:opacity-50"
-                >
-                  {submitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    "Create Workspace"
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+      <Modal active={isModalOpen} onClose={() => setIsModalOpen(false)} size="560px" padding={6}>
+        <Modal.Title>Create New Workspace</Modal.Title>
+        <form onSubmit={handleCreateProject}>
+          <View gap={4} paddingTop={4}>
+            <FormField label="Project Title" name="title" required placeholder="e.g. AI-Powered Code Reviewer" value={formData.title} onChange={set("title")} />
+            <FormField label="Description" name="description" multiline rows={4} placeholder="Describe your workspace goals and requirements..." value={formData.description} onChange={set("description")} />
+            <FormField
+              label="Visibility"
+              name="visibility"
+              value={formData.visibility}
+              onChange={set("visibility")}
+              options={[
+                { value: "Public", label: "Public (Visible to community)" },
+                { value: "Private", label: "Private (Members only)" },
+              ]}
+            />
+            <View direction="row" justify="end" gap={2}>
+              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" color="primary" loading={submitting}>Create Workspace</Button>
+            </View>
+          </View>
+        </form>
+      </Modal>
+    </Page>
   );
 }

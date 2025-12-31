@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
-import { Loader2, Save } from "lucide-react";
+import { Badge, Button, Card, Loader, View } from "reshaped";
+import { Save } from "lucide-react";
+import { Page, PageHeader, FormField } from "../components/ui";
 
 export default function Profile() {
   const { addToast } = useToast();
@@ -65,120 +67,31 @@ export default function Profile() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
+  if (loading) return <View align="center" padding={12}><Loader /></View>;
+
+  const set = (key) => (value) => setProfile((prev) => ({ ...prev, [key]: value }));
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6 sm:p-10">
-      <div className="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-6 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white">User Profile</h1>
-            <p className="text-sm text-slate-400 mt-1">
-              Manage your identity and metadata
-            </p>
-          </div>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            {profile.role?.name || "Member"}
-          </span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={profile.name}
-              onChange={(e) =>
-                setProfile({ ...profile, name: e.target.value })
-              }
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Email (Read Only)
-            </label>
-            <input
-              type="email"
-              disabled
-              value={profile.email}
-              className="w-full bg-slate-950/50 border border-slate-800/50 text-slate-500 rounded-xl px-4 py-2.5 text-sm cursor-not-allowed"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="professional-position"
-              className="block text-xs font-medium text-slate-300 mb-1.5"
-            >
-              Current Professional Position
-            </label>
-            <input
-              id="professional-position"
-              type="text"
-              maxLength={255}
-              value={profile.professional_position}
-              onChange={(e) =>
-                setProfile({ ...profile, professional_position: e.target.value })
-              }
-              placeholder="e.g. Software Engineering Student"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Bio / Overview
-            </label>
-            <textarea
-              rows={4}
-              value={profile.bio}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              placeholder="Tell the community about your technical background..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              Skill Tags (Comma separated)
-            </label>
-            <input
-              type="text"
-              value={profile.skills_tags}
-              onChange={(e) =>
-                setProfile({ ...profile, skills_tags: e.target.value })
-              }
-              placeholder="React, Laravel, MySQL, Tailwind"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl text-sm transition flex items-center justify-center space-x-2 disabled:opacity-50"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>Save Changes</span>
-              </>
-            )}
-          </button>
+    <Page width="760px">
+      <PageHeader
+        title="User Profile"
+        description="Manage your identity and metadata"
+        actions={<Badge color="primary" variant="faded">{profile.role?.role_name || profile.role?.name || "Member"}</Badge>}
+      />
+      <Card padding={6}>
+        <form onSubmit={handleSubmit}>
+          <View gap={5}>
+            <FormField label="Full Name" name="name" value={profile.name} onChange={set("name")} />
+            <View gap={1}>
+              <FormField label="Email (Read Only)" name="email" type="email" readOnly value={profile.email} onChange={() => {}} helper="Your email address cannot be changed here." />
+            </View>
+            <FormField label="Current Professional Position" name="professional_position" placeholder="e.g. Software Engineering Student" value={profile.professional_position} onChange={set("professional_position")} />
+            <FormField label="Bio / Overview" name="bio" multiline rows={5} placeholder="Tell the community about your technical background..." value={profile.bio} onChange={set("bio")} />
+            <FormField label="Skill Tags (Comma separated)" name="skills_tags" placeholder="React, Laravel, MySQL" value={profile.skills_tags} onChange={set("skills_tags")} />
+            <Button type="submit" color="primary" size="large" fullWidth icon={Save} loading={saving}>Save Changes</Button>
+          </View>
         </form>
-      </div>
-    </div>
+      </Card>
+    </Page>
   );
 }

@@ -1,24 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Badge, Button, Card, Divider, Loader, Text, TextArea, TextField, View, Grid } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
-import {
-  ArrowLeft,
-  Upload,
-  FileText,
-  Trash2,
-  Send,
-  Loader2,
-  Users,
-  Globe,
-  Lock,
-  Download,
-  UserPlus,
-  Copy,
-  UserX,
-  Shield,
-  Check,
-} from "lucide-react";
+import { ArrowLeft, Upload, FileText, Trash2, Send, Users, Globe, Lock, Download, UserPlus, Copy, UserX, Shield, Check } from "lucide-react";
+import { Page, EmptyState, NativeSelect } from "../components/ui";
+import { routerLink } from "../components/RouterLink";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
@@ -194,315 +181,158 @@ export default function ProjectDetail() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-10 text-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-      </div>
-    );
-  }
+  if (loading) return <View align="center" padding={12}><Loader /></View>;
+  if (!project) return <Page width="1100px"><EmptyState title="Workspace not found." /></Page>;
 
-  if (!project) {
-    return <div className="p-10 text-center text-white">Workspace not found.</div>;
-  }
+  const roleOptions = ["Maintainer", "Collaborator", "Reviewer"].map((v) => ({ value: v, label: v }));
 
   return (
-    <div className="p-6 sm:p-10 max-w-6xl mx-auto space-y-8 font-sans">
-      <Link
-        to="/projects"
-        className="text-slate-400 hover:text-white flex items-center gap-2 text-sm transition"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Workspaces
-      </Link>
+    <Page width="1100px">
+      <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink("/projects")}>Back to Workspaces</Button></View>
 
-      {/* Workspace Header */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold text-white">{project.title}</h1>
-          <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300">
-            {project.visibility === "Public" ? (
-              <Globe className="w-3.5 h-3.5 text-emerald-400" />
-            ) : (
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
-            )}
-            {project.visibility}
-          </span>
-        </div>
+      <Card padding={6}>
+        <View gap={4}>
+          <View direction="row" justify="space-between" align="center" wrap gap={3}>
+            <Text as="h1" variant="featured-2" weight="bold">{project.title}</Text>
+            <Badge variant="faded" color={project.visibility === "Public" ? "positive" : "warning"} icon={project.visibility === "Public" ? Globe : Lock}>{project.visibility}</Badge>
+          </View>
+          <Text color="neutral-faded">{project.description || "No description provided."}</Text>
+          <Divider />
+          <View direction="row" gap={4}>
+            <Text variant="caption-1" color="neutral-faded">Owner: <strong>{project.owner?.name}</strong></Text>
+            <View direction="row" align="center" gap={1}><Users size={14} aria-hidden="true" /><Text variant="caption-1" color="neutral-faded">{project.members?.length || 1} Members</Text></View>
+          </View>
+        </View>
+      </Card>
 
-        <p className="text-slate-300 text-sm leading-relaxed">
-          {project.description || "No description provided."}
-        </p>
-
-        <div className="flex items-center gap-4 text-xs text-slate-400 pt-4 border-t border-slate-800">
-          <span>
-            Owner: <strong className="text-slate-200">{project.owner?.name}</strong>
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" /> {project.members?.length || 1} Members
-          </span>
-        </div>
-      </div>
-
-      {/* Project Team & Invitations (Owner & Maintainer Controls) */}
       {canManage && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-blue-500" /> Invite Collaborator
-          </h2>
-
-          <div className="flex flex-wrap sm:flex-nowrap gap-3">
-            <select
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 shrink-0"
-            >
-              <option value="Collaborator">Collaborator</option>
-              <option value="Reviewer">Reviewer</option>
-              <option value="Maintainer">Maintainer</option>
-            </select>
-
-            <button
-              onClick={handleGenerateInvite}
-              disabled={generatingInvite}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition disabled:opacity-50 shrink-0"
-            >
-              {generatingInvite ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                "Generate Invite Link"
-              )}
-            </button>
-
+        <Card padding={6}>
+          <View gap={4}>
+            <View direction="row" align="center" gap={2}><UserPlus size={20} aria-hidden="true" /><Text as="h2" variant="featured-5" weight="bold">Invite Collaborator</Text></View>
+            <View direction={{ s: "column", m: "row" }} gap={3} align={{ s: "stretch", m: "center" }}>
+              <View width={{ s: "100%", m: "200px" }}>
+                <NativeSelect name="invite_role" value={inviteRole} onChange={({ value }) => setInviteRole(value)} inputAttributes={{ "aria-label": "Invite role" }}
+                  options={["Collaborator", "Reviewer", "Maintainer"].map((v) => ({ value: v, label: v }))} />
+              </View>
+              <Button color="primary" onClick={handleGenerateInvite} loading={generatingInvite}>Generate Invite Link</Button>
+            </View>
             {inviteUrl && (
-              <div className="flex items-center gap-2 w-full">
-                <input
-                  type="text"
-                  readOnly
-                  value={inviteUrl}
-                  className="bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2 w-full focus:outline-none"
-                />
-                <button
-                  onClick={handleCopyInvite}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition"
-                  title="Copy Link"
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
+              <TextField
+                name="invite_url"
+                value={inviteUrl}
+                onChange={() => {}}
+                inputAttributes={{ readOnly: true, "aria-label": "Invite link" }}
+                endSlot={<Button variant="ghost" size="small" icon={copied ? Check : Copy} onClick={handleCopyInvite} attributes={{ "aria-label": "Copy link", title: "Copy Link" }} />}
+              />
             )}
-          </div>
-        </div>
+          </View>
+        </Card>
       )}
 
-      {/* Workspace Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Shared Assets & Files */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-500" /> Shared Assets & Files
-              </h2>
-
-              {/* Hide Upload button for Reviewers */}
+      <Grid columns={{ s: 1, l: "2fr 1fr" }} gap={6} align="start">
+        <View gap={8}>
+          <View gap={4}>
+            <View direction="row" justify="space-between" align="center">
+              <View direction="row" align="center" gap={2}><FileText size={20} aria-hidden="true" /><Text as="h2" variant="featured-5" weight="bold">Shared Assets &amp; Files</Text></View>
               {canUpload && (
-                <label className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
-                  {uploading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Upload className="w-3.5 h-3.5" />
-                  )}
-                  Upload File
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={uploading}
-                  />
-                </label>
+                <>
+                  <input id="project-file" type="file" hidden onChange={handleFileUpload} disabled={uploading} />
+                  <Button variant="outline" icon={Upload} loading={uploading} onClick={() => document.getElementById("project-file").click()}>Upload File</Button>
+                </>
               )}
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 divide-y divide-slate-800/60">
+            </View>
+            <Card padding={4}>
               {project.files?.length === 0 ? (
-                <p className="text-slate-500 text-xs py-4 text-center">
-                  No files uploaded yet.
-                </p>
+                <View padding={4} align="center"><Text variant="body-2" color="neutral-faded">No files uploaded yet.</Text></View>
               ) : (
-                project.files?.map((file) => (
-                  <div
-                    key={file.id}
-                    className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-4"
-                  >
-                    <div className="truncate space-y-0.5">
-                      <p className="text-sm text-slate-200 font-medium truncate">
-                        {file.file_name}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Uploaded by {file.uploader?.name || "Member"}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <a
-                        href={`${backendUrl}/storage/${file.file_path}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-1.5 bg-slate-800 text-slate-300 hover:text-white rounded-lg transition"
-                        title="Download"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                      </a>
-
-                      {/* Delete file if User is Uploader, Owner, or Maintainer */}
-                      {(canManage || currentUser?.id === file.uploaded_by) && (
-                        <button
-                          onClick={() => handleDeleteFile(file.id)}
-                          className="p-1.5 bg-slate-800 text-slate-400 hover:text-red-400 rounded-lg transition"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Feedback & Discussions */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              Feedback & Community Discussion
-            </h2>
-
-            <div className="space-y-3">
-              {project.feedback?.length === 0 ? (
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-slate-500 text-xs text-center">
-                  No discussions yet. Be the first to leave feedback!
-                </div>
-              ) : (
-                project.feedback?.map((fb) => (
-                  <div
-                    key={fb.id}
-                    className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2"
-                  >
-                    <div className="flex justify-between items-center text-xs text-slate-400">
-                      <strong className="text-slate-200">
-                        {fb.user?.name || "Anonymous"}
-                      </strong>
-                      {/* Delete feedback if Author, Owner, or Maintainer */}
-                      {(canManage || currentUser?.id === fb.user_id) && (
-                        <button
-                          onClick={() => handleDeleteFeedback(fb.id)}
-                          className="text-slate-500 hover:text-red-400 transition"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed">
-                      {fb.comments}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <form onSubmit={handleAddFeedback} className="space-y-3 pt-2">
-              <textarea
-                rows={3}
-                required
-                placeholder="Leave technical feedback or ask a project question..."
-                value={feedbackText}
-                onChange={(e) => setFeedbackText(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-              />
-              <button
-                type="submit"
-                disabled={postingFeedback}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition disabled:opacity-50"
-              >
-                {postingFeedback ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <>
-                    <Send className="w-3.5 h-3.5" /> Post Comment
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Right Column: Active Members Sidepanel */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-blue-500" /> Workspace Team
-          </h2>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            {project.members?.map((member) => {
-              const isProjectOwner = member.id === project.owner_id;
-
-              return (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between pb-3 border-b border-slate-800/80 last:pb-0 last:border-b-0 gap-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-200 flex items-center gap-1.5 truncate">
-                      <span className="truncate">{member.name}</span>
-                      {isProjectOwner && (
-                        <Shield className="w-3.5 h-3.5 text-amber-400 shrink-0" title="Project Owner" />
-                      )}
-                    </p>
-
-                    {/* Dynamic Role Dropdown for Managers, Static Badge for Others */}
-                    {canManage && !isProjectOwner ? (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <select
-                          value={member.pivot?.role_in_project || "Collaborator"}
-                          disabled={updatingRoleId === member.id}
-                          onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                          className="bg-slate-950 border border-slate-800 text-[11px] text-slate-300 rounded-md px-2 py-0.5 focus:outline-none focus:border-blue-500 disabled:opacity-50 cursor-pointer"
-                        >
-                          <option value="Maintainer">Maintainer</option>
-                          <option value="Collaborator">Collaborator</option>
-                          <option value="Reviewer">Reviewer</option>
-                        </select>
-                        {updatingRoleId === member.id && (
-                          <Loader2 className="w-3 h-3 animate-spin text-blue-400 shrink-0" />
+                <View gap={3} divided>
+                  {project.files?.map((file) => (
+                    <View key={file.id} direction="row" align="center" justify="space-between" gap={3}>
+                      <View attributes={{ style: { minWidth: 0 } }}>
+                        <Text variant="body-2" weight="medium" maxLines={1}>{file.file_name}</Text>
+                        <Text variant="caption-1" color="neutral-faded">Uploaded by {file.uploader?.name || "Member"}</Text>
+                      </View>
+                      <View direction="row" gap={1} shrink={false}>
+                        <Button variant="ghost" size="small" icon={Download} href={`${backendUrl}/storage/${file.file_path}`} attributes={{ target: "_blank", rel: "noreferrer", "aria-label": "Download", title: "Download" }} />
+                        {(canManage || currentUser?.id === file.uploaded_by) && (
+                          <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDeleteFile(file.id)} attributes={{ "aria-label": "Delete file", title: "Delete" }} />
                         )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-500">
-                        {isProjectOwner ? "Owner" : member.pivot?.role_in_project || "Collaborator"}
-                      </p>
-                    )}
-                  </div>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </Card>
+          </View>
 
-                  {/* Remove Button for Managers (Owner cannot be removed) */}
-                  {canManage && !isProjectOwner && (
-                    <button
-                      onClick={() => handleRemoveMember(member.id)}
-                      className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-slate-800 transition shrink-0"
-                      title="Remove Member"
-                    >
-                      <UserX className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+          <View gap={4}>
+            <Text as="h2" variant="featured-5" weight="bold">Feedback &amp; Community Discussion</Text>
+            {project.feedback?.length === 0 ? (
+              <EmptyState title="No discussions yet" description="Be the first to leave feedback!" />
+            ) : (
+              project.feedback?.map((fb) => (
+                <Card key={fb.id} padding={4}>
+                  <View gap={2}>
+                    <View direction="row" justify="space-between" align="center">
+                      <Text variant="body-2" weight="bold">{fb.user?.name || "Anonymous"}</Text>
+                      {(canManage || currentUser?.id === fb.user_id) && (
+                        <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDeleteFeedback(fb.id)} attributes={{ "aria-label": "Delete feedback" }} />
+                      )}
+                    </View>
+                    <Text variant="body-2" color="neutral-faded" attributes={{ style: { whiteSpace: "pre-line" } }}>{fb.comments}</Text>
+                  </View>
+                </Card>
+              ))
+            )}
+            <form onSubmit={handleAddFeedback}>
+              <View gap={3}>
+                <TextArea name="feedback" placeholder="Leave technical feedback or ask a project question..." value={feedbackText} onChange={({ value }) => setFeedbackText(value)} inputAttributes={{ rows: 3, required: true, "aria-label": "Feedback" }} />
+                <View direction="row"><Button type="submit" color="primary" icon={Send} loading={postingFeedback}>Post Comment</Button></View>
+              </View>
+            </form>
+          </View>
+        </View>
+
+        <View gap={4}>
+          <View direction="row" align="center" gap={2}><Users size={20} aria-hidden="true" /><Text as="h2" variant="featured-5" weight="bold">Workspace Team</Text></View>
+          <Card padding={4}>
+            <View gap={3} divided>
+              {project.members?.map((member) => {
+                const isProjectOwner = member.id === project.owner_id;
+                return (
+                  <View key={member.id} direction="row" align="center" justify="space-between" gap={2}>
+                    <View gap={1} grow attributes={{ style: { minWidth: 0 } }}>
+                      <View direction="row" align="center" gap={1}>
+                        <Text variant="body-2" weight="medium" maxLines={1}>{member.name}</Text>
+                        {isProjectOwner && <Shield size={14} color="var(--rs-color-foreground-warning)" aria-label="Project Owner" />}
+                      </View>
+                      {canManage && !isProjectOwner ? (
+                        <View direction="row" align="center" gap={1}>
+                          <NativeSelect
+                            name={`role-${member.id}`}
+                            size="small"
+                            value={member.pivot?.role_in_project || "Collaborator"}
+                            disabled={updatingRoleId === member.id}
+                            onChange={({ value }) => handleRoleChange(member.id, value)}
+                            inputAttributes={{ "aria-label": `Role for ${member.name}` }}
+                            options={roleOptions}
+                          />
+                          {updatingRoleId === member.id && <Loader size="small" />}
+                        </View>
+                      ) : (
+                        <Text variant="caption-1" color="neutral-faded">{isProjectOwner ? "Owner" : member.pivot?.role_in_project || "Collaborator"}</Text>
+                      )}
+                    </View>
+                    {canManage && !isProjectOwner && (
+                      <Button variant="ghost" size="small" color="critical" icon={UserX} onClick={() => handleRemoveMember(member.id)} attributes={{ "aria-label": `Remove ${member.name}`, title: "Remove Member" }} />
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          </Card>
+        </View>
+      </Grid>
+    </Page>
   );
 }
