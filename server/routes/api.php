@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ConsultationController;
 use App\Http\Controllers\Api\ContentReportController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\NewsletterController;
 use App\Http\Controllers\Api\OpportunityController;
@@ -49,6 +50,7 @@ Route::get('/podcasts/{podcast}', [PodcastController::class, 'show']);
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
     Route::middleware('role:Admin')->prefix('admin')->group(function () {
         Route::post('/settings', [SettingController::class, 'update']);

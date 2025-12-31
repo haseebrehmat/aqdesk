@@ -13,10 +13,30 @@ test.beforeEach(async ({ page }) => {
     localStorage.setItem('token', 'test-token');
     localStorage.setItem('user', JSON.stringify(user));
   }, { user: signedInUser });
+
+  await page.route('**/api/dashboard/summary', async (route) => {
+    await route.fulfill({
+      json: {
+        stats: { workspaces: 3, questions: 4, answers: 5, applications: 2 },
+        activity: [
+          { label: 'Jul', questions: 0, answers: 1 },
+          { label: 'Aug', questions: 1, answers: 0 },
+          { label: 'Sep', questions: 1, answers: 1 },
+          { label: 'Oct', questions: 0, answers: 2 },
+          { label: 'Nov', questions: 2, answers: 1 },
+          { label: 'Dec', questions: 0, answers: 0 },
+        ],
+      },
+    });
+  });
 });
 
 test('public and authenticated navigation use different URLs and layouts', async ({ page }) => {
   await page.goto('/dashboard');
+
+  await expect(page.getByRole('heading', { name: 'Your activity' })).toBeVisible();
+  await expect(page.getByText('Six-month contribution trend')).toBeVisible();
+  await expect(page.getByText('5', { exact: true })).toBeVisible();
 
   const sidebar = page.locator('aside');
   await expect(sidebar.getByRole('link', { name: 'Q&A Board' })).toHaveAttribute('href', '/dashboard/questions');
