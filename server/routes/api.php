@@ -46,6 +46,7 @@ Route::get('/events/{event}', [EventController::class, 'show']);
 
 Route::get('/podcasts', [PodcastController::class, 'index']);
 Route::get('/podcasts/{podcast}', [PodcastController::class, 'show']);
+Route::get('/podcasts/{podcast}/audio', [PodcastController::class, 'audio']);
 
 // Protected Routes (Sanctum Authenticated)
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
