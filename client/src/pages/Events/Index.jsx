@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Badge, Button, Card, Loader, Text, View } from 'reshaped';
 import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
-import { Loader2 } from 'lucide-react';
+import { Page, PageHeader, EmptyState } from '../../components/ui'
+import { formatDate } from '../../utils/format';
+import { routerLink } from '../../components/RouterLink';
 
 export default function EventIndex() {
     const { addToast } = useToast();
@@ -39,112 +41,64 @@ export default function EventIndex() {
 
     if (loading) {
         return (
-            <div className="p-12 text-center text-slate-400">
-                <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-                <p className="mt-2 text-sm">Loading events...</p>
-            </div>
+            <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading events...</Text></View>
         );
     }
 
+    const when = (v) => formatDate(v, { dateStyle: 'medium', timeStyle: 'short' });
+
     return (
-        <div className="p-6 sm:p-10 max-w-7xl mx-auto space-y-8 font-sans">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Events & Webinars</h1>
-                </div>
-                <Link
-                    to="/dashboard/events/create"
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2.5 rounded-xl text-sm flex items-center space-x-2 transition w-fit"
-                >
-                    <span>Create Event</span>
-                </Link>
-            </div>
+        <Page>
+            <PageHeader
+                title="Events & Webinars"
+                description="Register for live sessions or host your own."
+                actions={<Button color="primary" {...routerLink('/dashboard/events/create')}>Create Event</Button>}
+            />
 
             {events.length === 0 ? (
-                <div className="p-12 text-center text-slate-400 bg-slate-900/50 border border-slate-800 rounded-2xl">
-                    <p className="text-base font-medium text-slate-300">No events found</p>
-                    <p className="text-xs text-slate-400 mt-1">Be the first one to create an event!</p>
-                </div>
+                <EmptyState title="No events found" description="Be the first one to create an event!" />
             ) : (
-                <div className="space-y-4">
+                <View gap={4}>
                     {events.map((event) => {
                         const isHost = event.host_id === currentUser?.id || event.host?.id === currentUser?.id;
                         const isRegistered = event.attendees?.some((attendee) => attendee.id === currentUser?.id);
-
                         return (
-                            <div
-                                key={event.id}
-                                className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row justify-between gap-4 hover:border-slate-700 transition"
-                            >
-                                <div className="space-y-3 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">
-                                            {event.status}
-                                        </span>
-                                        {isHost && (
-                                            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
-                                                Host
-                                            </span>
-                                        )}
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-white">
-                                        {event.title}
-                                    </h3>
-                                    <p className="text-slate-300 text-sm line-clamp-2">{event.description}</p>
-                                    
-                                    <div className="text-xs text-slate-400 space-y-1 pt-1">
-                                        {event.scheduled_at && (
-                                            <p><span className="font-medium text-slate-300">Scheduled At:</span> {new Date(event.scheduled_at).toLocaleString()}</p>
-                                        )}
-                                        {event.ends_at && (
-                                            <p><span className="font-medium text-slate-300">Ends At:</span> {new Date(event.ends_at).toLocaleString()}</p>
-                                        )}
-                                        <p>
-                                            <span className="font-medium text-slate-300">Attendance:</span>{' '}
-                                            {event.attendees_count || 0}{event.max_attendees ? ` / ${event.max_attendees}` : ''}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 border-slate-800 pt-4 md:pt-0 shrink-0 text-xs text-slate-400">
-                                    <div>
-                                        <span className="font-medium text-slate-300">Host:</span> {event.host?.name || "Anonymous"}
-                                    </div>
-                                    <div className="flex items-center space-x-2 mt-3">
-                                        <Link
-                                            to={`/dashboard/events/${event.id}`}
-                                            className="text-blue-400 hover:underline font-medium text-xs px-2.5 py-1"
-                                        >
-                                            View Details &rarr;
-                                        </Link>
-                                        
-                                        {isHost ? (
-                                            <span className="text-emerald-400 font-medium text-xs px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                                                Hosting
-                                            </span>
-                                        ) : isRegistered ? (
-                                            <span className="text-slate-400 font-medium text-xs px-3 py-1.5 bg-slate-800 rounded-xl">
-                                                Registered
-                                            </span>
-                                        ) : event.is_full ? (
-                                            <span className="text-amber-300 font-medium text-xs px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                                                Fully Booked
-                                            </span>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleRegister(event.id)}
-                                                className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-xl font-medium transition"
-                                            >
-                                                Register
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <Card key={event.id} padding={5}>
+                                <View direction={{ s: 'column', m: 'row' }} justify="space-between" gap={4}>
+                                    <View gap={2} grow>
+                                        <View direction="row" gap={2}>
+                                            <Badge color="primary" variant="faded">{event.status}</Badge>
+                                            {isHost && <Badge color="positive" variant="faded">Host</Badge>}
+                                        </View>
+                                        <Text as="h2" variant="featured-5" weight="bold">{event.title}</Text>
+                                        <Text variant="body-2" color="neutral-faded" maxLines={2}>{event.description}</Text>
+                                        <View gap={1}>
+                                            {event.scheduled_at && <Text variant="caption-1" color="neutral-faded">Scheduled: {when(event.scheduled_at)}</Text>}
+                                            {event.ends_at && <Text variant="caption-1" color="neutral-faded">Ends: {when(event.ends_at)}</Text>}
+                                            <Text variant="caption-1" color="neutral-faded">Attendance: {event.attendees_count || 0}{event.max_attendees ? ` / ${event.max_attendees}` : ''}</Text>
+                                        </View>
+                                    </View>
+                                    <View align={{ s: 'start', m: 'end' }} justify="space-between" gap={3}>
+                                        <Text variant="caption-1" color="neutral-faded">Host: {event.host?.name || 'Anonymous'}</Text>
+                                        <View direction="row" align="center" gap={2}>
+                                            <Button variant="ghost" color="primary" {...routerLink(`/dashboard/events/${event.id}`)}>View Details →</Button>
+                                            {isHost ? (
+                                                <Badge color="positive" variant="faded">Hosting</Badge>
+                                            ) : isRegistered ? (
+                                                <Badge variant="faded">Registered</Badge>
+                                            ) : event.is_full ? (
+                                                <Badge color="warning" variant="faded">Fully Booked</Badge>
+                                            ) : (
+                                                <Button color="primary" onClick={() => handleRegister(event.id)}>Register</Button>
+                                            )}
+                                        </View>
+                                    </View>
+                                </View>
+                            </Card>
                         );
                     })}
-                </div>
+                </View>
             )}
-        </div>
+        </Page>
     );
 }

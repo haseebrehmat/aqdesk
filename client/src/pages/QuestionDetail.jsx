@@ -1,19 +1,23 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
+import { Badge, Button, Card, Divider, Loader, Text, TextArea, View } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import MarkdownContent from "../components/MarkdownContent";
-import {
-  ThumbsUp,
-  ThumbsDown,
-  CheckCircle2,
-  Eye,
-  Send,
-  ArrowLeft,
-  Loader2,
-  Check,
-  Flag,
-} from "lucide-react";
+import { ThumbsUp, ThumbsDown, CheckCircle2, Eye, Send, ArrowLeft, Check, Flag } from "lucide-react";
+import { Page, EmptyState } from "../components/ui"
+import { formatDate } from "../utils/format";
+import { routerLink } from "../components/RouterLink";
+
+function VoteControl({ votes, current, onUp, onDown, label }) {
+  return (
+    <View direction="row" align="center" gap={1} borderRadius="medium" border paddingInline={1}>
+      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="small" icon={ThumbsUp} onClick={onUp} attributes={{ "aria-label": `Upvote ${label}`, title: `Upvote ${label}` }} />
+      <Text variant="body-2" weight="bold">{votes ?? 0}</Text>
+      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="small" icon={ThumbsDown} onClick={onDown} attributes={{ "aria-label": `Downvote ${label}`, title: `Downvote ${label}` }} />
+    </View>
+  );
+}
 
 export default function QuestionDetail() {
   const { slug } = useParams();
@@ -129,205 +133,80 @@ export default function QuestionDetail() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="p-10 text-center text-white">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-      </div>
-    );
-  if (!question)
-    return <div className="p-10 text-center text-white">Question not found.</div>;
+  if (loading) return <View align="center" padding={12}><Loader /></View>;
+  if (!question) return <Page width="900px"><EmptyState title="Question not found." /></Page>;
 
   const isQuestionOwner = currentUser?.id === question.user_id;
+  const backTo = location.pathname.startsWith("/dashboard/") ? "/dashboard/questions" : "/questions";
 
   return (
-    <div className="p-6 sm:p-10 max-w-5xl mx-auto space-y-8 font-sans">
-      <Link
-        to={location.pathname.startsWith("/dashboard/") ? "/dashboard/questions" : "/questions"}
-        className="text-slate-400 hover:text-white flex items-center gap-2 text-sm transition"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Q&A
-      </Link>
+    <Page width="1000px">
+      <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink(backTo)}>Back to Q&amp;A</Button></View>
 
-      {/* Question Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <h1 className="text-2xl font-bold text-white">{question.title}</h1>
-        <MarkdownContent className="text-slate-300 text-sm leading-relaxed">
-          {question.body}
-        </MarkdownContent>
-
-        {/* Footer Metadata & Voting Row */}
-        <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400 pt-4 border-t border-slate-800">
-          <span>
-            Asked by{" "}
-            <strong className="text-slate-200">
-              {question.user?.name || "Anonymous"}
-            </strong>
-          </span>
-
-          <div className="flex items-center gap-6">
-            {currentUser.id && !isQuestionOwner && (
-              <button onClick={() => reportContent("question", question.id)} className="flex items-center gap-1 text-amber-300 hover:text-amber-200">
-                <Flag className="w-4 h-4" /> Report
-              </button>
-            )}
-            <div className="flex items-center bg-slate-950/60 border border-slate-800 rounded-xl px-2 py-1 space-x-1">
-              <button
-                onClick={() => handleVoteQuestion(1)}
-                className={`p-1.5 rounded-lg transition ${
-                  question.user_vote === 1
-                    ? "bg-blue-600/20 text-blue-400"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Upvote"
-              >
-                <ThumbsUp className="w-4 h-4" />
-              </button>
-              <span className="font-semibold text-sm text-white px-1">
-                {question.net_votes ?? 0}
-              </span>
-              <button
-                onClick={() => handleVoteQuestion(-1)}
-                className={`p-1.5 rounded-lg transition ${
-                  question.user_vote === -1
-                    ? "bg-red-600/20 text-red-400"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Downvote"
-              >
-                <ThumbsDown className="w-4 h-4" />
-              </button>
-            </div>
-
-            <span className="flex items-center gap-1">
-              <Eye className="w-4 h-4 text-slate-400" /> {question.views} views
-            </span>
-            <span>{new Date(question.created_at).toLocaleDateString()}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Answers List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-white">
-          {question.answers?.length || 0} Answers
-        </h2>
-        {question.answers?.map((ans) => (
-          <div
-            key={ans.id}
-            className={`p-6 rounded-2xl border space-y-4 transition ${
-              ans.is_accepted
-                ? "bg-emerald-950/20 border-emerald-500/40"
-                : "bg-slate-900 border-slate-800"
-            }`}
-          >
-            <div className="flex justify-between items-start gap-4">
-              <MarkdownContent className="text-slate-200 text-sm flex-1 leading-relaxed">
-                {ans.body}
-              </MarkdownContent>
-
-              {/* Solution Badge or Accept Button */}
-              <div className="shrink-0 flex items-center space-x-2">
-                {ans.is_accepted && (
-                  <span className="flex items-center gap-1 text-emerald-400 text-xs font-semibold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
-                    <CheckCircle2 className="w-4 h-4" /> Solution
-                  </span>
-                )}
-
-                {/* Question Author Action Button */}
-                {isQuestionOwner && (
-                  <button
-                    onClick={() => handleAcceptAnswer(ans.id)}
-                    className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-md border transition ${
-                      ans.is_accepted
-                        ? "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
-                        : "bg-emerald-600/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/20"
-                    }`}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>{ans.is_accepted ? "Unmark" : "Accept Solution"}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Answer Footer & Voting Controls */}
-            <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-800/60">
-              <span>
-                Answered by{" "}
-                <strong className="text-slate-300">
-                  {ans.user?.name || "Anonymous"}
-                </strong>
-              </span>
-
-              <div className="flex items-center bg-slate-950/60 border border-slate-800 rounded-xl px-2 py-1 space-x-1">
-                <button
-                  onClick={() => handleVoteAnswer(ans.id, 1)}
-                  className={`p-1 rounded-lg transition ${
-                    ans.user_vote === 1
-                      ? "bg-blue-600/20 text-blue-400"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Upvote Answer"
-                >
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                </button>
-                <span className="font-semibold text-xs text-white px-1">
-                  {ans.net_votes ?? 0}
-                </span>
-                <button
-                  onClick={() => handleVoteAnswer(ans.id, -1)}
-                  className={`p-1 rounded-lg transition ${
-                    ans.user_vote === -1
-                      ? "bg-red-600/20 text-red-400"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Downvote Answer"
-                >
-                  <ThumbsDown className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              {currentUser.id && Number(currentUser.id) !== Number(ans.user_id) && (
-                <button onClick={() => reportContent("answer", ans.id)} className="flex items-center gap-1 text-amber-300 hover:text-amber-200">
-                  <Flag className="w-3.5 h-3.5" /> Report
-                </button>
+      <Card padding={6}>
+        <View gap={4}>
+          <Text as="h1" variant="featured-2" weight="bold">{question.title}</Text>
+          <MarkdownContent>{question.body}</MarkdownContent>
+          <Divider />
+          <View direction="row" justify="space-between" align="center" wrap gap={3}>
+            <Text variant="caption-1" color="neutral-faded">Asked by <strong>{question.user?.name || "Anonymous"}</strong></Text>
+            <View direction="row" align="center" gap={4} wrap>
+              {currentUser.id && !isQuestionOwner && (
+                <Button variant="ghost" color="warning" size="small" icon={Flag} onClick={() => reportContent("question", question.id)}>Report</Button>
               )}
-            </div>
-          </div>
-        ))}
-      </div>
+              <VoteControl votes={question.net_votes} current={question.user_vote} onUp={() => handleVoteQuestion(1)} onDown={() => handleVoteQuestion(-1)} label="question" />
+              <View direction="row" align="center" gap={1}><Eye size={14} aria-hidden="true" /><Text variant="caption-1" color="neutral-faded">{question.views} views</Text></View>
+              <Text variant="caption-1" color="neutral-faded">{formatDate(question.created_at)}</Text>
+            </View>
+          </View>
+        </View>
+      </Card>
 
-      {/* Answer Form */}
-      <form
-        onSubmit={handlePostAnswer}
-        className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4"
-      >
-        <h3 className="text-lg font-semibold text-white">Your Answer</h3>
-        <textarea
-          rows={4}
-          required
-          placeholder="Write your solution using Markdown..."
-          value={answerBody}
-          onChange={(e) => setAnswerBody(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-        />
-        <p className="text-xs text-slate-400">
-          Markdown is supported. Raw HTML is ignored for safety.
-        </p>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 transition disabled:opacity-50"
-        >
-          {submitting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <>
-              <Send className="w-4 h-4" /> Post Answer
-            </>
-          )}
-        </button>
-      </form>
-    </div>
+      <View gap={4}>
+        <Text as="h2" variant="featured-5" weight="bold">{question.answers?.length || 0} Answers</Text>
+        {question.answers?.map((ans) => (
+          <Card key={ans.id} padding={5} attributes={ans.is_accepted ? { style: { borderColor: "var(--rs-color-border-positive)" } } : undefined}>
+            <View gap={4}>
+              <View direction={{ s: "column", m: "row" }} justify="space-between" gap={4}>
+                <View grow attributes={{ style: { minWidth: 0 } }}><MarkdownContent>{ans.body}</MarkdownContent></View>
+                <View direction="row" align="start" gap={2} shrink={false}>
+                  {ans.is_accepted && <Badge color="positive" variant="faded" icon={CheckCircle2}>Solution</Badge>}
+                  {isQuestionOwner && (
+                    <Button size="small" variant="outline" color={ans.is_accepted ? "neutral" : "positive"} icon={Check} onClick={() => handleAcceptAnswer(ans.id)}>
+                      {ans.is_accepted ? "Unmark" : "Accept Solution"}
+                    </Button>
+                  )}
+                </View>
+              </View>
+              <Divider />
+              <View direction="row" justify="space-between" align="center" wrap gap={3}>
+                <Text variant="caption-1" color="neutral-faded">Answered by <strong>{ans.user?.name || "Anonymous"}</strong></Text>
+                <VoteControl votes={ans.net_votes} current={ans.user_vote} onUp={() => handleVoteAnswer(ans.id, 1)} onDown={() => handleVoteAnswer(ans.id, -1)} label="answer" />
+                {currentUser.id && Number(currentUser.id) !== Number(ans.user_id) && (
+                  <Button variant="ghost" color="warning" size="small" icon={Flag} onClick={() => reportContent("answer", ans.id)}>Report</Button>
+                )}
+              </View>
+            </View>
+          </Card>
+        ))}
+      </View>
+
+      <Card padding={6}>
+        <form onSubmit={handlePostAnswer}>
+          <View gap={4}>
+            <Text as="h2" variant="featured-5" weight="bold">Your Answer</Text>
+            <TextArea
+              name="answer"
+              placeholder="Write your solution using Markdown..."
+              value={answerBody}
+              onChange={({ value }) => setAnswerBody(value)}
+              inputAttributes={{ rows: 5, required: true, "aria-label": "Your answer" }}
+            />
+            <Text variant="caption-1" color="neutral-faded">Markdown is supported. Raw HTML is ignored for safety.</Text>
+            <View direction="row"><Button type="submit" color="primary" icon={Send} loading={submitting}>Post Answer</Button></View>
+          </View>
+        </form>
+      </Card>
+    </Page>
   );
 }

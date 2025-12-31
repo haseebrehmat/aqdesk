@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import api from '../../api/axios'; // Adjust path to your custom api instance
+import { useParams, useLocation } from 'react-router-dom';
+import { Badge, Button, Card, Loader, Text, View } from 'reshaped';
+import { ArrowLeft } from 'lucide-react';
+import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
+import { Page, EmptyState } from '../../components/ui';
+import { routerLink } from '../../components/RouterLink';
 
 export default function EventShow() {
     const { id } = useParams();
@@ -53,48 +57,38 @@ export default function EventShow() {
         }
     };
 
-    if (loading) return <div className="p-6 text-center text-white">Loading...</div>;
-    if (!event) return <div className="p-6 text-center text-white">Event not found.</div>;
+    if (loading) return <View align="center" padding={12}><Loader /></View>;
+    if (!event) return <Page width="800px"><EmptyState title="Event not found." /></Page>;
 
     const isRegistered = event.attendees?.some(attendee => attendee.id === currentUser.id);
+    const backTo = location.pathname.startsWith('/dashboard/') ? '/dashboard/events' : '/events';
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8">
-            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 space-y-4">
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded bg-indigo-100 text-indigo-800 uppercase">
-                    {event.status}
-                </span>
-                <h1 className="text-3xl font-bold text-gray-900">{event.title}</h1>
-                <p className="text-sm text-gray-500">Hosted by: <span className="font-medium">{event.host?.name}</span></p>
-                <p className="text-gray-700 whitespace-pre-line">{event.description}</p>
-                <p className="text-sm text-gray-600">
-                    Attendance: {event.attendees_count || 0}{event.max_attendees ? ` / ${event.max_attendees}` : ' (unlimited)'}
-                </p>
-                
-                <div className="flex space-x-4 pt-4 border-t border-gray-100">
-                    {isRegistered ? (
-                        <>
-                            <button onClick={downloadCalendarInvite} className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
-                                Add to Calendar
-                            </button>
-                            <button onClick={handleUnregister} className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded-md hover:bg-gray-300">
-                                Unregister
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            onClick={handleRegister}
-                            disabled={event.is_full}
-                            className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        >
-                            {event.is_full ? 'Fully Booked' : 'Register'}
-                        </button>
-                    )}
-                </div>
-                <div>
-                    <Link to={location.pathname.startsWith('/dashboard/') ? '/dashboard/events' : '/events'} className="text-indigo-600 text-sm hover:underline">&larr; Back to Events</Link>
-                </div>
-            </div>
-        </div>
+        <Page width="800px">
+            <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink(backTo)}>Back to Events</Button></View>
+            <Card padding={6}>
+                <View gap={4}>
+                    <View direction="row"><Badge color="primary" variant="faded">{event.status}</Badge></View>
+                    <Text as="h1" variant="featured-2" weight="bold">{event.title}</Text>
+                    <Text color="neutral-faded">Hosted by {event.host?.name}</Text>
+                    <Text attributes={{ style: { whiteSpace: 'pre-line' } }}>{event.description}</Text>
+                    <Text variant="body-2" color="neutral-faded">
+                        Attendance: {event.attendees_count || 0}{event.max_attendees ? ` / ${event.max_attendees}` : ' (unlimited)'}
+                    </Text>
+                    <View direction="row" gap={2} borderTop paddingTop={4}>
+                        {isRegistered ? (
+                            <>
+                                <Button color="primary" onClick={downloadCalendarInvite}>Add to Calendar</Button>
+                                <Button variant="outline" onClick={handleUnregister}>Unregister</Button>
+                            </>
+                        ) : (
+                            <Button color="primary" onClick={handleRegister} disabled={event.is_full}>
+                                {event.is_full ? 'Fully Booked' : 'Register'}
+                            </Button>
+                        )}
+                    </View>
+                </View>
+            </Card>
+        </Page>
     );
 }

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
+import { Alert, Badge, Button, Card, Divider, Grid, Loader, Text, View } from 'reshaped';
 import opportunityService from '../../services/opportunityService';
-import { 
-  Briefcase, MapPin, Building2, UploadCloud, CheckCircle2, 
-  AlertCircle, ArrowLeft, Clock, ShieldCheck, FileText, Sparkles
-} from 'lucide-react';
+import { MapPin, Building2, UploadCloud, ArrowLeft, FileText } from 'lucide-react';
+import { Page, EmptyState } from '../../components/ui'
+import { formatDate } from '../../utils/format';
+import { routerLink } from '../../components/RouterLink';
 
 export default function OpportunityDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const location = useLocation();
   const opportunityBasePath = location.pathname.startsWith('/dashboard/')
     ? '/dashboard/opportunities'
@@ -97,200 +97,127 @@ export default function OpportunityDetail() {
     [1, 2, 3].includes(roleId)
   );
 
-  if (loading) return <div className="p-20 text-center text-slate-500 font-sans">Loading opportunity details...</div>;
-  if (error && !opportunity) return <div className="p-20 text-center text-rose-600 font-sans">{error}</div>;
-  if (!opportunity) return <div className="p-20 text-center text-slate-500 font-sans">Opportunity not found.</div>;
+  if (loading) return <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading opportunity details...</Text></View>;
+  if (error && !opportunity) return <Page width="800px"><Alert color="critical">{error}</Alert></Page>;
+  if (!opportunity) return <Page width="800px"><EmptyState title="Opportunity not found." /></Page>;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-8 font-sans">
-      <div className="max-w-5xl mx-auto space-y-8">
-        
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(opportunityBasePath)}
-          className="text-blue-600 font-semibold text-xs hover:underline flex items-center gap-1.5 bg-blue-50 border border-blue-200 px-3.5 py-2 rounded-xl transition w-fit shadow-xs"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Opportunities Board
-        </button>
+    <Page width="1100px">
+      <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink(opportunityBasePath)}>Back to Opportunities Board</Button></View>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left Column: Main Job Details & Description */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b border-slate-100">
-                <div className="space-y-2">
-                  <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-200 inline-block">
-                    {opportunity.job_type || 'Full-Time'}
-                  </span>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{opportunity.title}</h1>
-                  <p className="text-slate-600 text-sm font-semibold flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-slate-400" /> {opportunity.company_name}
-                  </p>
-                </div>
-                
-                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> {opportunity.location || 'Remote'}
-                </div>
-              </div>
+      <Grid columns={{ s: 1, l: '8fr 4fr' }} gap={6} align="start">
+        <Card padding={{ s: 5, m: 8 }}>
+          <View gap={6}>
+            <View direction={{ s: 'column', m: 'row' }} justify="space-between" gap={3}>
+              <View gap={2}>
+                <View direction="row"><Badge color="positive" variant="faded">{opportunity.job_type || 'Full-Time'}</Badge></View>
+                <Text as="h1" variant="featured-2" weight="bold">{opportunity.title}</Text>
+                <View direction="row" align="center" gap={1}><Building2 size={16} aria-hidden="true" /><Text weight="medium">{opportunity.company_name}</Text></View>
+              </View>
+              <View direction="row" align="start"><Badge variant="faded" icon={MapPin}>{opportunity.location || 'Remote'}</Badge></View>
+            </View>
 
-              {/* Quick Info Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date Posted</p>
-                  <p className="text-xs font-bold text-slate-800 mt-0.5 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-blue-600" /> {new Date(opportunity.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Listing Status</p>
-                  <p className="text-xs font-bold text-emerald-600 mt-0.5 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5" /> {opportunity.status || 'Published'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</p>
-                  <p className="text-xs font-bold text-purple-600 mt-0.5 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> Software & Tech
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Application Deadline</p>
-                  <p className="text-xs font-bold text-slate-800 mt-0.5">
-                    {opportunity.application_deadline
-                      ? new Date(opportunity.application_deadline).toLocaleString()
-                      : 'Open until filled'}
-                  </p>
-                </div>
-              </div>
+            <Grid columns={{ s: 2, m: 4 }} gap={4}>
+              {[
+                ['Date Posted', formatDate(opportunity.created_at)],
+                ['Listing Status', opportunity.status || 'Published'],
+                ['Category', 'Software & Tech'],
+                ['Application Deadline', opportunity.application_deadline ? formatDate(opportunity.application_deadline, { dateStyle: 'medium', timeStyle: 'short' }) : 'Open until filled'],
+              ].map(([label, value]) => (
+                <View key={label} gap={1}>
+                  <Text variant="caption-1" color="neutral-faded">{label}</Text>
+                  <Text variant="body-2" weight="medium">{value}</Text>
+                </View>
+              ))}
+            </Grid>
+            <Divider />
 
-              {/* Description Section */}
-              <div className="space-y-3">
-                <h3 className="text-base font-bold text-slate-900">Job Description & Requirements</h3>
-                <div className="text-slate-600 text-xs sm:text-sm whitespace-pre-line leading-relaxed bg-white border border-slate-100 rounded-2xl p-4">
-                  {opportunity.description}
-                </div>
-              </div>
+            <View gap={2}>
+              <Text as="h2" variant="featured-5" weight="bold">Job Description &amp; Requirements</Text>
+              <Text color="neutral-faded" attributes={{ style: { whiteSpace: 'pre-line' } }}>{opportunity.description}</Text>
+            </View>
+            <Divider />
+            <View direction="row" justify="space-between">
+              <Text variant="caption-1" color="neutral-faded">Opportunity ID: #{opportunity.id}</Text>
+              <Text variant="caption-1" color="neutral-faded">Verified Talent Network</Text>
+            </View>
+          </View>
+        </Card>
 
-              <div className="text-xs text-slate-400 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span>Opportunity ID: #{opportunity.id}</span>
-                <span>Verified AQDesk Talent Network</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Application Form or Employer Management */}
-          <div className="lg:col-span-4 space-y-6">
-            {isEmployer ? (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4 text-center">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
-                  <Briefcase className="w-6 h-6" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900">Employer Management View</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+        <View gap={5}>
+          {isEmployer ? (
+            <Card padding={6}>
+              <View gap={3} align="center" textAlign="center">
+                <Text as="h2" variant="featured-5" weight="bold">Employer Management View</Text>
+                <Text variant="body-2" color="neutral-faded">
                   You are signed in with employer/administrator credentials. Candidate applications are managed through the dashboard.
-                </p>
-                <Link
-                  to="/dashboard/applications"
-                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-md shadow-blue-600/20"
-                >
-                  Manage Candidate Pipeline
-                </Link>
-              </div>
-            ) : !opportunity.accepts_applications ? (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs text-center">
-                <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-slate-900">Applications Closed</h3>
-                <p className="text-xs text-slate-500 mt-2">This listing is no longer accepting applications.</p>
-              </div>
-            ) : (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 sticky top-20">
-                <div className="space-y-1">
-                  <h3 className="text-lg font-extrabold text-slate-900">Apply for Position</h3>
-                  <p className="text-xs text-slate-500">Submit your professional PDF resume for review.</p>
-                </div>
-                
-                {message && (
-                  <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-2xl flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>{message}</span>
-                  </div>
-                )}
-                {error && (
-                  <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl flex items-start gap-2.5">
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleApply} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Upload Resume Document
-                    </label>
-                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-slate-50 transition bg-slate-50/50">
+                </Text>
+                <Button color="primary" fullWidth {...routerLink('/dashboard/applications')}>Manage Candidate Pipeline</Button>
+              </View>
+            </Card>
+          ) : !opportunity.accepts_applications ? (
+            <Card padding={6}>
+              <View gap={2} align="center" textAlign="center">
+                <Text as="h2" variant="featured-5" weight="bold">Applications Closed</Text>
+                <Text variant="body-2" color="neutral-faded">This listing is no longer accepting applications.</Text>
+              </View>
+            </Card>
+          ) : (
+            <Card padding={6}>
+              <View gap={4}>
+                <View gap={1}>
+                  <Text as="h2" variant="featured-5" weight="bold">Apply for Position</Text>
+                  <Text variant="body-2" color="neutral-faded">Submit your professional PDF resume for review.</Text>
+                </View>
+                {message && <Alert color="positive" attributes={{ role: 'status' }}>{message}</Alert>}
+                {error && <Alert color="critical" attributes={{ role: 'alert' }}>{error}</Alert>}
+                <form onSubmit={handleApply}>
+                  <View gap={4}>
+                    <View gap={2}>
+                      <Text as="label" variant="body-2" weight="medium" attributes={{ htmlFor: 'resume-upload' }}>Upload Resume Document</Text>
                       <input
+                        id="resume-upload"
                         type="file"
                         accept="application/pdf,.pdf"
                         onChange={(e) => setResume(e.target.files[0])}
-                        className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                       />
-                      <p className="text-[10px] text-slate-400 mt-2">PDF only (Max 2MB)</p>
-                    </div>
-                    {resume && (
-                      <p className="text-xs font-semibold text-blue-600 flex items-center gap-1 mt-1">
-                        <FileText className="w-3.5 h-3.5" /> Selected: {resume.name}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-md shadow-blue-600/20"
-                  >
-                    <UploadCloud className="w-4 h-4" />
-                    {submitting ? 'Transmitting Application...' : 'Submit Application Now'}
-                  </button>
+                      <Text variant="caption-1" color="neutral-faded">PDF only (Max 2MB)</Text>
+                      {resume && <View direction="row" align="center" gap={1}><FileText size={14} aria-hidden="true" /><Text variant="caption-1" color="primary">Selected: {resume.name}</Text></View>}
+                    </View>
+                    <Button type="submit" color="primary" fullWidth icon={UploadCloud} loading={submitting}>Submit Application</Button>
+                  </View>
                 </form>
+                <Divider />
+                <View gap={1}>
+                  <Text variant="caption-1" weight="bold">Application Guidelines</Text>
+                  <Text variant="caption-1" color="neutral-faded">• Ensure your contact email is up to date in your profile settings.</Text>
+                  <Text variant="caption-1" color="neutral-faded">• Applications are reviewed directly by the employer.</Text>
+                </View>
+              </View>
+            </Card>
+          )}
 
-                <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400 space-y-1.5">
-                  <p className="font-semibold text-slate-600">Application Guidelines:</p>
-                  <p>• Ensure your contact email is up to date in your profile settings.</p>
-                  <p>• Applications are reviewed directly by the employer.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Other Available Jobs Card */}
-            {otherOpportunities.length > 0 && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
-                <h3 className="text-sm font-extrabold text-slate-900">Other Open Roles</h3>
-                <div className="space-y-3">
-                  {otherOpportunities.map((job) => (
-                    <Link
-                      key={job.id}
-                      to={`${opportunityBasePath}/${job.id}`}
-                      className="block p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-300 transition space-y-1"
-                    >
-                      <div className="flex justify-between items-center text-[10px] font-bold text-emerald-700">
-                        <span>{job.job_type}</span>
-                        <span className="text-slate-400 font-normal">{job.location || 'Remote'}</span>
-                      </div>
-                      <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{job.title}</h4>
-                      <p className="text-[11px] text-slate-500 font-medium">{job.company_name}</p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          </div>
-
-        </div>
-
-      </div>
-    </div>
+          {otherOpportunities.length > 0 && (
+            <Card padding={6}>
+              <View gap={3}>
+                <Text as="h2" variant="body-2" weight="bold">Other Open Roles</Text>
+                {otherOpportunities.map((job) => (
+                  <Card key={job.id} padding={3} {...routerLink(`${opportunityBasePath}/${job.id}`)}>
+                    <View gap={1}>
+                      <View direction="row" justify="space-between">
+                        <Text variant="caption-1" color="positive" weight="bold">{job.job_type}</Text>
+                        <Text variant="caption-1" color="neutral-faded">{job.location || 'Remote'}</Text>
+                      </View>
+                      <Text variant="body-2" weight="bold" maxLines={1}>{job.title}</Text>
+                      <Text variant="caption-1" color="neutral-faded">{job.company_name}</Text>
+                    </View>
+                  </Card>
+                ))}
+              </View>
+            </Card>
+          )}
+        </View>
+      </Grid>
+    </Page>
   );
 }

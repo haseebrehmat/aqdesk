@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Alert, Button, Card, View } from 'reshaped';
 import opportunityService from '../../services/opportunityService';
+import { Page, PageHeader, FormField } from '../../components/ui';
+import { routerLink } from '../../components/RouterLink';
 
 export default function OpportunityForm() {
   const navigate = useNavigate();
@@ -14,17 +17,12 @@ export default function OpportunityForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const set = (key) => (value) => setFormData((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       await opportunityService.createOpportunity(formData);
       navigate('/dashboard/opportunities');
@@ -36,110 +34,38 @@ export default function OpportunityForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-white dark:text-white mb-6">Post a New Opportunity</h1>
-
-      {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">{error}</div>}
-
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-8 shadow-sm space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>
-          <input
-            type="text"
-            name="title"
-            required
-            value={formData.title}
-            onChange={handleChange}
-            className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="e.g. Senior Full Stack Developer"
-          />
-        </div>
-
-        <div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
-            <input
-              type="text"
-              name="company_name"
-              required
-              value={formData.company_name}
-              onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="e.g. Acme Corp"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="e.g. Lahore / Remote"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Application Deadline</label>
-            <input
-              type="datetime-local"
-              name="application_deadline"
-              value={formData.application_deadline}
-              onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Type</label>
-            <select
-              name="job_type"
-              value={formData.job_type}
-              onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="Full-Time">Full-Time</option>
-              <option value="Internship">Internship</option>
-              <option value="Contract">Contract</option>
-            </select>
-          </div>
-        </div>
-
-        <p className="text-sm text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
-          New listings are reviewed by an administrator before they become public.
-        </p>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-          <textarea
-            name="description"
-            rows="5"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full border rounded-md px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="Detailed requirements and responsibilities..."
-          ></textarea>
-        </div>
-
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard/opportunities')}
-            className="px-4 py-2 border rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition disabled:opacity-50"
-          >
-            {loading ? 'Posting...' : 'Post Opportunity'}
-          </button>
-        </div>
-      </form>
-    </div>
+    <Page width="800px">
+      <PageHeader title="Post a New Opportunity" />
+      {error && <Alert color="critical" attributes={{ role: 'alert' }}>{error}</Alert>}
+      <Card padding={6}>
+        <form onSubmit={handleSubmit}>
+          <View gap={4}>
+            <FormField label="Job Title" name="title" required placeholder="e.g. Senior Full Stack Developer" value={formData.title} onChange={set('title')} />
+            <View direction={{ s: 'column', m: 'row' }} gap={4}>
+              <View grow><FormField label="Company Name" name="company_name" required placeholder="e.g. Acme Corp" value={formData.company_name} onChange={set('company_name')} /></View>
+              <View grow><FormField label="Location" name="location" placeholder="e.g. Lahore / Remote" value={formData.location} onChange={set('location')} /></View>
+            </View>
+            <View direction={{ s: 'column', m: 'row' }} gap={4}>
+              <View grow><FormField label="Application Deadline" name="application_deadline" type="datetime-local" value={formData.application_deadline} onChange={set('application_deadline')} /></View>
+              <View grow>
+                <FormField
+                  label="Job Type"
+                  name="job_type"
+                  value={formData.job_type}
+                  onChange={set('job_type')}
+                  options={['Full-Time', 'Internship', 'Contract'].map((v) => ({ value: v, label: v }))}
+                />
+              </View>
+            </View>
+            <Alert color="warning">New listings are reviewed by an administrator before they become public.</Alert>
+            <FormField label="Description" name="description" multiline rows={6} placeholder="Detailed requirements and responsibilities..." value={formData.description} onChange={set('description')} />
+            <View direction="row" justify="end" gap={2}>
+              <Button variant="outline" {...routerLink('/dashboard/opportunities')}>Cancel</Button>
+              <Button type="submit" color="primary" loading={loading}>Post Opportunity</Button>
+            </View>
+          </View>
+        </form>
+      </Card>
+    </Page>
   );
 }

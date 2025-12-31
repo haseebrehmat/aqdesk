@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Button, Card, View } from 'reshaped';
 import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
-import { Loader2 } from 'lucide-react';
+import { Page, PageHeader, FormField } from '../../components/ui';
+import { routerLink } from '../../components/RouterLink';
 
 export default function EventCreate() {
     const navigate = useNavigate();
@@ -17,6 +19,7 @@ export default function EventCreate() {
         max_attendees: '',
     });
     const [errors, setErrors] = useState({});
+    const set = (key) => (value) => setForm((prev) => ({ ...prev, [key]: value }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -40,94 +43,26 @@ export default function EventCreate() {
     };
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-12 font-sans text-white">
-            <h1 className="text-2xl font-bold mb-6">Create Event</h1>
-            <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                <div>
-                    <label htmlFor="event-title" className="block text-xs font-medium text-slate-300 mb-1">Title</label>
-                    <input
-                        id="event-title"
-                        type="text"
-                        value={form.title}
-                        onChange={e => setForm({ ...form, title: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.title && <span className="text-red-400 text-xs mt-1 block">{errors.title[0]}</span>}
-                </div>
-
-                <div>
-                    <label htmlFor="event-description" className="block text-xs font-medium text-slate-300 mb-1">Description</label>
-                    <textarea
-                        id="event-description"
-                        rows={4}
-                        value={form.description}
-                        onChange={e => setForm({ ...form, description: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="event-url" className="block text-xs font-medium text-slate-300 mb-1">Webinar URL</label>
-                    <input
-                        id="event-url"
-                        type="url"
-                        value={form.webinar_url}
-                        onChange={e => setForm({ ...form, webinar_url: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.webinar_url && <span className="text-red-400 text-xs mt-1 block">{errors.webinar_url[0]}</span>}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="event-start" className="block text-xs font-medium text-slate-300 mb-1">Scheduled At</label>
-                        <input
-                            id="event-start"
-                            type="datetime-local"
-                            value={form.scheduled_at}
-                            onChange={e => setForm({ ...form, scheduled_at: e.target.value })}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                        />
-                        {errors.scheduled_at && <span className="text-red-400 text-xs mt-1 block">{errors.scheduled_at[0]}</span>}
-                    </div>
-                    <div>
-                        <label htmlFor="event-end" className="block text-xs font-medium text-slate-300 mb-1">Ends At</label>
-                        <input
-                            id="event-end"
-                            type="datetime-local"
-                            value={form.ends_at}
-                            onChange={e => setForm({ ...form, ends_at: e.target.value })}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                        />
-                        {errors.ends_at && <span className="text-red-400 text-xs mt-1 block">{errors.ends_at[0]}</span>}
-                    </div>
-                </div>
-
-                <div>
-                    <label htmlFor="event-capacity" className="block text-xs font-medium text-slate-300 mb-1">Maximum Attendees</label>
-                    <input
-                        id="event-capacity"
-                        type="number"
-                        min="1"
-                        value={form.max_attendees}
-                        onChange={e => setForm({ ...form, max_attendees: e.target.value })}
-                        placeholder="Leave blank for unlimited"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.max_attendees && <span className="text-red-400 text-xs mt-1 block">{errors.max_attendees[0]}</span>}
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">
-                    <Link to="/dashboard/events" className="px-4 py-2.5 border border-slate-800 rounded-xl text-slate-300 text-sm hover:bg-slate-800 transition">Cancel</Link>
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition flex items-center justify-center space-x-2 disabled:opacity-50"
-                    >
-                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Save Event</span>}
-                    </button>
-                </div>
-            </form>
-        </div>
+        <Page width="720px">
+            <PageHeader title="Create Event" description="Schedule a webinar or workshop for the community." />
+            <Card padding={6}>
+                <form onSubmit={handleSubmit}>
+                    <View gap={4}>
+                        <FormField label="Title" name="title" value={form.title} onChange={set('title')} error={errors.title} />
+                        <FormField label="Description" name="description" multiline value={form.description} onChange={set('description')} error={errors.description} />
+                        <FormField label="Webinar URL" name="webinar_url" type="url" value={form.webinar_url} onChange={set('webinar_url')} error={errors.webinar_url} />
+                        <View direction={{ s: 'column', m: 'row' }} gap={4}>
+                            <View grow><FormField label="Scheduled At" name="scheduled_at" type="datetime-local" value={form.scheduled_at} onChange={set('scheduled_at')} error={errors.scheduled_at} /></View>
+                            <View grow><FormField label="Ends At" name="ends_at" type="datetime-local" value={form.ends_at} onChange={set('ends_at')} error={errors.ends_at} /></View>
+                        </View>
+                        <FormField label="Maximum Attendees" name="max_attendees" type="number" min="1" placeholder="Leave blank for unlimited" value={form.max_attendees} onChange={set('max_attendees')} error={errors.max_attendees} />
+                        <View direction="row" justify="end" gap={2} borderTop paddingTop={4}>
+                            <Button variant="outline" {...routerLink('/dashboard/events')}>Cancel</Button>
+                            <Button type="submit" color="primary" loading={submitting}>Save Event</Button>
+                        </View>
+                    </View>
+                </form>
+            </Card>
+        </Page>
     );
 }

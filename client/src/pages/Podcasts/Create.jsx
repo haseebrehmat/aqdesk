@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Button, Card, View } from 'reshaped';
 import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
-import { Loader2 } from 'lucide-react';
+import { Page, PageHeader, FormField } from '../../components/ui';
+import { routerLink } from '../../components/RouterLink';
 
 export default function PodcastCreate() {
     const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function PodcastCreate() {
         cover_image_url: '',
         duration_in_minutes: '',
     });
+    const set = (key) => (value) => setForm((prev) => ({ ...prev, [key]: value }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,75 +42,23 @@ export default function PodcastCreate() {
     };
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-12 font-sans text-white">
-            <h1 className="text-2xl font-bold mb-6">Publish Podcast Episode</h1>
-            <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Title</label>
-                    <input
-                        type="text"
-                        value={form.title}
-                        onChange={e => setForm({ ...form, title: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.title && <span className="text-red-400 text-xs mt-1 block">{errors.title[0]}</span>}
-                </div>
-
-                <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Description</label>
-                    <textarea
-                        rows={4}
-                        value={form.description}
-                        onChange={e => setForm({ ...form, description: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.description && <span className="text-red-400 text-xs mt-1 block">{errors.description[0]}</span>}
-                </div>
-
-                <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Media URL</label>
-                    <input
-                        type="url"
-                        value={form.media_url}
-                        onChange={e => setForm({ ...form, media_url: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.media_url && <span className="text-red-400 text-xs mt-1 block">{errors.media_url[0]}</span>}
-                </div>
-
-                <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Cover Image URL</label>
-                    <input
-                        type="url"
-                        value={form.cover_image_url}
-                        onChange={e => setForm({ ...form, cover_image_url: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.cover_image_url && <span className="text-red-400 text-xs mt-1 block">{errors.cover_image_url[0]}</span>}
-                </div>
-
-                <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Duration (minutes)</label>
-                    <input
-                        type="number"
-                        value={form.duration_in_minutes}
-                        onChange={e => setForm({ ...form, duration_in_minutes: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                    {errors.duration_in_minutes && <span className="text-red-400 text-xs mt-1 block">{errors.duration_in_minutes[0]}</span>}
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">
-                    <Link to="/dashboard/podcasts" className="px-4 py-2.5 border border-slate-800 rounded-xl text-slate-300 text-sm hover:bg-slate-800 transition">Cancel</Link>
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition flex items-center justify-center space-x-2 disabled:opacity-50"
-                    >
-                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Publish</span>}
-                    </button>
-                </div>
-            </form>
-        </div>
+        <Page width="720px">
+            <PageHeader title="Publish Podcast" description="Share a new episode with the community." />
+            <Card padding={6}>
+                <form onSubmit={handleSubmit}>
+                    <View gap={4}>
+                        <FormField label="Title" name="title" value={form.title} onChange={set('title')} error={errors.title} />
+                        <FormField label="Description" name="description" multiline value={form.description} onChange={set('description')} error={errors.description} />
+                        <FormField label="Media URL" name="media_url" type="url" value={form.media_url} onChange={set('media_url')} error={errors.media_url} />
+                        <FormField label="Cover Image URL" name="cover_image_url" type="url" value={form.cover_image_url} onChange={set('cover_image_url')} error={errors.cover_image_url} />
+                        <FormField label="Duration (minutes)" name="duration_in_minutes" type="number" value={form.duration_in_minutes} onChange={set('duration_in_minutes')} error={errors.duration_in_minutes} />
+                        <View direction="row" justify="end" gap={2} borderTop paddingTop={4}>
+                            <Button variant="outline" {...routerLink('/dashboard/podcasts')}>Cancel</Button>
+                            <Button type="submit" color="primary" loading={submitting}>Publish</Button>
+                        </View>
+                    </View>
+                </form>
+            </Card>
+        </Page>
     );
 }

@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
-// import Navbar from '../components/Navbar';
-import api from '../api/axios';
+import { Alert, Badge, Button, Card, Grid, Text, View } from 'reshaped';
 import { UserCheck, Clock } from 'lucide-react';
+import api from '../api/axios';
+import { Page, PageHeader, FormField, EmptyState } from '../components/ui'
+import { formatDate } from '../utils/format';
+
+const dateTime = { dateStyle: 'medium', timeStyle: 'short' };
 
 export default function Consulting() {
   const [consultations, setConsultations] = useState([]);
@@ -45,10 +49,7 @@ export default function Consulting() {
   const handleBookConsultation = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/consultations', {
-        expert_id: expertId,
-        booking_slot: bookingSlot
-      });
+      await api.post('/consultations', { expert_id: expertId, booking_slot: bookingSlot });
       setStatusMsg('Consultation request submitted successfully!');
       fetchConsultations();
     } catch (err) {
@@ -64,10 +65,7 @@ export default function Consulting() {
   const addAvailability = async (event) => {
     event.preventDefault();
     try {
-      await api.post('/consultations/availability', {
-        starts_at: availabilityStart,
-        ends_at: availabilityEnd,
-      });
+      await api.post('/consultations/availability', { starts_at: availabilityStart, ends_at: availabilityEnd });
       setAvailabilityStart('');
       setAvailabilityEnd('');
       setStatusMsg('Availability added successfully.');
@@ -90,132 +88,76 @@ export default function Consulting() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* <Navbar /> */}
+    <Page>
+      <PageHeader title="Expert Consulting & Advisory" description="Book advisory sessions with verified software engineering consultants." />
+      {statusMsg && <Alert color="primary" attributes={{ role: 'status' }}>{statusMsg}</Alert>}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Expert Consulting & Advisory
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Book advisory sessions with verified software engineering consultants.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Booking Request Form */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-fit">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center space-x-2">
-              <UserCheck className="w-5 h-5 text-blue-400" />
-              <span>Book Consultation</span>
-            </h2>
-
-            {statusMsg && (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 p-3 rounded-xl text-xs mb-4">
-                {statusMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleBookConsultation} className="space-y-4">
-              <div>
-                <label htmlFor="consultation-expert" className="block text-xs font-medium text-slate-300 mb-1">
-                  Select Expert
-                </label>
-                <select
-                  id="consultation-expert"
-                  required
-                  value={expertId}
-                  onChange={(e) => setExpertId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                >
-                  {experts.map((expert) => <option key={expert.id} value={expert.id}>{expert.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="consultation-slot" className="block text-xs font-medium text-slate-300 mb-1">
-                  Available Date & Time
-                </label>
-                <select
-                  id="consultation-slot"
-                  required
+      <Grid columns={{ s: 1, l: '1fr 1fr 2fr' }} gap={6} align="start">
+        <Card padding={6}>
+          <View gap={4}>
+            <View direction="row" align="center" gap={2}><UserCheck size={20} aria-hidden="true" /><Text as="h2" variant="featured-5" weight="bold">Book Consultation</Text></View>
+            <form onSubmit={handleBookConsultation}>
+              <View gap={4}>
+                <FormField label="Select Expert" name="expert" value={expertId} onChange={setExpertId} options={experts.map((e) => ({ value: String(e.id), label: e.name }))} />
+                <FormField
+                  label="Available Date & Time"
+                  name="slot"
                   value={bookingSlot}
-                  onChange={(e) => setBookingSlot(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select an open time</option>
-                  {availability.map((slot) => (
-                    <option key={slot.id} value={slot.starts_at}>
-                      {new Date(slot.starts_at).toLocaleString()} - {new Date(slot.ends_at).toLocaleTimeString()}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-xl text-sm transition"
-              >
-                Schedule Session
-              </button>
+                  onChange={setBookingSlot}
+                  options={[
+                    { value: '', label: 'Select an open time' },
+                    ...availability.map((slot) => ({ value: slot.starts_at, label: `${formatDate(slot.starts_at, dateTime)} - ${formatDate(slot.ends_at, { timeStyle: 'short' })}` })),
+                  ]}
+                />
+                <Button type="submit" color="primary" fullWidth disabled={!bookingSlot}>Schedule Session</Button>
+              </View>
             </form>
-          </div>
+          </View>
+        </Card>
 
-          {isExpert && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-fit">
-              <h2 className="text-lg font-bold text-white mb-4">Publish Availability</h2>
-              <form onSubmit={addAvailability} className="space-y-4">
-                <div>
-                  <label htmlFor="availability-start" className="block text-xs font-medium text-slate-300 mb-1">Starts</label>
-                  <input id="availability-start" type="datetime-local" required value={availabilityStart} onChange={(event) => setAvailabilityStart(event.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white" />
-                </div>
-                <div>
-                  <label htmlFor="availability-end" className="block text-xs font-medium text-slate-300 mb-1">Ends</label>
-                  <input id="availability-end" type="datetime-local" required value={availabilityEnd} onChange={(event) => setAvailabilityEnd(event.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white" />
-                </div>
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl text-sm">Add Open Time</button>
+        {isExpert ? (
+          <Card padding={6}>
+            <View gap={4}>
+              <Text as="h2" variant="featured-5" weight="bold">Publish Availability</Text>
+              <form onSubmit={addAvailability}>
+                <View gap={4}>
+                  <FormField label="Starts" name="availability_start" type="datetime-local" required value={availabilityStart} onChange={setAvailabilityStart} />
+                  <FormField label="Ends" name="availability_end" type="datetime-local" required value={availabilityEnd} onChange={setAvailabilityEnd} />
+                  <Button type="submit" color="primary" variant="outline" fullWidth>Add Open Time</Button>
+                </View>
               </form>
-            </div>
-          )}
+            </View>
+          </Card>
+        ) : <div />}
 
-          {/* Bookings History */}
-          <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-lg font-bold text-white mb-2">My Scheduled Consultations</h2>
-            {consultations.length === 0 ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-                No consultations requested yet.
-              </div>
-            ) : (
-              consultations.map((item) => (
-                <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center">
-                  <div>
-                    <div className="flex items-center space-x-2 text-sm font-semibold text-white">
-                      <Clock className="w-4 h-4 text-blue-400" />
-                      <span>{new Date(item.booking_slot).toLocaleString()}</span>
-                    </div>
-                    <span className="text-xs text-slate-400 mt-1 block">
-                      Expert: {item.expert?.name || item.expert_id} · Client: {item.client?.name || item.client_id}
-                    </span>
-                    {item.proposal && <p className="text-xs text-slate-300 mt-2">Proposal: {item.proposal.terms} (${item.proposal.budget})</p>}
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-xs font-medium">{item.status}</span>
-                    {Number(item.expert_id) === Number(currentUser.id) && (
-                      <div className="flex flex-wrap justify-end gap-2">
-                        {['Approved', 'Active', 'Completed', 'Rejected'].map((status) => (
-                          <button key={status} onClick={() => updateStatus(item.id, status)} className="text-xs px-2 py-1 rounded bg-slate-800 hover:bg-slate-700">{status}</button>
-                        ))}
-                        <button onClick={() => saveProposal(item.id)} className="text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-500">Proposal</button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
+        <View gap={4}>
+          <Text as="h2" variant="featured-5" weight="bold">My Scheduled Consultations</Text>
+          {consultations.length === 0 ? (
+            <EmptyState title="No consultations requested yet." />
+          ) : consultations.map((item) => (
+            <Card key={item.id} padding={5}>
+              <View direction={{ s: 'column', m: 'row' }} justify="space-between" gap={4}>
+                <View gap={1}>
+                  <View direction="row" align="center" gap={2}><Clock size={16} aria-hidden="true" /><Text weight="bold">{formatDate(item.booking_slot, dateTime)}</Text></View>
+                  <Text variant="caption-1" color="neutral-faded">Expert: {item.expert?.name || item.expert_id} · Client: {item.client?.name || item.client_id}</Text>
+                  {item.proposal && <Text variant="caption-1">Proposal: {item.proposal.terms} (${item.proposal.budget})</Text>}
+                </View>
+                <View align={{ s: 'start', m: 'end' }} gap={2}>
+                  <Badge color="warning" variant="faded">{item.status}</Badge>
+                  {Number(item.expert_id) === Number(currentUser.id) && (
+                    <View direction="row" gap={1} wrap>
+                      {['Approved', 'Active', 'Completed', 'Rejected'].map((status) => (
+                        <Button key={status} size="small" variant="outline" onClick={() => updateStatus(item.id, status)}>{status}</Button>
+                      ))}
+                      <Button size="small" color="primary" onClick={() => saveProposal(item.id)}>Proposal</Button>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </Card>
+          ))}
+        </View>
+      </Grid>
+    </Page>
   );
 }

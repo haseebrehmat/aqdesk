@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import api from '../../api/axios'; // Adjust path to your custom api instance
+import { useParams, useLocation } from 'react-router-dom';
+import { Badge, Button, Card, Divider, Image, Loader, Text, View } from 'reshaped';
+import { ArrowLeft } from 'lucide-react';
+import api from '../../api/axios';
+import { Page, EmptyState } from '../../components/ui';
+import { routerLink } from '../../components/RouterLink';
 
 export default function PodcastShow() {
     const { id } = useParams();
@@ -15,52 +19,41 @@ export default function PodcastShow() {
             .finally(() => setLoading(false));
     }, [id]);
 
-    if (loading) return <div className="p-6 text-center text-white">Loading podcast...</div>;
-    if (!podcast) return <div className="p-6 text-center text-white">Podcast episode not found.</div>;
+    if (loading) return <View align="center" padding={12} gap={2}><Loader /><Text color="neutral-faded">Loading podcast...</Text></View>;
+    if (!podcast) return <Page width="800px"><EmptyState title="Podcast episode not found." /></Page>;
+
+    const backTo = location.pathname.startsWith('/dashboard/') ? '/dashboard/podcasts' : '/podcasts';
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8">
-            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 space-y-6">
-                <div className="flex items-center space-x-4">
-                    <img
-                        src={podcast.cover_image_url || 'https://via.placeholder.com/150'}
-                        alt={podcast.title}
-                        className="w-24 h-24 rounded-lg object-cover shadow-sm"
-                    />
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">{podcast.title}</h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Expert: <span className="font-medium text-gray-800">{podcast.expert?.name}</span>
-                        </p>
-                        {podcast.duration_in_minutes && (
-                            <span className="inline-block mt-2 text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-                                {podcast.duration_in_minutes} minutes
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Episode Audio</h3>
-                    <audio controls className="w-full">
-                        <source src={podcast.media_url} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-
-                <div className="border-t border-gray-100 pt-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-1">Description</h3>
-                    <p className="text-gray-700 whitespace-pre-line text-sm leading-relaxed">
-                        {podcast.description || 'No description provided for this episode.'}
-                    </p>
-                </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                    <Link to={location.pathname.startsWith('/dashboard/') ? '/dashboard/podcasts' : '/podcasts'} className="text-indigo-600 text-sm hover:underline">
-                        &larr; Back to Podcasts
-                    </Link>
-                </div>
-            </div>
-        </div>
+        <Page width="800px">
+            <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink(backTo)}>Back to Podcasts</Button></View>
+            <Card padding={6}>
+                <View gap={5}>
+                    <View direction="row" align="center" gap={4}>
+                        {podcast.cover_image_url && <Image src={podcast.cover_image_url} alt={podcast.title} width="96px" height="96px" borderRadius="large" />}
+                        <View gap={1}>
+                            <Text as="h1" variant="featured-2" weight="bold">{podcast.title}</Text>
+                            <Text color="neutral-faded">Expert: {podcast.expert?.name}</Text>
+                            {podcast.duration_in_minutes && <View direction="row"><Badge variant="faded">{podcast.duration_in_minutes} minutes</Badge></View>}
+                        </View>
+                    </View>
+                    <Divider />
+                    <View gap={2}>
+                        <Text as="h2" variant="body-2" weight="bold">Episode Audio</Text>
+                        <audio controls style={{ width: '100%' }}>
+                            <source src={podcast.media_url} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                        </audio>
+                    </View>
+                    <Divider />
+                    <View gap={2}>
+                        <Text as="h2" variant="body-2" weight="bold">Description</Text>
+                        <Text color="neutral-faded" attributes={{ style: { whiteSpace: 'pre-line' } }}>
+                            {podcast.description || 'No description provided for this episode.'}
+                        </Text>
+                    </View>
+                </View>
+            </Card>
+        </Page>
     );
 }
