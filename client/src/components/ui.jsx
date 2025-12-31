@@ -1,5 +1,5 @@
 import { Badge, Card, Container, FormControl, Select, Text, TextArea, TextField, View } from 'reshaped';
-import { routerLink } from './RouterLink';
+import { Link } from 'react-router-dom';
 
 // Page width wrapper used by every route.
 export function Page({ children, width = '1200px', paddingBlock = 8 }) {
@@ -51,9 +51,11 @@ export function EmptyState({ title, description, action }) {
 // A Card that navigates with the router.
 export function LinkCard({ to, children, padding = 5 }) {
   return (
-    <Card padding={padding} height="100%" {...routerLink(to)}>
-      {children}
-    </Card>
+    <Link to={to} style={{ color: 'inherit', display: 'block', height: '100%', textDecoration: 'none' }}>
+      <Card padding={padding} height="100%">
+        {children}
+      </Card>
+    </Link>
   );
 }
 

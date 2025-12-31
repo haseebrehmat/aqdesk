@@ -34,7 +34,10 @@ const question = {
   ],
 };
 
+let publicVoteCount;
+
 test.beforeEach(async ({ page }) => {
+  publicVoteCount = question.net_votes;
   await page.addInitScript(({ user }) => {
     localStorage.setItem('token', 'qa-test-token');
     localStorage.setItem('user', JSON.stringify(user));
@@ -45,15 +48,16 @@ test.beforeEach(async ({ page }) => {
     const url = new URL(request.url());
 
     if (request.method() === 'GET' && url.pathname === '/api/questions') {
-      await route.fulfill({ json: { data: [question] } });
+      await route.fulfill({ json: { data: [{ ...question, net_votes: publicVoteCount }] } });
       return;
     }
     if (request.method() === 'GET' && url.pathname === '/api/questions/api-testing') {
-      await route.fulfill({ json: question });
+      await route.fulfill({ json: { ...question, net_votes: publicVoteCount } });
       return;
     }
     if (request.method() === 'POST' && url.pathname === '/api/questions/api-testing/vote') {
-      await route.fulfill({ json: { net_votes: 4, user_vote: 1 } });
+      publicVoteCount = 4;
+      await route.fulfill({ json: { net_votes: publicVoteCount, user_vote: 1 } });
       return;
     }
     if (request.method() === 'POST' && url.pathname === '/api/answers/20/vote') {
@@ -80,14 +84,20 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('public Q&A exposes counts, answers, voting, and answer posting', async ({ page }) => {
+  await page.goto('/');
+  const homeDiscussion = page.getByRole('link', { name: /API Testing/ }).last();
+  await expect(homeDiscussion).toHaveAttribute('href', '/questions/api-testing');
+  await homeDiscussion.click();
+  await expect(page).toHaveURL(/\/questions\/api-testing$/);
+
   await page.goto('/questions');
 
   await expect(page.getByText('3', { exact: true })).toBeVisible();
   const answersLink = page.getByRole('link', { name: '1 Answers' });
-  await expect(answersLink).toHaveAttribute('href', '/questions/api-testing#answers');
+  await expect(answersLink).toHaveAttribute('href', '/questions/api-testing');
   await answersLink.click();
 
-  await expect(page).toHaveURL(/\/questions\/api-testing#answers$/);
+  await expect(page).toHaveURL(/\/questions\/api-testing$/);
   await expect(page.getByText('Use an integration test against the public response.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Upvote question' }).click();
@@ -100,4 +110,9 @@ test('public Q&A exposes counts, answers, voting, and answer posting', async ({ 
   await page.getByRole('button', { name: 'Post Answer' }).click();
   await expect(page.getByText('This answer was posted from the public detail page.')).toBeVisible();
   await expect(page.getByRole('heading', { name: '2 Answers' })).toBeVisible();
+
+  await page.goto('/questions');
+  await expect(page.getByText('4', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: /API Testing/ }).click();
+  await expect(page).toHaveURL(/\/questions\/api-testing$/);
 });

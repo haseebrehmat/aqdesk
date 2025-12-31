@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Answers, Search, VoteUp } from '../components/icons';
-import { Avatar, Badge, Button, Card, Loader, Text, TextField, View } from 'reshaped';
+import { Avatar, Badge, Loader, Text, TextField, View } from 'reshaped';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
-import { Page, PageHeader, EmptyState } from '../components/ui'
+import { Page, PageHeader, EmptyState, LinkCard } from '../components/ui'
 import { formatDate } from '../utils/format';
-import { routerLink } from '../components/RouterLink';
 
 export default function PublicQA() {
   const [questions, setQuestions] = useState([]);
@@ -68,10 +66,10 @@ export default function PublicQA() {
       ) : (
         <View gap={4}>
           {filtered.map((q) => (
-            <Card key={q.id || q.slug} padding={5}>
+            <LinkCard key={q.id || q.slug} to={`/questions/${q.slug}`}>
               <View direction={{ s: 'column', m: 'row' }} gap={5}>
                 <View align="center" justify="center" gap={0} width={{ s: '100%', m: '64px' }} direction={{ s: 'row', m: 'column' }} borderRadius="medium" backgroundColor="neutral-faded" padding={3}>
-                  <VoteUp size={18} color="var(--rs-color-foreground-positive)" aria-hidden="true" />
+                  <VoteUp size={28} filled color="var(--rs-color-foreground-positive)" aria-hidden="true" />
                   <Text variant="body-2" weight="bold">{q.net_votes ?? 0}</Text>
                   <Text variant="caption-2" color="neutral-faded">Votes</Text>
                 </View>
@@ -81,27 +79,19 @@ export default function PublicQA() {
                     <Text variant="caption-1" weight="bold">{q.user?.name || 'Anonymous Peer'}</Text>
                     <Text variant="caption-1" color="neutral-faded">• {formatDate(q.created_at)}</Text>
                   </View>
-                  <Link to={`/questions/${q.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                    <Text as="h2" variant="featured-5" weight="bold">{q.title}</Text>
-                  </Link>
+                  <Text as="h2" variant="featured-5" weight="bold">{q.title}</Text>
                   <Text variant="body-2" color="neutral-faded" maxLines={2}>{q.body}</Text>
                   <View direction="row" align="center" gap={2} wrap>
                     {(q.tags || []).map((tag, idx) => <Badge key={idx} variant="faded">{tag.tag_name || tag}</Badge>)}
                     <View gapBefore="auto">
-                      <Button
-                        variant="faded"
-                        color="primary"
-                        size="small"
-                        icon={Answers}
-                        {...routerLink(`/questions/${q.slug}#answers`)}
-                      >
+                      <Badge variant="faded" color="primary" icon={Answers}>
                         {q.answers_count || q.answers?.length || 0} Answers
-                      </Button>
+                      </Badge>
                     </View>
                   </View>
                 </View>
               </View>
-            </Card>
+            </LinkCard>
           ))}
         </View>
       )}

@@ -12,9 +12,9 @@ import { routerLink } from "../components/RouterLink";
 function VoteControl({ votes, current, onUp, onDown, label }) {
   return (
     <View direction="row" align="center" gap={1} borderRadius="medium" border paddingInline={1}>
-      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="small" icon={VoteUp} onClick={onUp} attributes={{ "aria-label": `Upvote ${label}`, title: `Upvote ${label}` }} />
+      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="large" icon={<VoteUp size={28} filled={current === 1} />} onClick={onUp} attributes={{ "aria-label": `Upvote ${label}`, title: `Upvote ${label}` }} />
       <Text variant="body-2" weight="bold">{votes ?? 0}</Text>
-      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="small" icon={VoteDown} onClick={onDown} attributes={{ "aria-label": `Downvote ${label}`, title: `Downvote ${label}` }} />
+      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="large" icon={<VoteDown size={28} filled={current === -1} />} onClick={onDown} attributes={{ "aria-label": `Downvote ${label}`, title: `Downvote ${label}` }} />
     </View>
   );
 }

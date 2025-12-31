@@ -53,6 +53,10 @@ class QuestionIntegrityTest extends TestCase
             ->assertJsonPath('net_votes', -1)
             ->assertJsonPath('user_vote', -1);
         $this->assertDatabaseCount('votes', 2);
+
+        $this->getJson('/api/questions')
+            ->assertOk()
+            ->assertJsonPath('data.0.net_votes', 1);
     }
 
     public function test_question_creation_rejects_more_than_five_tags(): void

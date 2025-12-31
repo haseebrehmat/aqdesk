@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Avatar, Badge, Button, Card, Container, Grid, Skeleton, Text, View } from 'reshaped';
-import { MessageSquare, Briefcase, Calendar, Mic2, ArrowRight, Sparkles, Hash } from '../components/icons';
+import { MessageSquare, Briefcase, Calendar, Mic2, ArrowRight, Sparkles, Hash, VoteUp } from '../components/icons';
 import api from '../api/axios';
 import { useBranding } from '../context/BrandingContext';
 import { routerLink } from '../components/RouterLink';
@@ -148,9 +148,15 @@ export default function HomePage() {
                       <Text as="h3" variant="body-1" weight="bold" maxLines={2}>{q.title}</Text>
                       <Text variant="body-2" color="neutral-faded" maxLines={2}>{q.body}</Text>
                     </View>
-                    <View direction="row" justify="space-between">
+                    <View direction="row" justify="space-between" align="center" gap={3}>
                       <Text variant="caption-1" color="neutral-faded">By {q.user?.name || 'Developer'}</Text>
-                      <Text variant="caption-1" weight="bold" color="primary">{q.answers_count || 0} Answers</Text>
+                      <View direction="row" align="center" gap={3}>
+                        <View direction="row" align="center" gap={1}>
+                          <VoteUp size={18} filled color="var(--rs-color-foreground-positive)" aria-hidden="true" />
+                          <Text variant="caption-1" weight="bold">{q.net_votes ?? 0} Votes</Text>
+                        </View>
+                        <Text variant="caption-1" weight="bold" color="primary">{q.answers_count || 0} Answers</Text>
+                      </View>
                     </View>
                   </View>
                 </LinkCard>
