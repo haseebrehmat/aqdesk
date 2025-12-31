@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Button, Card, Loader, Text, View } from 'reshaped';
-import { Mic2, Play } from '../components/icons';
+import { Card, Loader, Text, View } from 'reshaped';
+import { Mic2 } from '../components/icons';
+import PodcastPlayButton from '../components/PodcastPlayButton';
+import { formatDuration } from '../utils/format';
 import api from '../api/axios';
 import { Page, PageHeader, EmptyState } from '../components/ui';
+
+const durationOf = (pod) => (pod.duration_in_seconds ? formatDuration(pod.duration_in_seconds) : pod.duration_in_minutes ? `${pod.duration_in_minutes} min` : '');
 
 export default function PublicPodcasts() {
   const [podcasts, setPodcasts] = useState([]);
@@ -35,12 +39,10 @@ export default function PublicPodcasts() {
                   <View gap={1}>
                     <Text as="h2" variant="featured-5" weight="bold">{pod.title}</Text>
                     <Text variant="body-2" color="neutral-faded" maxLines={1}>{pod.description}</Text>
-                    <Text variant="caption-1" color="neutral-faded">Host: {pod.expert?.name || 'Expert Consultant'}</Text>
+                    <Text variant="caption-1" color="neutral-faded">Host: {pod.expert?.name || 'Expert Consultant'}{durationOf(pod) ? ` · ${durationOf(pod)}` : ''}</Text>
                   </View>
                 </View>
-                {pod.media_url && (
-                  <Button color="primary" icon={Play} href={pod.media_url} attributes={{ target: '_blank', rel: 'noreferrer' }}>Listen</Button>
-                )}
+                <PodcastPlayButton podcast={pod} />
               </View>
             </Card>
           ))}

@@ -26,6 +26,8 @@ import Consulting from './pages/Consulting';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import QAIndex from './pages/QAIndex';
+import { AudioPlayerProvider } from './context/AudioPlayerContext';
+import AudioPlayerBar from './components/AudioPlayerBar';
 import { ToastProvider } from './components/ToastContainer';
 
 // Opportunities Pages
@@ -86,6 +88,7 @@ function ProtectedLayout() {
 export default function App() {
   return (
     <ToastProvider>
+      <AudioPlayerProvider>
       <Router>
         <Routes>
           {/* Standalone Authentication & Direct Join Pages */}
@@ -158,7 +161,9 @@ export default function App() {
           {/* Catch-all Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+      <AudioPlayerBar />
       </Router>
+      </AudioPlayerProvider>
     </ToastProvider>
   );
 }

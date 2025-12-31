@@ -5,6 +5,8 @@ import { ArrowLeft } from '../../components/icons';
 import api from '../../api/axios';
 import { Page, EmptyState } from '../../components/ui';
 import { routerLink } from '../../components/RouterLink';
+import PodcastPlayButton from '../../components/PodcastPlayButton';
+import { formatDuration } from '../../utils/format';
 
 export default function PodcastShow() {
     const { id } = useParams();
@@ -34,16 +36,13 @@ export default function PodcastShow() {
                         <View gap={1}>
                             <Text as="h1" variant="featured-2" weight="bold">{podcast.title}</Text>
                             <Text color="neutral-faded">Expert: {podcast.expert?.name}</Text>
-                            {podcast.duration_in_minutes && <View direction="row"><Badge variant="faded">{podcast.duration_in_minutes} minutes</Badge></View>}
+                            {(podcast.duration_in_seconds || podcast.duration_in_minutes) && <View direction="row"><Badge variant="faded">{podcast.duration_in_seconds ? formatDuration(podcast.duration_in_seconds) : `${podcast.duration_in_minutes} minutes`}</Badge></View>}
                         </View>
                     </View>
                     <Divider />
                     <View gap={2}>
                         <Text as="h2" variant="body-2" weight="bold">Episode Audio</Text>
-                        <audio controls style={{ width: '100%' }}>
-                            <source src={podcast.media_url} type="audio/mpeg" />
-                            Your browser does not support the audio element.
-                        </audio>
+                        <View direction="row"><PodcastPlayButton podcast={podcast} /></View>
                     </View>
                     <Divider />
                     <View gap={2}>

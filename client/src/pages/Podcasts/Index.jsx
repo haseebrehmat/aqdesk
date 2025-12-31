@@ -4,6 +4,8 @@ import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
 import { Page, PageHeader, EmptyState } from '../../components/ui';
 import { routerLink } from '../../components/RouterLink';
+import PodcastPlayButton from '../../components/PodcastPlayButton';
+import { formatDuration } from '../../utils/format';
 
 export default function PodcastIndex() {
     const { addToast } = useToast();
@@ -49,16 +51,13 @@ export default function PodcastIndex() {
                                         <View gap={1}>
                                             <View direction="row" align="center" gap={2}>
                                                 {isHost && <Badge color="positive" variant="faded">Your Episode</Badge>}
-                                                {podcast.duration_in_minutes && <Text variant="caption-1" color="neutral-faded">{podcast.duration_in_minutes} mins</Text>}
+                                                {(podcast.duration_in_seconds || podcast.duration_in_minutes) && <Text variant="caption-1" color="neutral-faded">{podcast.duration_in_seconds ? formatDuration(podcast.duration_in_seconds) : `${podcast.duration_in_minutes} min`}</Text>}
                                             </View>
                                             <Button variant="ghost" color="primary" {...routerLink(`/dashboard/podcasts/${podcast.id}`)}>{podcast.title}</Button>
                                             <Text variant="caption-1" color="neutral-faded">Expert: {podcast.expert?.name || 'Anonymous'}</Text>
                                         </View>
                                     </View>
-                                    <audio controls style={{ maxWidth: 280, width: '100%' }}>
-                                        <source src={podcast.media_url} type="audio/mpeg" />
-                                        Your browser does not support the audio element.
-                                    </audio>
+                                    <PodcastPlayButton podcast={podcast} />
                                 </View>
                             </Card>
                         );
