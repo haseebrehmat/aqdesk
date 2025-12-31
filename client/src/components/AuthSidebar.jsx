@@ -93,7 +93,7 @@ export default function AuthSidebar() {
 
         <View as="nav" grow padding={3} gap={1} attributes={{ 'aria-label': `${appName} workspace`, style: { overflowY: 'auto' } }}>
           <SidebarLink
-            to={isAdmin ? '/admin/users' : '/dashboard'}
+            to="/dashboard"
             icon={Dashboard}
             label={isAdmin ? 'Admin Dashboard' : 'Dashboard'}
             expanded={isSidebarExpanded}

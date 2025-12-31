@@ -36,6 +36,7 @@ export default function UserDashboard() {
       .finally(() => setLoadingSummary(false));
   }, []);
 
+  const isAll = summary.scope === "all";
   const activityMax = Math.max(
     1,
     ...summary.activity.map((month) => month.questions + month.answers),
@@ -54,7 +55,7 @@ export default function UserDashboard() {
       </Card>
 
       <View gap={4}>
-        <Text as="h2" variant="featured-4" weight="bold">Your activity</Text>
+        <Text as="h2" variant="featured-4" weight="bold">{isAll ? "Platform activity" : "Your activity"}</Text>
         <Grid columns={{ s: 2, l: 4 }} gap={4}>
           {statCards.map(({ key, label, icon: Icon }) => (
             <Card key={key} padding={5}>
@@ -76,7 +77,7 @@ export default function UserDashboard() {
             <View direction={{ s: "column", m: "row" }} justify="space-between" gap={2}>
               <View>
                 <Text as="h3" variant="featured-5" weight="bold">Six-month contribution trend</Text>
-                <Text variant="body-2" color="neutral-faded">Questions and answers you contributed each month.</Text>
+                <Text variant="body-2" color="neutral-faded">{isAll ? "Questions and answers from all users each month." : "Questions and answers you contributed each month."}</Text>
               </View>
               <View direction="row" gap={4}>
                 <Text variant="caption-1"><span style={{ color: "var(--rs-color-foreground-primary)" }}>●</span> Questions</Text>
