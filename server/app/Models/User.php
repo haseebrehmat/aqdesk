@@ -16,7 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasApiTokens, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -79,5 +79,10 @@ class User extends Authenticatable
     public function podcasts()
     {
         return $this->hasMany(Podcast::class, 'expert_id');
+    }
+
+    public function availabilitySlots()
+    {
+        return $this->hasMany(ExpertAvailability::class, 'expert_id');
     }
 }

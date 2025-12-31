@@ -8,6 +8,9 @@ export default function Consulting() {
   const [experts, setExperts] = useState([]);
   const [expertId, setExpertId] = useState('');
   const [bookingSlot, setBookingSlot] = useState('');
+  const [availability, setAvailability] = useState([]);
+  const [availabilityStart, setAvailabilityStart] = useState('');
+  const [availabilityEnd, setAvailabilityEnd] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
 
   useEffect(() => {
@@ -19,6 +22,16 @@ export default function Consulting() {
   }, []);
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const isExpert = ['Expert', 'Admin'].includes(currentUser.role?.role_name);
+
+  useEffect(() => {
+    if (!expertId) return;
+    api.get('/consultations/availability', { params: { expert_id: expertId } })
+      .then(({ data }) => {
+        setAvailability(data);
+        setBookingSlot(data[0]?.starts_at || '');
+      });
+  }, [expertId]);
 
   const fetchConsultations = async () => {
     try {
@@ -46,6 +59,25 @@ export default function Consulting() {
   const updateStatus = async (id, status) => {
     await api.patch(`/consultations/${id}/status`, { status });
     fetchConsultations();
+  };
+
+  const addAvailability = async (event) => {
+    event.preventDefault();
+    try {
+      await api.post('/consultations/availability', {
+        starts_at: availabilityStart,
+        ends_at: availabilityEnd,
+      });
+      setAvailabilityStart('');
+      setAvailabilityEnd('');
+      setStatusMsg('Availability added successfully.');
+      if (Number(expertId) === Number(currentUser.id)) {
+        const { data } = await api.get('/consultations/availability', { params: { expert_id: expertId } });
+        setAvailability(data);
+      }
+    } catch (error) {
+      setStatusMsg(error.response?.data?.message || 'Unable to add availability.');
+    }
   };
 
   const saveProposal = async (id) => {
@@ -102,16 +134,23 @@ export default function Consulting() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Booking Date & Time
+                <label htmlFor="consultation-slot" className="block text-xs font-medium text-slate-300 mb-1">
+                  Available Date & Time
                 </label>
-                <input
-                  type="datetime-local"
+                <select
+                  id="consultation-slot"
                   required
                   value={bookingSlot}
                   onChange={(e) => setBookingSlot(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                />
+                >
+                  <option value="">Select an open time</option>
+                  {availability.map((slot) => (
+                    <option key={slot.id} value={slot.starts_at}>
+                      {new Date(slot.starts_at).toLocaleString()} - {new Date(slot.ends_at).toLocaleTimeString()}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <button
@@ -122,6 +161,23 @@ export default function Consulting() {
               </button>
             </form>
           </div>
+
+          {isExpert && (
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-fit">
+              <h2 className="text-lg font-bold text-white mb-4">Publish Availability</h2>
+              <form onSubmit={addAvailability} className="space-y-4">
+                <div>
+                  <label htmlFor="availability-start" className="block text-xs font-medium text-slate-300 mb-1">Starts</label>
+                  <input id="availability-start" type="datetime-local" required value={availabilityStart} onChange={(event) => setAvailabilityStart(event.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white" />
+                </div>
+                <div>
+                  <label htmlFor="availability-end" className="block text-xs font-medium text-slate-300 mb-1">Ends</label>
+                  <input id="availability-end" type="datetime-local" required value={availabilityEnd} onChange={(event) => setAvailabilityEnd(event.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white" />
+                </div>
+                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl text-sm">Add Open Time</button>
+              </form>
+            </div>
+          )}
 
           {/* Bookings History */}
           <div className="lg:col-span-2 space-y-4">

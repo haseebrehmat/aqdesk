@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Consultation;
+use App\Models\ExpertAvailability;
 use App\Models\Proposal;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -35,6 +36,56 @@ class ConsultationController extends Controller
         );
     }
 
+    public function availability(Request $request)
+    {
+        $validated = $request->validate(['expert_id' => 'required|exists:users,id']);
+        $bookedSlots = Consultation::query()
+            ->where('expert_id', $validated['expert_id'])
+            ->whereNotIn('status', ['Rejected', 'Cancelled'])
+            ->pluck('booking_slot');
+
+        return response()->json(
+            ExpertAvailability::query()
+                ->where('expert_id', $validated['expert_id'])
+                ->where('starts_at', '>', now())
+                ->whereNotIn('starts_at', $bookedSlots)
+                ->orderBy('starts_at')
+                ->get()
+        );
+    }
+
+    public function storeAvailability(Request $request)
+    {
+        abort_unless(in_array($request->user()->role?->role_name, ['Expert', 'Admin'], true), 403);
+        $validated = $request->validate([
+            'starts_at' => 'required|date|after:now',
+            'ends_at' => 'required|date|after:starts_at',
+        ]);
+
+        $slot = $request->user()->availabilitySlots()->create($validated);
+
+        return response()->json(['message' => 'Availability added.', 'availability' => $slot], 201);
+    }
+
+    public function destroyAvailability(Request $request, ExpertAvailability $availability)
+    {
+        $isAdmin = $request->user()->role?->role_name === 'Admin';
+        abort_unless((int) $availability->expert_id === (int) $request->user()->id || $isAdmin, 403);
+
+        $hasBooking = Consultation::query()
+            ->where('expert_id', $availability->expert_id)
+            ->where('booking_slot', $availability->starts_at)
+            ->whereNotIn('status', ['Rejected', 'Cancelled'])
+            ->exists();
+        if ($hasBooking) {
+            return response()->json(['message' => 'Booked availability cannot be removed.'], 422);
+        }
+
+        $availability->delete();
+
+        return response()->json(['message' => 'Availability removed.']);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -43,7 +94,7 @@ class ConsultationController extends Controller
         ]);
 
         $expert = User::with('role')->findOrFail($validated['expert_id']);
-        if ($expert->role?->role_name !== 'Expert' || !$expert->is_active) {
+        if ($expert->role?->role_name !== 'Expert' || ! $expert->is_active) {
             throw ValidationException::withMessages(['expert_id' => ['Select an active expert.']]);
         }
         if ((int) $expert->id === (int) $request->user()->id) {
@@ -51,6 +102,16 @@ class ConsultationController extends Controller
         }
 
         $consultation = DB::transaction(function () use ($request, $validated) {
+            $availability = ExpertAvailability::query()
+                ->where('expert_id', $validated['expert_id'])
+                ->where('starts_at', $validated['booking_slot'])
+                ->where('starts_at', '>', now())
+                ->lockForUpdate()
+                ->first();
+            if (! $availability) {
+                throw ValidationException::withMessages(['booking_slot' => ['Select an available expert time.']]);
+            }
+
             $conflict = Consultation::where('expert_id', $validated['expert_id'])
                 ->where('booking_slot', $validated['booking_slot'])
                 ->whereNotIn('status', ['Rejected', 'Cancelled'])
@@ -78,7 +139,7 @@ class ConsultationController extends Controller
     public function updateStatus(Request $request, Consultation $consultation)
     {
         $isAdmin = $request->user()->role?->role_name === 'Admin';
-        if ((int) $consultation->expert_id !== (int) $request->user()->id && !$isAdmin) {
+        if ((int) $consultation->expert_id !== (int) $request->user()->id && ! $isAdmin) {
             return response()->json(['message' => 'Only the assigned expert can update this consultation.'], 403);
         }
 
@@ -93,7 +154,7 @@ class ConsultationController extends Controller
     public function saveProposal(Request $request, Consultation $consultation)
     {
         $isAdmin = $request->user()->role?->role_name === 'Admin';
-        if ((int) $consultation->expert_id !== (int) $request->user()->id && !$isAdmin) {
+        if ((int) $consultation->expert_id !== (int) $request->user()->id && ! $isAdmin) {
             return response()->json(['message' => 'Only the assigned expert can manage the proposal.'], 403);
         }
 
