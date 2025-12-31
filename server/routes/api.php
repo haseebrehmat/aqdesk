@@ -39,6 +39,7 @@ Route::get('/questions/{slug}', [QuestionController::class, 'show']);
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/opportunities', [OpportunityController::class, 'index']);
 Route::get('/opportunities/{opportunity}', [OpportunityController::class, 'show']);
+Route::post('/applications', [ApplicationController::class, 'store'])->middleware('throttle:10,1');
 
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{event}', [EventController::class, 'show']);
@@ -98,7 +99,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Applications routes
     Route::get('/applications', [ApplicationController::class, 'index']);
-    Route::post('/applications', [ApplicationController::class, 'store']);
+    Route::get('/applications/{application}/resume', [ApplicationController::class, 'resume']);
     Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus']);
 
     // Project CRUD

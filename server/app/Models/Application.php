@@ -9,6 +9,8 @@ class Application extends Model
     protected $fillable = [
         'opportunity_id',
         'user_id',
+        'applicant_name',
+        'applicant_email',
         'resume_path',
         'status',
     ];

@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\Opportunity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
 {
@@ -50,10 +51,18 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        // Public endpoint: signed-in users apply as themselves, guests supply name + email.
+        $user = Auth::guard('sanctum')->user();
+
+        $rules = [
             'opportunity_id' => 'required|exists:opportunities,id',
             'resume' => 'required|file|mimes:pdf|max:2048',
-        ]);
+        ];
+        if (! $user) {
+            $rules['applicant_name'] = 'required|string|max:255';
+            $rules['applicant_email'] = 'required|email|max:255';
+        }
+        $request->validate($rules);
 
         $opportunity = Opportunity::findOrFail($request->opportunity_id);
         if (! $opportunity->accepts_applications) {
@@ -63,11 +72,17 @@ class ApplicationController extends Controller
         }
 
         $opportunityId = $opportunity->id;
-        $userId = Auth::id();
+        $userId = $user?->id;
+        $email = $user ? $user->email : strtolower($request->applicant_email);
 
         // Check if already applied
         $existing = Application::where('opportunity_id', $opportunityId)
-            ->where('user_id', $userId)
+            ->where(function ($q) use ($userId, $email) {
+                $q->where('applicant_email', $email);
+                if ($userId) {
+                    $q->orWhere('user_id', $userId);
+                }
+            })
             ->first();
 
         if ($existing) {
@@ -80,6 +95,8 @@ class ApplicationController extends Controller
         $application = Application::create([
             'opportunity_id' => $opportunityId,
             'user_id' => $userId,
+            'applicant_name' => $user ? $user->name : $request->applicant_name,
+            'applicant_email' => $email,
             'resume_path' => $resumePath,
             'status' => 'Submitted',
         ]);
@@ -88,6 +105,30 @@ class ApplicationController extends Controller
             'message' => 'Application submitted successfully.',
             'data' => $application->load('opportunity'),
         ], 201);
+    }
+
+    /**
+     * Stream the resume PDF to the applicant, the opportunity owner or an admin.
+     */
+    public function resume(Application $application)
+    {
+        $user = Auth::user()->load('role');
+        $isAdmin = strtolower((string) $user->role?->role_name) === 'admin';
+        $application->load('opportunity');
+
+        if (! $isAdmin
+            && $application->user_id !== $user->id
+            && $application->opportunity?->posted_by !== $user->id) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        abort_unless(Storage::disk('public')->exists($application->resume_path), 404);
+
+        return response()->file(Storage::disk('public')->path($application->resume_path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="resume.pdf"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /**
