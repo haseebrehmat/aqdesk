@@ -239,8 +239,8 @@ export default function HomePage() {
             <Text as="h2" variant="featured-2" weight="bold" color="inherit">Ready to Join the {appName} Community?</Text>
             <Text color="inherit">Create your account today to join Q&amp;A discussions, form team workspaces, and apply to tech opportunities.</Text>
             <View direction="row" gap={3} wrap justify="center">
-              <Button color="white" {...routerLink('/register')}>Sign Up Now</Button>
-              <Button variant="outline" color="inherit" {...routerLink('/login')}>Sign In to Account</Button>
+              <Button color="primary" {...routerLink('/register')}>Sign Up Now</Button>
+              <Button variant="outline" color="neutral" {...routerLink('/login')}>Sign In to Account</Button>
             </View>
           </View>
         </Container>
