@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { ToastProvider as ReshapedToastProvider, useToast as useReshapedToast } from 'reshaped';
-import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info } from './icons';
 
 const ToastContext = createContext(null);
 

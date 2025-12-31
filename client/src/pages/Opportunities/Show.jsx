@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Divider, Grid, Loader, Text, View } from 'reshaped';
 import opportunityService from '../../services/opportunityService';
-import { MapPin, Building2, UploadCloud, ArrowLeft, FileText } from 'lucide-react';
+import { MapPin, Building2, UploadCloud, ArrowLeft, FileText } from '../../components/icons';
 import { Page, EmptyState } from '../../components/ui'
 import { formatDate } from '../../utils/format';
 import { routerLink } from '../../components/RouterLink';

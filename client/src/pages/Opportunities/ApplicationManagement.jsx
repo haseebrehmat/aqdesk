@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Badge, Button, Card, Grid, Loader, Text, View } from 'reshaped';
-import { FileText, Building2, Calendar } from 'lucide-react';
+import { FileText, Building2, Calendar } from '../../components/icons';
 import opportunityService from '../../services/opportunityService';
 import { Page, PageHeader, EmptyState } from '../../components/ui'
 import { formatDate } from '../../utils/format';

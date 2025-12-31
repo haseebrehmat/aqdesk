@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, Card, Loader, Text, View } from "reshaped";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from "../components/icons";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 

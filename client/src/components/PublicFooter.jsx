@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Container, Divider, Grid, Link as RLink, Text, TextField, View } from 'reshaped';
-import { Heart } from 'lucide-react';
+import { Heart } from './icons';
 import Logo from './Logo';
 import { NativeSelect } from './ui';
 import { useBranding } from '../context/BrandingContext';
@@ -120,7 +120,7 @@ export default function PublicFooter() {
             <Text variant="caption-1" color="neutral-faded">© {new Date().getFullYear()} {appName} Platform. All rights reserved.</Text>
             <View direction="row" align="center" gap={1}>
               <Text variant="caption-1" color="neutral-faded">Engineered with</Text>
-              <Heart size={14} color="#e11d48" fill="#e11d48" />
+              <Heart size={14} color="#e11d48" filled aria-hidden="true" />
               <Text variant="caption-1" color="neutral-faded">for Software Engineers</Text>
             </View>
           </View>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Badge, Button, Card, Grid, Loader, Text, TextField, View } from 'reshaped';
-import { Building2, MapPin, Search, ArrowUpRight } from 'lucide-react';
+import { Building2, MapPin, Search, ArrowUpRight } from '../components/icons';
 import api from '../api/axios';
 import { Page, PageHeader, EmptyState } from '../components/ui';
 import { routerLink } from '../components/RouterLink';

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Alert, Button, Card, Container, FormControl, Image, Text, TextField, View } from 'reshaped';
-import { ImageUp, Trash2, Save } from 'lucide-react';
+import { ImageUp, Trash2, Save } from '../components/icons';
 import api from '../api/axios';
 import { useBranding } from '../context/BrandingContext';
 import { useToast } from '../components/ToastContainer';

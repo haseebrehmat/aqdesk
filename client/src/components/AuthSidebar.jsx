@@ -3,21 +3,10 @@ import { Avatar, Button, Divider, Text, View } from 'reshaped';
 import { useLayout } from '../context/LayoutContext';
 import { useBranding } from '../context/BrandingContext';
 import Logo from './Logo';
-import { materialIcon } from './MaterialIcon';
-
-const MessageSquare = materialIcon('forum');
-const Folder = materialIcon('folder');
-const Briefcase = materialIcon('work');
-const Calendar = materialIcon('calendar_month');
-const Podcast = materialIcon('podcast');
-const Shield = materialIcon('admin_panel_settings');
-const LayoutDashboard = materialIcon('dashboard');
-const LogOut = materialIcon('logout');
-const ChevronLeft = materialIcon('chevron_left');
-const ChevronRight = materialIcon('chevron_right');
-const Close = materialIcon('close');
-const Mail = materialIcon('mail');
-const Settings = materialIcon('settings');
+import {
+  AdminPanel, Briefcase, Calendar, Close, Dashboard, Exit, LeftPanelClose,
+  LeftPanelOpen, MessageSquare, Newsletter, Podcast, Settings, Workspaces,
+} from './icons';
 
 function SidebarLink({ to, icon: Icon, label, expanded, onNavigate }) {
   return (
@@ -60,14 +49,14 @@ export default function AuthSidebar() {
 
   const navItems = [
     { label: 'Q&A Board', path: '/dashboard/questions', icon: MessageSquare },
-    { label: 'Workspaces', path: '/projects', icon: Folder },
+    { label: 'Workspaces', path: '/projects', icon: Workspaces },
     { label: 'Opportunities', path: '/dashboard/opportunities', icon: Briefcase },
     { label: 'Events', path: '/dashboard/events', icon: Calendar },
     { label: 'Podcasts', path: '/dashboard/podcasts', icon: Podcast },
   ];
   if (isAdmin) {
-    navItems.push({ label: 'User Management', path: '/admin/users', icon: Shield });
-    navItems.push({ label: 'Newsletter', path: '/admin/newsletters', icon: Mail });
+    navItems.push({ label: 'User Management', path: '/admin/users', icon: AdminPanel });
+    navItems.push({ label: 'Newsletter', path: '/admin/newsletters', icon: Newsletter });
     navItems.push({ label: 'Site Settings', path: '/admin/settings', icon: Settings });
   }
 
@@ -92,7 +81,7 @@ export default function AuthSidebar() {
             <Button
               variant="ghost"
               size="small"
-              icon={isSidebarExpanded ? ChevronLeft : ChevronRight}
+              icon={isSidebarExpanded ? LeftPanelClose : LeftPanelOpen}
               onClick={toggleSidebar}
               attributes={{ 'aria-label': isSidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar' }}
             />
@@ -105,7 +94,7 @@ export default function AuthSidebar() {
         <View as="nav" grow padding={3} gap={1} attributes={{ 'aria-label': `${appName} workspace`, style: { overflowY: 'auto' } }}>
           <SidebarLink
             to={isAdmin ? '/admin/users' : '/dashboard'}
-            icon={LayoutDashboard}
+            icon={Dashboard}
             label={isAdmin ? 'Admin Dashboard' : 'Dashboard'}
             expanded={isSidebarExpanded}
             onNavigate={closeOnMobile}
@@ -127,7 +116,7 @@ export default function AuthSidebar() {
                 </View>
               </View>
             )}
-            <Button variant="ghost" color="critical" icon={LogOut} onClick={handleLogout} attributes={{ 'aria-label': 'Sign out', title: 'Sign Out' }} />
+            <Button variant="ghost" color="critical" icon={Exit} onClick={handleLogout} attributes={{ 'aria-label': 'Sign out', title: 'Sign Out' }} />
           </View>
         </View>
       </aside>

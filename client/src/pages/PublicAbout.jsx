@@ -1,5 +1,5 @@
 import { Card, Grid, Text, View } from 'reshaped';
-import { Users, Briefcase, Calendar, MessageSquare } from 'lucide-react';
+import { Users, Briefcase, Calendar, MessageSquare } from '../components/icons';
 import { useBranding } from '../context/BrandingContext';
 import { Page } from '../components/ui';
 

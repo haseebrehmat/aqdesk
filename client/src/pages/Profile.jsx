@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import { Badge, Button, Card, Loader, View } from "reshaped";
-import { Save } from "lucide-react";
+import { Save } from "../components/icons";
 import { Page, PageHeader, FormField } from "../components/ui";
 
 export default function Profile() {

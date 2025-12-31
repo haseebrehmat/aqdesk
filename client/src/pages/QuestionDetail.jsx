@@ -4,7 +4,7 @@ import { Badge, Button, Card, Divider, Loader, Text, TextArea, View } from "resh
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import MarkdownContent from "../components/MarkdownContent";
-import { ThumbsUp, ThumbsDown, CheckCircle2, Eye, Send, ArrowLeft, Check, Flag } from "lucide-react";
+import { ThumbsUp, ThumbsDown, CheckCircle2, Eye, Send, ArrowLeft, Check, Flag } from "../components/icons";
 import { Page, EmptyState } from "../components/ui"
 import { formatDate } from "../utils/format";
 import { routerLink } from "../components/RouterLink";

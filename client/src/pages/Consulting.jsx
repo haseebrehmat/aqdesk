@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Alert, Badge, Button, Card, Grid, Text, View } from 'reshaped';
-import { UserCheck, Clock } from 'lucide-react';
+import { UserCheck, Clock } from '../components/icons';
 import api from '../api/axios';
 import { Page, PageHeader, FormField, EmptyState } from '../components/ui'
 import { formatDate } from '../utils/format';

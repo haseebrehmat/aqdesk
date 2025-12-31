@@ -1,8 +1,5 @@
 import { Button, useTheme } from 'reshaped';
-import { materialIcon } from './MaterialIcon';
-
-const DarkMode = materialIcon('dark_mode');
-const LightMode = materialIcon('light_mode');
+import { DarkMode, LightMode } from './icons';
 
 export default function ColorModeToggle() {
   const { colorMode, setColorMode } = useTheme();

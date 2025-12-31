@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Button, FormControl, Link as RLink, TextField, View } from "reshaped";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from "../components/icons";
 import api from "../api/axios";
 import SocialButtons from "../components/SocialButtons";
 import AuthShell from "../components/AuthShell";

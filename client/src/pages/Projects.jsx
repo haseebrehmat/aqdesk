@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Badge, Button, Card, Grid, Loader, Modal, View, Text } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
-import { FolderPlus, Folder, Lock, Globe, FileText, MessageSquare, Users, Trash2 } from "lucide-react";
+import { FolderPlus, Folder, Lock, Globe, FileText, MessageSquare, Users, Trash2 } from "../components/icons";
 import { Page, PageHeader, EmptyState, FormField } from "../components/ui";
 import { routerLink } from "../components/RouterLink";
 

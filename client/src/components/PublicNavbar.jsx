@@ -4,17 +4,7 @@ import { Button, Container, Divider, Hidden, View } from 'reshaped';
 import Logo from './Logo';
 import ColorModeToggle from './ColorModeToggle';
 import { routerLink } from './RouterLink';
-import { materialIcon } from './MaterialIcon';
-
-const MessageSquare = materialIcon('forum');
-const Briefcase = materialIcon('work');
-const Calendar = materialIcon('calendar_month');
-const Podcast = materialIcon('podcast');
-const Info = materialIcon('info');
-const LayoutDashboard = materialIcon('dashboard');
-const LogIn = materialIcon('login');
-const Menu = materialIcon('menu');
-const Close = materialIcon('close');
+import { Briefcase, Calendar, Close, Dashboard, Info, Login, Menu, MessageSquare, Podcast } from './icons';
 
 const navItems = [
   { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
@@ -33,7 +23,7 @@ function NavButton({ item, onNavigate }) {
           as="span"
           variant={isActive ? 'faded' : 'ghost'}
           color={isActive ? 'primary' : 'neutral'}
-          startSlot={<Icon size={20} filled={isActive} aria-hidden="true" />}
+          icon={(props) => <Icon {...props} filled={isActive} aria-hidden="true" />}
           attributes={{ tabIndex: -1 }}
         >
           {item.label}
@@ -68,7 +58,7 @@ export default function PublicNavbar() {
           <View direction="row" align="center" gap={2}>
             <ColorModeToggle />
             <Hidden hide={{ s: true, m: false }}>
-              <Button color="primary" icon={token ? LayoutDashboard : LogIn} {...routerLink(accountLink)}>
+              <Button color="primary" icon={token ? Dashboard : Login} {...routerLink(accountLink)}>
                 {accountLabel}
               </Button>
             </Hidden>
@@ -90,7 +80,7 @@ export default function PublicNavbar() {
           <View as="nav" padding={4} gap={1} attributes={{ 'aria-label': 'Mobile' }}>
             {navItems.map((item) => <NavButton key={item.path} item={item} onNavigate={() => setIsOpen(false)} />)}
             <Divider />
-            <Button color="primary" fullWidth icon={token ? LayoutDashboard : LogIn} {...routerLink(accountLink, { onClick: () => setIsOpen(false) })}>
+            <Button color="primary" fullWidth icon={token ? Dashboard : Login} {...routerLink(accountLink, { onClick: () => setIsOpen(false) })}>
               {accountLabel}
             </Button>
           </View>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Badge, Button, Card, Grid, Loader, Text, View } from 'reshaped';
-import { Video, Users } from 'lucide-react';
+import { Video, Users } from '../components/icons';
 import api from '../api/axios';
 import { echo } from '../utils/echo';
 import { Page, PageHeader, EmptyState } from '../components/ui'

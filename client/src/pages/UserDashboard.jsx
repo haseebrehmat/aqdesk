@@ -1,19 +1,13 @@
 import { Card, Badge, Grid, Text, View } from "reshaped";
 import { Page } from "../components/ui";
 import { routerLink } from "../components/RouterLink";
-import { materialIcon } from "../components/MaterialIcon";
-
-const Folder = materialIcon('folder');
-const Help = materialIcon('help');
-const Briefcase = materialIcon('work');
-const Person = materialIcon('person');
-const ArrowRight = materialIcon('arrow_forward');
+import { ArrowRight, Briefcase, HelpCircle, User, Workspaces } from "../components/icons";
 
 const links = [
-  { to: "/projects", icon: Folder, title: "Workspaces", text: "Collaborate on team project files and share feedback.", cta: "View projects" },
-  { to: "/dashboard/questions", icon: Help, title: "Community Q&A", text: "Ask technical questions and share solutions with peers.", cta: "Browse discussions" },
+  { to: "/projects", icon: Workspaces, title: "Workspaces", text: "Collaborate on team project files and share feedback.", cta: "View projects" },
+  { to: "/dashboard/questions", icon: HelpCircle, title: "Community Q&A", text: "Ask technical questions and share solutions with peers.", cta: "Browse discussions" },
   { to: "/dashboard/opportunities", icon: Briefcase, title: "Opportunities", text: "Explore verified internships, jobs, and academic openings.", cta: "View listings" },
-  { to: "/profile", icon: Person, title: "Profile Settings", text: "Update your personal bio, developer skills, and tags.", cta: "Edit profile" },
+  { to: "/profile", icon: User, title: "Profile Settings", text: "Update your personal bio, developer skills, and tags.", cta: "Edit profile" },
 ];
 
 export default function UserDashboard() {

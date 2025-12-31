@@ -1,5 +1,5 @@
 import { Container, Text, View } from 'reshaped';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from './icons';
 import Logo from './Logo';
 
 const features = [

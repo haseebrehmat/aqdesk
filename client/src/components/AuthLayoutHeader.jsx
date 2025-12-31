@@ -2,10 +2,7 @@ import { Avatar, Button, Hidden, TextField, View, Text } from 'reshaped';
 import { useLayout } from '../context/LayoutContext';
 import { routerLink } from './RouterLink';
 import ColorModeToggle from './ColorModeToggle';
-import { materialIcon } from './MaterialIcon';
-
-const Menu = materialIcon('menu');
-const Search = materialIcon('search');
+import { Menu, Search } from './icons';
 
 export default function AuthLayoutHeader() {
   const { toggleSidebar } = useLayout();

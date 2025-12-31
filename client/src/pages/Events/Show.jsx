@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Badge, Button, Card, Loader, Text, View } from 'reshaped';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '../../components/icons';
 import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
 import { Page, EmptyState } from '../../components/ui';

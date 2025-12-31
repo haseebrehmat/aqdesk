@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Card, Loader, Text, View } from 'reshaped';
-import { Mic2, Play } from 'lucide-react';
+import { Mic2, Play } from '../components/icons';
 import api from '../api/axios';
 import { Page, PageHeader, EmptyState } from '../components/ui';
 

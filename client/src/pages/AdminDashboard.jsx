@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Badge, Button, Card, Loader, Modal, Table, Text, TextField, View } from "reshaped";
-import { Plus, Trash2, Edit, Search } from "lucide-react";
+import { Plus, Trash2, Edit, Search } from "../components/icons";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import { Page, PageHeader, FormField, EmptyState } from "../components/ui";

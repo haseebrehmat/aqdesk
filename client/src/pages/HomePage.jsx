@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Avatar, Badge, Button, Card, Container, Grid, Skeleton, Text, View } from 'reshaped';
-import { MessageSquare, Briefcase, Calendar, Mic2, ArrowRight, Sparkles, Hash } from 'lucide-react';
+import { MessageSquare, Briefcase, Calendar, Mic2, ArrowRight, Sparkles, Hash } from '../components/icons';
 import api from '../api/axios';
 import { useBranding } from '../context/BrandingContext';
 import { routerLink } from '../components/RouterLink';

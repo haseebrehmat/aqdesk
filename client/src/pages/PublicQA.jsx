@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, ArrowUp, Search } from 'lucide-react';
+import { MessageSquare, ArrowUp, Search } from '../components/icons';
 import { Avatar, Badge, Card, Loader, Text, TextField, View } from 'reshaped';
 import api from '../api/axios';
 import { echo } from '../utils/echo';

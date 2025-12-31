@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Badge, Button, Card, FormControl, Loader, Modal, Text, TextArea, TextField, View } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
-import { Search, PlusCircle, Trash2, Edit } from "lucide-react";
+import { Search, PlusCircle, Trash2, Edit } from "../components/icons";
 import { Page, PageHeader, EmptyState, NativeSelect } from "../components/ui";
 import { routerLink } from "../components/RouterLink";
 

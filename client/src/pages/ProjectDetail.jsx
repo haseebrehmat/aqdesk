@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Badge, Button, Card, Divider, Loader, Text, TextArea, TextField, View, Grid } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
-import { ArrowLeft, Upload, FileText, Trash2, Send, Users, Globe, Lock, Download, UserPlus, Copy, UserX, Shield, Check } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Trash2, Send, Users, Globe, Lock, Download, UserPlus, Copy, UserX, Shield, Check } from "../components/icons";
 import { Page, EmptyState, NativeSelect } from "../components/ui";
 import { routerLink } from "../components/RouterLink";
 

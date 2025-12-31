@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Badge, Button, Card, Grid, Loader, Text, TextField, View } from 'reshaped';
 import opportunityService from '../../services/opportunityService';
-import { MapPin, Search, PlusCircle, Building2 } from 'lucide-react';
+import { MapPin, Search, PlusCircle, Building2 } from '../../components/icons';
 import { Page, PageHeader, EmptyState, NativeSelect } from '../../components/ui';
 import { routerLink } from '../../components/RouterLink';
 
