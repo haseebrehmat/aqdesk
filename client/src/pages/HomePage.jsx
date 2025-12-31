@@ -80,15 +80,15 @@ export default function HomePage() {
             <div className="grid grid-cols-3 gap-4 pt-8 border-t border-slate-100 max-w-md mx-auto lg:mx-0">
               <div>
                 <p className="text-2xl font-black text-slate-900">4.8k+</p>
-                <p className="text-xs text-slate-500 font-medium">Active Peers</p>
+                <p className="text-xs text-slate-600 font-medium">Active Peers</p>
               </div>
               <div>
                 <p className="text-2xl font-black text-slate-900">1.2k</p>
-                <p className="text-xs text-slate-500 font-medium">Solved Threads</p>
+                <p className="text-xs text-slate-600 font-medium">Solved Threads</p>
               </div>
               <div>
                 <p className="text-2xl font-black text-slate-900">350+</p>
-                <p className="text-xs text-slate-500 font-medium">Tech Gigs</p>
+                <p className="text-xs text-slate-600 font-medium">Tech Gigs</p>
               </div>
             </div>
           </div>
@@ -227,12 +227,12 @@ export default function HomePage() {
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-8 space-y-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
-            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               Careers & Opportunities
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">Latest Featured Gigs & Roles</h2>
           </div>
-          <Link to="/opportunities" className="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1">
+          <Link to="/opportunities" className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1">
             Explore Job Board <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -249,7 +249,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">{job.title}</h3>
-                  <p className="text-xs font-semibold text-slate-500">{job.company_name}</p>
+                  <p className="text-xs font-semibold text-slate-600">{job.company_name}</p>
                 </div>
                 <p className="text-xs text-slate-600 line-clamp-2">{job.description}</p>
                 <Link to={`/opportunities/${job.id}`} className="block text-center py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition">
@@ -322,7 +322,7 @@ export default function HomePage() {
       <section className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               <Database className="w-4 h-4" /> Relational Database Seeders
             </span>
             <h2 className="text-3xl font-extrabold text-slate-900">Preloaded With Verified System Seed Data</h2>
@@ -449,7 +449,7 @@ export default function HomePage() {
       <section className="py-16 bg-blue-600 text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 text-center space-y-6">
           <h2 className="text-3xl sm:text-4xl font-black">Ready to Join the AQDesk Community?</h2>
-          <p className="text-blue-100 text-sm max-w-xl mx-auto">
+          <p className="text-white text-sm max-w-xl mx-auto">
             Create your account today to participate in Q&A discussions, form team project workspaces, and apply to tech opportunities.
           </p>
           <div className="flex justify-center gap-4 pt-2">

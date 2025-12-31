@@ -19,7 +19,7 @@ export default function PublicPodcasts() {
         
         {/* Header */}
         <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-xs space-y-1">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 uppercase tracking-wider bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
             <Radio className="w-3.5 h-3.5" /> Audio Network
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight pt-1">Podcasts & Technical Interviews</h1>
@@ -54,7 +54,7 @@ export default function PublicPodcasts() {
                   href={pod.media_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-5 py-3 rounded-2xl transition shadow-sm shrink-0"
+                  className="inline-flex items-center gap-2 bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs px-5 py-3 rounded-2xl transition shadow-sm shrink-0"
                 >
                   <Play className="w-4 h-4 fill-current" /> Listen Broadcast
                 </a>

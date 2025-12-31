@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test:a11y": "playwright test --config=playwright.a11y.config.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -20,7 +21,9 @@
     "simple-icons": "^16.36.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",

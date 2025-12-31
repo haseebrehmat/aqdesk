@@ -27,7 +27,7 @@ export default function PublicOpportunities() {
         {/* Header */}
         <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               <Sparkles className="w-3.5 h-3.5" /> Career Center
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight pt-1">Tech Opportunities & Gigs</h1>
@@ -36,7 +36,7 @@ export default function PublicOpportunities() {
 
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl transition shadow-md shadow-emerald-600/20 shrink-0"
+            className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl transition shadow-md shadow-emerald-600/20 shrink-0"
           >
             Post a Listing
           </Link>
@@ -97,7 +97,7 @@ export default function PublicOpportunities() {
 
                   <Link
                     to={`/opportunities/${opp.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:underline"
                   >
                     View Details & Apply <ArrowUpRight className="w-4 h-4" />
                   </Link>
