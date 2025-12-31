@@ -52,3 +52,14 @@ cp client/.env.example client/.env
 The templates assume Laravel runs at <http://localhost:8000> and Vite runs at
 <http://localhost:3000>. Change both URL values together if either port or host
 is different.
+
+Run the public API performance gate after the stack is healthy:
+
+```bash
+node scripts/api-load-test.mjs
+```
+
+The default run sends 100 requests to each public collection endpoint with 10
+concurrent clients and fails if any endpoint exceeds 500 ms at the 95th
+percentile. Override `LOAD_TEST_REQUESTS`, `LOAD_TEST_CONCURRENCY`,
+`LOAD_TEST_THRESHOLD_MS`, or `LOAD_TEST_BASE_URL` when testing another target.
