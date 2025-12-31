@@ -37,6 +37,7 @@ export default function NewsletterAdmin() {
     event.preventDefault();
     run(async () => {
       const { data } = await api.post('/admin/newsletter/campaigns', { subject, body, cohort });
+      setCampaigns((items) => [data.campaign, ...items]);
       setMessage(`${data.message} ${data.queued_recipients} recipient(s).`);
       setSubject('');
       setBody('');

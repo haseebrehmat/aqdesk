@@ -54,10 +54,22 @@ class NewsletterController extends Controller
             );
         }
 
+        // Keep a record of every queued campaign, not just drafts.
+        $campaign = NewsletterCampaign::create([
+            'created_by' => $request->user()->id,
+            'subject' => $validated['subject'],
+            'body' => $validated['body'],
+            'cohort' => $cohort,
+            'status' => 'Sent',
+            'queued_recipients' => $subscribers->count(),
+            'sent_at' => now(),
+        ]);
+
         return response()->json([
             'message' => 'Community update queued successfully.',
             'queued_recipients' => $subscribers->count(),
             'cohort' => $cohort,
+            'campaign' => $campaign->load('creator'),
         ]);
     }
 
