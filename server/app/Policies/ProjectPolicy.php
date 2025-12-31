@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Log;
 
 class ProjectPolicy
 {
+    private function isAdmin(User $user): bool
+    {
+        return strtolower((string) $user->loadMissing('role')->role?->role_name) === 'admin';
+    }
+
     private function getMemberRole(User $user, Project $project): ?string
     {
         Log::info('[Policy Check] evaluating getMemberRole', [
@@ -72,6 +77,11 @@ class ProjectPolicy
         return $allowed;
     }
 
+    public function delete(User $user, Project $project): bool
+    {
+        return (int) $project->owner_id === (int) $user->id || $this->isAdmin($user);
+    }
+
     public function manage(User $user, Project $project): bool
     {
         $role = $this->getMemberRole($user, $project);
@@ -90,7 +100,9 @@ class ProjectPolicy
     public function uploadFile(User $user, Project $project): bool
     {
         $role = $this->getMemberRole($user, $project);
-        $allowed = in_array($role, ['Owner', 'Maintainer', 'Collaborator'], true);
+        // Public workspaces accept contributions from any signed-in user.
+        $allowed = $project->visibility === 'Public'
+            || in_array($role, ['Owner', 'Maintainer', 'Collaborator'], true);
 
         Log::info('[Policy Check] uploadFile policy outcome', [
             'user_id' => $user->id,
@@ -104,7 +116,7 @@ class ProjectPolicy
 
     public function deleteFile(User $user, Project $project, File $file): bool
     {
-        if ((int) $user->id === (int) $file->uploaded_by) {
+        if ($this->isAdmin($user) || (int) $user->id === (int) $file->uploaded_by) {
             Log::info('[Policy Check] deleteFile allowed (User is original uploader)');
             return true;
         }
@@ -125,7 +137,7 @@ class ProjectPolicy
     public function addFeedback(User $user, Project $project): bool
     {
         $role = $this->getMemberRole($user, $project);
-        $allowed = $role !== null;
+        $allowed = $role !== null || $project->visibility === 'Public';
 
         Log::info('[Policy Check] addFeedback policy outcome', [
             'user_id' => $user->id,
@@ -139,7 +151,7 @@ class ProjectPolicy
 
     public function deleteFeedback(User $user, Project $project, Feedback $feedback): bool
     {
-        if ((int) $user->id === (int) $feedback->user_id) {
+        if ($this->isAdmin($user) || (int) $user->id === (int) $feedback->user_id) {
             Log::info('[Policy Check] deleteFeedback allowed (User is feedback author)');
             return true;
         }

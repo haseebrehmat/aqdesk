@@ -4,11 +4,12 @@ import { Button, Container, Divider, Hidden, View } from 'reshaped';
 import Logo from './Logo';
 import ColorModeToggle from './ColorModeToggle';
 import { routerLink } from './RouterLink';
-import { Briefcase, Calendar, Close, Dashboard, Info, Login, Menu, MessageSquare, Podcast } from './icons';
+import { Briefcase, Calendar, Close, Dashboard, Info, Login, Menu, MessageSquare, Podcast, Workspaces } from './icons';
 
 const navItems = [
   { label: 'Q&A Board', path: '/questions', icon: MessageSquare },
   { label: 'Opportunities', path: '/opportunities', icon: Briefcase },
+  { label: 'Workspaces', path: '/workspaces', icon: Workspaces },
   { label: 'Events', path: '/events', icon: Calendar },
   { label: 'Podcasts', path: '/podcasts', icon: Podcast },
   { label: 'About Us', path: '/about', icon: Info },

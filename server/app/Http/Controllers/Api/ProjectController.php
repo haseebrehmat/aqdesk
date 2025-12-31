@@ -18,7 +18,8 @@ class ProjectController extends Controller
     {
         $userId = $request->user()->id;
 
-        $projects = Project::with(['owner', 'members', 'files'])
+        $projects = Project::with(['owner', 'members'])
+            ->withCount(['files', 'feedback'])
             ->where(function ($query) use ($userId) {
                 // 1. Include all Public projects
                 $query->where('visibility', 'Public')
@@ -33,6 +34,27 @@ class ProjectController extends Controller
             ->get();
 
         return response()->json($projects);
+    }
+
+    /** Public workspaces, readable without an account. */
+    public function publicIndex()
+    {
+        return response()->json(
+            Project::with(['owner:id,name', 'members:id,name'])
+                ->withCount(['files', 'feedback'])
+                ->where('visibility', 'Public')
+                ->latest()
+                ->get()
+        );
+    }
+
+    public function publicShow($id)
+    {
+        $project = Project::with(['owner:id,name', 'members:id,name', 'files.uploader:id,name', 'feedback.user:id,name'])
+            ->where('visibility', 'Public')
+            ->findOrFail($id);
+
+        return response()->json($project);
     }
 
     public function store(Request $request)
@@ -104,13 +126,8 @@ class ProjectController extends Controller
 
         $project = Project::findOrFail($id);
 
-        if ((int)$project->owner_id !== (int)$request->user()->id) {
-            Log::warning('[ProjectController@destroy] User is not owner', [
-                'owner_id' => $project->owner_id,
-                'user_id' => $request->user()->id
-            ]);
-            return response()->json(['message' => 'Only the project owner can delete this project.'], 403);
-        }
+        // Owners can delete their own workspaces; admins can delete any workspace.
+        $this->authorize('delete', $project);
 
         foreach ($project->files as $file) {
             Storage::disk('public')->delete($file->file_path);

@@ -37,6 +37,8 @@ Route::get('/settings/logo', [SettingController::class, 'logo']);
 Route::get('/questions', [QuestionController::class, 'index']);
 Route::get('/questions/{slug}', [QuestionController::class, 'show']);
 Route::get('/tags', [TagController::class, 'index']);
+Route::get('/public/projects', [ProjectController::class, 'publicIndex']);
+Route::get('/public/projects/{id}', [ProjectController::class, 'publicShow']);
 Route::get('/opportunities', [OpportunityController::class, 'index']);
 Route::get('/opportunities/{opportunity}', [OpportunityController::class, 'show']);
 Route::post('/applications', [ApplicationController::class, 'store'])->middleware('throttle:10,1');

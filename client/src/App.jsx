@@ -15,6 +15,7 @@ import PublicQA from './pages/PublicQA';
 import PublicOpportunities from './pages/PublicOpportunities';
 import PublicEvents from './pages/PublicEvents';
 import PublicPodcasts from './pages/PublicPodcasts';
+import PublicWorkspaces from './pages/PublicWorkspaces';
 import PublicAbout from './pages/PublicAbout';
 
 // Protected / Workspace Pages
@@ -112,6 +113,9 @@ export default function App() {
             <Route path="/events" element={<PublicEvents />} />
             <Route path="/events/:id" element={<EventShow />} />
             
+            <Route path="/workspaces" element={<PublicWorkspaces />} />
+            <Route path="/workspaces/:id" element={<ProjectDetail />} />
+
             <Route path="/podcasts" element={<PublicPodcasts />} />
             <Route path="/podcasts/:id" element={<PodcastShow />} />
             

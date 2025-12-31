@@ -21,6 +21,7 @@ export default function Projects() {
   });
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isAdmin = currentUser?.role?.role_name?.toLowerCase() === "admin";
 
   useEffect(() => {
     fetchProjects();
@@ -91,7 +92,7 @@ export default function Projects() {
                     <Badge variant="faded" color={project.visibility === "Public" ? "positive" : "warning"} icon={project.visibility === "Public" ? Globe : Lock}>
                       {project.visibility}
                     </Badge>
-                    {currentUser?.id === project.owner_id && (
+                    {(currentUser?.id === project.owner_id || isAdmin) && (
                       <Button variant="ghost" color="critical" size="small" icon={Trash2} onClick={() => handleDeleteProject(project.id)} attributes={{ "aria-label": "Delete project", title: "Delete Project" }} />
                     )}
                   </View>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { Badge, Button, Card, Divider, Loader, Text, TextArea, TextField, View, Grid } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
@@ -11,6 +11,9 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default function ProjectDetail() {
   const { id } = useParams();
+  const location = useLocation();
+  const isPublicRoute = location.pathname.startsWith("/workspaces");
+  const isSignedIn = !!localStorage.getItem("token");
   const { addToast, confirm } = useToast();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ export default function ProjectDetail() {
 
   const fetchProjectDetail = async () => {
     try {
-      const res = await api.get(`/projects/${id}`);
+      const res = await api.get(isSignedIn ? `/projects/${id}` : `/public/projects/${id}`);
       setProject(res.data);
     } catch {
       addToast("Failed to load project workspace.", "error");
@@ -52,7 +55,10 @@ export default function ProjectDetail() {
   // Management rights: Owner & Maintainer
   const canManage = isOwner || userRole === "Maintainer";
   // Upload rights: Owner, Maintainer, & Collaborator (Reviewers excluded)
-  const canUpload = isOwner || ["Maintainer", "Collaborator"].includes(userRole);
+  const isAdmin = currentUser?.role?.role_name?.toLowerCase() === "admin";
+  // Anyone signed in can contribute to a public workspace.
+  const canContribute = isSignedIn && (project?.visibility === "Public" || userRole !== null);
+  const canUpload = isSignedIn && (project?.visibility === "Public" || isOwner || ["Maintainer", "Collaborator"].includes(userRole));
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -188,7 +194,7 @@ export default function ProjectDetail() {
 
   return (
     <Page width="1100px">
-      <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink("/projects")}>Back to Workspaces</Button></View>
+      <View direction="row"><Button variant="ghost" icon={ArrowLeft} {...routerLink(isPublicRoute ? "/workspaces" : "/projects")}>Back to Workspaces</Button></View>
 
       <Card padding={6}>
         <View gap={4}>
@@ -234,6 +240,9 @@ export default function ProjectDetail() {
           <View gap={4}>
             <View direction="row" justify="space-between" align="center">
               <View direction="row" align="center" gap={2}><FileText size={20} aria-hidden="true" /><Text as="h2" variant="featured-5" weight="bold">Shared Assets &amp; Files</Text></View>
+              {!isSignedIn && project.visibility === "Public" && (
+                <Button variant="outline" {...routerLink("/login")}>Sign in to upload</Button>
+              )}
               {canUpload && (
                 <>
                   <input id="project-file" type="file" hidden onChange={handleFileUpload} disabled={uploading} />
@@ -254,7 +263,7 @@ export default function ProjectDetail() {
                       </View>
                       <View direction="row" gap={1} shrink={false}>
                         <Button variant="ghost" size="small" icon={Download} href={`${backendUrl}/storage/${file.file_path}`} attributes={{ target: "_blank", rel: "noreferrer", "aria-label": "Download", title: "Download" }} />
-                        {(canManage || currentUser?.id === file.uploaded_by) && (
+                        {(canManage || isAdmin || (isSignedIn && currentUser?.id === file.uploaded_by)) && (
                           <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDeleteFile(file.id)} attributes={{ "aria-label": "Delete file", title: "Delete" }} />
                         )}
                       </View>
@@ -275,7 +284,7 @@ export default function ProjectDetail() {
                   <View gap={2}>
                     <View direction="row" justify="space-between" align="center">
                       <Text variant="body-2" weight="bold">{fb.user?.name || "Anonymous"}</Text>
-                      {(canManage || currentUser?.id === fb.user_id) && (
+                      {(canManage || isAdmin || (isSignedIn && currentUser?.id === fb.user_id)) && (
                         <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDeleteFeedback(fb.id)} attributes={{ "aria-label": "Delete feedback" }} />
                       )}
                     </View>
@@ -284,12 +293,16 @@ export default function ProjectDetail() {
                 </Card>
               ))
             )}
+            {!isSignedIn ? (
+              <Card padding={4}><View direction="row" align="center" justify="space-between" gap={3} wrap><Text variant="body-2" color="neutral-faded">Sign in to join the discussion.</Text><Button variant="outline" {...routerLink("/login")}>Sign in</Button></View></Card>
+            ) : canContribute && (
             <form onSubmit={handleAddFeedback}>
               <View gap={3}>
                 <TextArea name="feedback" placeholder="Leave technical feedback or ask a project question..." value={feedbackText} onChange={({ value }) => setFeedbackText(value)} inputAttributes={{ rows: 3, required: true, "aria-label": "Feedback" }} />
                 <View direction="row"><Button type="submit" color="primary" icon={Send} loading={postingFeedback}>Post Comment</Button></View>
               </View>
             </form>
+            )}
           </View>
         </View>
 
