@@ -149,6 +149,7 @@ export default function App() {
 
             <Route path="/dashboard/events" element={<EventIndex />} />
             <Route path="/dashboard/events/create" element={<EventCreate />} />
+            <Route path="/dashboard/events/:id/edit" element={<EventCreate />} />
             <Route path="/dashboard/events/:id" element={<EventShow />} />
 
             <Route path="/dashboard/podcasts" element={<PodcastIndex />} />

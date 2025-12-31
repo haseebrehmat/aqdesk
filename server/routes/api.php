@@ -128,6 +128,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::delete('/feedback/{feedbackId}', [ProjectController::class, 'deleteFeedback']);
 
     // Events
+    Route::put('/events/{event}', [EventController::class, 'update']);
+    Route::delete('/events/{event}', [EventController::class, 'destroy']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::delete('/events/{event}/register', [EventController::class, 'unregister']);
     Route::get('/events/{event}/calendar', [EventController::class, 'calendar']);

@@ -1,12 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Card, View } from 'reshaped';
 import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
 import { Page, PageHeader, FormField } from '../../components/ui';
 import { routerLink } from '../../components/RouterLink';
 
+// ISO timestamp -> value for <input type="datetime-local"> in local time
+const toLocalInput = (iso) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 export default function EventCreate() {
+    const { id } = useParams();
+    const isEdit = Boolean(id);
     const navigate = useNavigate();
     const { addToast } = useToast();
     const [submitting, setSubmitting] = useState(false);
@@ -19,6 +29,20 @@ export default function EventCreate() {
         max_attendees: '',
     });
     const [errors, setErrors] = useState({});
+    useEffect(() => {
+        if (!isEdit) return;
+        api.get(`/events/${id}`)
+            .then(({ data }) => setForm({
+                title: data.title || '',
+                description: data.description || '',
+                webinar_url: data.webinar_url || '',
+                scheduled_at: toLocalInput(data.scheduled_at),
+                ends_at: toLocalInput(data.ends_at),
+                max_attendees: data.max_attendees || '',
+            }))
+            .catch(() => addToast('Failed to load the event.', 'error'));
+    }, [id, isEdit, addToast]);
+
     const set = (key) => (value) => setForm((prev) => ({ ...prev, [key]: value }));
 
     const handleSubmit = async (e) => {
@@ -27,9 +51,14 @@ export default function EventCreate() {
         setErrors({});
 
         try {
-            await api.post('/events', form);
-            addToast('Event created successfully!', 'success');
-            navigate('/dashboard/events');
+            if (isEdit) {
+                await api.put(`/events/${id}`, form);
+                addToast('Event updated successfully!', 'success');
+            } else {
+                await api.post('/events', form);
+                addToast('Event created successfully!', 'success');
+            }
+            navigate(isEdit ? `/dashboard/events/${id}` : '/dashboard/events');
         } catch (error) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
@@ -44,7 +73,7 @@ export default function EventCreate() {
 
     return (
         <Page width="720px">
-            <PageHeader title="Create Event" description="Schedule a webinar or workshop for the community." />
+            <PageHeader title={isEdit ? 'Edit Event' : 'Create Event'} description={isEdit ? 'Update the details of this event.' : 'Schedule a webinar or workshop for the community.'} />
             <Card padding={6}>
                 <form onSubmit={handleSubmit}>
                     <View gap={4}>

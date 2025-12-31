@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/format';
 import { routerLink } from '../../components/RouterLink';
 
 export default function EventIndex() {
-    const { addToast } = useToast();
+    const { addToast, confirm } = useToast();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,6 +28,19 @@ export default function EventIndex() {
     useEffect(() => {
         fetchEvents();
     }, []);
+
+    const isAdmin = currentUser?.role?.role_name?.toLowerCase() === 'admin';
+
+    const handleDelete = async (eventId) => {
+        if (!(await confirm('Delete this event? Registered attendees will lose their registration.', { title: 'Delete event', confirmLabel: 'Delete' }))) return;
+        try {
+            await api.delete(`/events/${eventId}`);
+            setEvents((list) => list.filter((e) => e.id !== eventId));
+            addToast('Event deleted.', 'success');
+        } catch (error) {
+            addToast(error.response?.data?.message || 'Failed to delete the event.', 'error');
+        }
+    };
 
     const handleRegister = async (eventId) => {
         try {
@@ -60,7 +73,7 @@ export default function EventIndex() {
             ) : (
                 <View gap={4}>
                     {events.map((event) => {
-                        const isHost = event.host_id === currentUser?.id || event.host?.id === currentUser?.id;
+                        const isHost = event.creator_id === currentUser?.id || event.host?.id === currentUser?.id;
                         const isRegistered = event.attendees?.some((attendee) => attendee.id === currentUser?.id);
                         return (
                             <Card key={event.id} padding={5}>
@@ -80,7 +93,13 @@ export default function EventIndex() {
                                     </View>
                                     <View align={{ s: 'start', m: 'end' }} justify="space-between" gap={3}>
                                         <Text variant="caption-1" color="neutral-faded">Host: {event.host?.name || 'Anonymous'}</Text>
-                                        <View direction="row" align="center" gap={2}>
+                                        <View direction="row" align="center" gap={2} wrap>
+                                            {(isHost || isAdmin) && (
+                                                <>
+                                                    <Button variant="outline" size="small" {...routerLink(`/dashboard/events/${event.id}/edit`)}>Edit</Button>
+                                                    <Button variant="outline" size="small" color="critical" onClick={() => handleDelete(event.id)}>Delete</Button>
+                                                </>
+                                            )}
                                             <Button variant="ghost" color="primary" {...routerLink(`/dashboard/events/${event.id}`)}>View Details →</Button>
                                             {isHost ? (
                                                 <Badge color="positive" variant="faded">Hosting</Badge>

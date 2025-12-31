@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Badge, Button, Card, Loader, Text, View } from 'reshaped';
 import { ArrowLeft } from '../../components/icons';
 import api from '../../api/axios';
@@ -10,7 +10,8 @@ import { routerLink } from '../../components/RouterLink';
 export default function EventShow() {
     const { id } = useParams();
     const location = useLocation();
-    const { addToast } = useToast();
+    const navigate = useNavigate();
+    const { addToast, confirm } = useToast();
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -43,6 +44,17 @@ export default function EventShow() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!(await confirm('Delete this event? Registered attendees will lose their registration.', { title: 'Delete event', confirmLabel: 'Delete' }))) return;
+        try {
+            await api.delete(`/events/${id}`);
+            addToast('Event deleted.', 'success');
+            navigate(location.pathname.startsWith('/dashboard/') ? '/dashboard/events' : '/events');
+        } catch (error) {
+            addToast(error.response?.data?.message || 'Failed to delete the event.', 'error');
+        }
+    };
+
     const downloadCalendarInvite = async () => {
         try {
             const response = await api.get(`/events/${id}/calendar`, { responseType: 'blob' });
@@ -61,6 +73,8 @@ export default function EventShow() {
     if (!event) return <Page width="800px"><EmptyState title="Event not found." /></Page>;
 
     const isRegistered = event.attendees?.some(attendee => attendee.id === currentUser.id);
+    const isAdmin = currentUser?.role?.role_name?.toLowerCase() === 'admin';
+    const canManage = !!currentUser?.id && (isAdmin || event.creator_id === currentUser.id);
     const backTo = location.pathname.startsWith('/dashboard/') ? '/dashboard/events' : '/events';
 
     return (
@@ -87,6 +101,12 @@ export default function EventShow() {
                             </Button>
                         )}
                     </View>
+                    {canManage && (
+                        <View direction="row" gap={2}>
+                            <Button variant="outline" {...routerLink(`/dashboard/events/${event.id}/edit`)}>Edit Event</Button>
+                            <Button variant="outline" color="critical" onClick={handleDelete}>Delete Event</Button>
+                        </View>
+                    )}
                 </View>
             </Card>
         </Page>

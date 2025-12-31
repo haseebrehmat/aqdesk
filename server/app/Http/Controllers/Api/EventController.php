@@ -43,6 +43,52 @@ class EventController extends Controller
         return response()->json($event->load(['host', 'attendees'])->loadCount('attendees'));
     }
 
+    private function authorizeManage(Request $request, Event $event): void
+    {
+        $user = $request->user()->loadMissing('role');
+        $isAdmin = strtolower((string) $user->role?->role_name) === 'admin';
+        abort_unless($isAdmin || (int) $event->creator_id === (int) $user->id, 403, 'Only the host or an admin can change this event.');
+    }
+
+    public function update(Request $request, Event $event): JsonResponse
+    {
+        $this->authorizeManage($request, $event);
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'webinar_url' => ['required', 'url'],
+            'scheduled_at' => ['required', 'date'],
+            'ends_at' => ['nullable', 'date', 'after:scheduled_at'],
+            'max_attendees' => ['nullable', 'integer', 'min:1', 'max:100000'],
+        ]);
+
+        // Capacity can't drop below the people already registered.
+        if (! empty($validated['max_attendees']) && $event->attendees()->count() > $validated['max_attendees']) {
+            return response()->json([
+                'message' => 'Maximum attendees cannot be lower than the current registrations.',
+                'errors' => ['max_attendees' => ['Cannot be lower than the '.$event->attendees()->count().' people already registered.']],
+            ], 422);
+        }
+
+        $event->update($validated);
+
+        return response()->json([
+            'message' => 'Event updated successfully.',
+            'data' => $event->load(['host', 'attendees'])->loadCount('attendees'),
+        ]);
+    }
+
+    public function destroy(Request $request, Event $event): JsonResponse
+    {
+        $this->authorizeManage($request, $event);
+
+        $event->attendees()->detach();
+        $event->delete();
+
+        return response()->json(['message' => 'Event deleted successfully.']);
+    }
+
     public function register(Request $request, Event $event): JsonResponse
     {
         return DB::transaction(function () use ($request, $event) {
