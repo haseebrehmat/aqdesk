@@ -4,17 +4,20 @@ import { Badge, Button, Card, Divider, Loader, Text, TextArea, View } from "resh
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import MarkdownContent from "../components/MarkdownContent";
-import { ThumbsUp, ThumbsDown, CheckCircle2, Eye, Send, ArrowLeft, Check, Flag } from "../components/icons";
+import { VoteUp, VoteDown, CheckCircle2, Eye, Send, ArrowLeft, Check, Flag } from "../components/icons";
 import { Page, EmptyState } from "../components/ui"
 import { formatDate } from "../utils/format";
 import { routerLink } from "../components/RouterLink";
 
-function VoteControl({ votes, current, onUp, onDown, label }) {
+function VoteControl({ votes, current, onUp, onDown, label, disabled = false, disabledReason = "" }) {
+  const upLabel = disabled ? disabledReason : `Upvote ${label}`;
+  const downLabel = disabled ? disabledReason : `Downvote ${label}`;
+
   return (
     <View direction="row" align="center" gap={1} borderRadius="medium" border paddingInline={1}>
-      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="small" icon={ThumbsUp} onClick={onUp} attributes={{ "aria-label": `Upvote ${label}`, title: `Upvote ${label}` }} />
+      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="small" icon={VoteUp} onClick={onUp} disabled={disabled} attributes={{ "aria-label": upLabel, title: upLabel }} />
       <Text variant="body-2" weight="bold">{votes ?? 0}</Text>
-      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="small" icon={ThumbsDown} onClick={onDown} attributes={{ "aria-label": `Downvote ${label}`, title: `Downvote ${label}` }} />
+      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="small" icon={VoteDown} onClick={onDown} disabled={disabled} attributes={{ "aria-label": downLabel, title: downLabel }} />
     </View>
   );
 }
@@ -33,6 +36,12 @@ export default function QuestionDetail() {
   useEffect(() => {
     fetchQuestion();
   }, [slug]);
+
+  useEffect(() => {
+    if (!loading && question && location.hash === "#answers") {
+      document.getElementById("answers")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [loading, question, location.hash]);
 
   const fetchQuestion = async () => {
     try {
@@ -54,8 +63,8 @@ export default function QuestionDetail() {
         net_votes: res.data.net_votes,
         user_vote: res.data.user_vote,
       });
-    } catch {
-      addToast("Please sign in to vote.", "error");
+    } catch (error) {
+      addToast(error.response?.data?.message || (error.response?.status === 401 ? "Please sign in to vote." : "Unable to record your vote."), "error");
     }
   };
 
@@ -70,8 +79,8 @@ export default function QuestionDetail() {
             : ans
         ),
       });
-    } catch {
-      addToast("Please sign in to vote.", "error");
+    } catch (error) {
+      addToast(error.response?.data?.message || (error.response?.status === 401 ? "Please sign in to vote." : "Unable to record your vote."), "error");
     }
   };
 
@@ -105,14 +114,14 @@ export default function QuestionDetail() {
     setSubmitting(true);
     try {
       const res = await api.post(`/questions/${slug}/answers`, { body: answerBody });
-      setQuestion({
-        ...question,
-        answers: [...(question.answers || []), res.data.answer],
-      });
+      setQuestion((prev) => ({
+        ...prev,
+        answers: [...(prev.answers || []), { ...res.data.answer, net_votes: 0, user_vote: 0 }],
+      }));
       setAnswerBody("");
       addToast("Answer posted successfully!", "success");
-    } catch {
-      addToast("Failed to post answer.", "error");
+    } catch (error) {
+      addToast(error.response?.data?.message || (error.response?.status === 401 ? "Please sign in to post an answer." : "Failed to post answer."), "error");
     } finally {
       setSubmitting(false);
     }
@@ -136,7 +145,8 @@ export default function QuestionDetail() {
   if (loading) return <View align="center" padding={12}><Loader /></View>;
   if (!question) return <Page width="900px"><EmptyState title="Question not found." /></Page>;
 
-  const isQuestionOwner = currentUser?.id === question.user_id;
+  const isSignedIn = Boolean(localStorage.getItem("token"));
+  const isQuestionOwner = Number(currentUser?.id) === Number(question.user_id);
   const backTo = location.pathname.startsWith("/dashboard/") ? "/dashboard/questions" : "/questions";
 
   return (
@@ -154,7 +164,15 @@ export default function QuestionDetail() {
               {currentUser.id && !isQuestionOwner && (
                 <Button variant="ghost" color="warning" size="small" icon={Flag} onClick={() => reportContent("question", question.id)}>Report</Button>
               )}
-              <VoteControl votes={question.net_votes} current={question.user_vote} onUp={() => handleVoteQuestion(1)} onDown={() => handleVoteQuestion(-1)} label="question" />
+              <VoteControl
+                votes={question.net_votes}
+                current={question.user_vote}
+                onUp={() => handleVoteQuestion(1)}
+                onDown={() => handleVoteQuestion(-1)}
+                label="question"
+                disabled={isQuestionOwner}
+                disabledReason="You cannot vote on your own question"
+              />
               <View direction="row" align="center" gap={1}><Eye size={14} aria-hidden="true" /><Text variant="caption-1" color="neutral-faded">{question.views} views</Text></View>
               <Text variant="caption-1" color="neutral-faded">{formatDate(question.created_at)}</Text>
             </View>
@@ -162,7 +180,7 @@ export default function QuestionDetail() {
         </View>
       </Card>
 
-      <View gap={4}>
+      <View gap={4} attributes={{ id: "answers" }}>
         <Text as="h2" variant="featured-5" weight="bold">{question.answers?.length || 0} Answers</Text>
         {question.answers?.map((ans) => (
           <Card key={ans.id} padding={5} attributes={ans.is_accepted ? { style: { borderColor: "var(--rs-color-border-positive)" } } : undefined}>
@@ -181,7 +199,15 @@ export default function QuestionDetail() {
               <Divider />
               <View direction="row" justify="space-between" align="center" wrap gap={3}>
                 <Text variant="caption-1" color="neutral-faded">Answered by <strong>{ans.user?.name || "Anonymous"}</strong></Text>
-                <VoteControl votes={ans.net_votes} current={ans.user_vote} onUp={() => handleVoteAnswer(ans.id, 1)} onDown={() => handleVoteAnswer(ans.id, -1)} label="answer" />
+                <VoteControl
+                  votes={ans.net_votes}
+                  current={ans.user_vote}
+                  onUp={() => handleVoteAnswer(ans.id, 1)}
+                  onDown={() => handleVoteAnswer(ans.id, -1)}
+                  label="answer"
+                  disabled={Number(currentUser?.id) === Number(ans.user_id)}
+                  disabledReason="You cannot vote on your own answer"
+                />
                 {currentUser.id && Number(currentUser.id) !== Number(ans.user_id) && (
                   <Button variant="ghost" color="warning" size="small" icon={Flag} onClick={() => reportContent("answer", ans.id)}>Report</Button>
                 )}
@@ -192,20 +218,28 @@ export default function QuestionDetail() {
       </View>
 
       <Card padding={6}>
-        <form onSubmit={handlePostAnswer}>
-          <View gap={4}>
-            <Text as="h2" variant="featured-5" weight="bold">Your Answer</Text>
-            <TextArea
-              name="answer"
-              placeholder="Write your solution using Markdown..."
-              value={answerBody}
-              onChange={({ value }) => setAnswerBody(value)}
-              inputAttributes={{ rows: 5, required: true, "aria-label": "Your answer" }}
-            />
-            <Text variant="caption-1" color="neutral-faded">Markdown is supported. Raw HTML is ignored for safety.</Text>
-            <View direction="row"><Button type="submit" color="primary" icon={Send} loading={submitting}>Post Answer</Button></View>
+        {isSignedIn ? (
+          <form onSubmit={handlePostAnswer}>
+            <View gap={4}>
+              <Text as="h2" variant="featured-5" weight="bold">Your Answer</Text>
+              <TextArea
+                name="answer"
+                placeholder="Write your solution using Markdown..."
+                value={answerBody}
+                onChange={({ value }) => setAnswerBody(value)}
+                inputAttributes={{ rows: 5, required: true, "aria-label": "Your answer" }}
+              />
+              <Text variant="caption-1" color="neutral-faded">Markdown is supported. Raw HTML is ignored for safety.</Text>
+              <View direction="row"><Button type="submit" color="primary" icon={Send} loading={submitting}>Post Answer</Button></View>
+            </View>
+          </form>
+        ) : (
+          <View gap={3} align="start">
+            <Text as="h2" variant="featured-5" weight="bold">Join the discussion</Text>
+            <Text color="neutral-faded">Answers are public to read. Sign in to post your own answer or vote.</Text>
+            <Button color="primary" {...routerLink("/login")}>Sign in to answer</Button>
           </View>
-        </form>
+        )}
       </Card>
     </Page>
   );

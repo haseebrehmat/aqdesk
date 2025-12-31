@@ -2,7 +2,7 @@ import { materialIcon } from './MaterialIcon';
 
 // Semantic icon vocabulary for the application. Component names intentionally
 // match the concepts used by screens so icon choices stay consistent.
-export const Add = materialIcon('add_circle');
+export const Add = materialIcon('add_box');
 export const AlertCircle = materialIcon('error');
 export const ArrowLeft = materialIcon('arrow_back');
 export const ArrowRight = materialIcon('arrow_forward');
@@ -37,7 +37,7 @@ export const Mail = materialIcon('mail');
 export const MapPin = materialIcon('location_on');
 export const Menu = materialIcon('menu');
 export const MessageSquare = materialIcon('question_answer');
-export const Mic2 = materialIcon('podcasts');
+export const Mic2 = materialIcon('headphones');
 export const Play = materialIcon('play_circle');
 export const Plus = Add;
 export const PlusCircle = Add;
@@ -67,4 +67,8 @@ export const LeftPanelOpen = materialIcon('left_panel_open');
 export const Newsletter = materialIcon('mark_email_unread');
 export const Podcast = Mic2;
 export const Settings = materialIcon('tune');
-export const Workspaces = materialIcon('workspaces');
+export const Workspaces = materialIcon('folder_copy');
+export const Answers = materialIcon('forum');
+export const Profile = materialIcon('account_circle');
+export const VoteDown = materialIcon('arrow_circle_down');
+export const VoteUp = materialIcon('arrow_circle_up');
