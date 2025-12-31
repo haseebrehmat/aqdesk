@@ -62,7 +62,11 @@ class ApplicationController extends Controller
             $rules['applicant_name'] = 'required|string|max:255';
             $rules['applicant_email'] = 'required|email|max:255';
         }
-        $request->validate($rules);
+        $request->validate($rules, [
+            'resume.max' => 'The resume may not be larger than 2 MB.',
+            'resume.mimes' => 'The resume must be a PDF file.',
+            'resume.uploaded' => 'The resume upload failed. Files must be 2 MB or smaller.',
+        ]);
 
         $opportunity = Opportunity::findOrFail($request->opportunity_id);
         if (! $opportunity->accepts_applications) {

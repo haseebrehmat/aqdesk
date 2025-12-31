@@ -11,6 +11,15 @@ class StorePodcastRequest extends FormRequest
         return true;
     }
 
+    public function messages(): array
+    {
+        return [
+            'audio.max' => 'The audio file may not be larger than 100 MB.',
+            'audio.mimes' => 'The audio file must be an MP3.',
+            'audio.uploaded' => 'The audio upload failed. Files must be 100 MB or smaller.',
+        ];
+    }
+
     public function rules(): array
     {
         return [

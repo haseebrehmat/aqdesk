@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Card, Divider, FormControl, Grid, Loader, Text, T
 import opportunityService from '../../services/opportunityService';
 import { MapPin, Building2, UploadCloud, ArrowLeft, FileText } from '../../components/icons';
 import { Page, EmptyState, NativeSelect } from '../../components/ui'
+import { MAX_RESUME_MB, validateUpload } from '../../utils/limits';
 import { formatDate } from '../../utils/format';
 import ResumeButton from '../../components/ResumeModal';
 import { routerLink } from '../../components/RouterLink';
@@ -254,9 +255,15 @@ export default function OpportunityDetail() {
                         id="resume-upload"
                         type="file"
                         accept="application/pdf,.pdf"
-                        onChange={(e) => setResume(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0] || null;
+                          const problem = validateUpload(file, { extension: 'pdf', maxMb: MAX_RESUME_MB, label: 'Resume' });
+                          setError(problem);
+                          setResume(problem ? null : file);
+                          if (problem) e.target.value = '';
+                        }}
                       />
-                      <Text variant="caption-1" color="neutral-faded">PDF only (Max 2MB)</Text>
+                      <Text variant="caption-1" color="neutral-faded">PDF only, maximum {MAX_RESUME_MB} MB.</Text>
                       {resume && <View direction="row" align="center" gap={1}><FileText size={14} aria-hidden="true" /><Text variant="caption-1" color="primary">Selected: {resume.name}</Text></View>}
                     </View>
                     <Button type="submit" color="primary" fullWidth icon={UploadCloud} loading={submitting}>Submit Application</Button>

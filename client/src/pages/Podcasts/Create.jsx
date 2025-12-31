@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Text, View } from 'reshaped';
+import { MAX_AUDIO_MB, validateUpload } from '../../utils/limits';
 import { formatDuration } from '../../utils/format';
 import api from '../../api/axios';
 import { useToast } from '../../components/ToastContainer';
@@ -23,8 +24,15 @@ export default function PodcastCreate() {
 
     const handleAudio = (e) => {
         const file = e.target.files[0] || null;
-        setAudio(file);
         setDurationSeconds(0);
+        const problem = validateUpload(file, { extension: 'mp3', maxMb: MAX_AUDIO_MB, label: 'Audio file' });
+        setErrors(problem ? { audio: [problem] } : {});
+        if (problem) {
+            e.target.value = '';
+            setAudio(null);
+            return;
+        }
+        setAudio(file);
         if (!file) return;
         // Read the length from the file itself so listeners see the runtime.
         const url = URL.createObjectURL(file);
@@ -78,7 +86,7 @@ export default function PodcastCreate() {
                         <View gap={2}>
                             <Text as="label" variant="body-2" weight="medium" attributes={{ htmlFor: 'audio-upload' }}>Audio File (MP3)</Text>
                             <input id="audio-upload" type="file" accept="audio/mpeg,.mp3" onChange={handleAudio} />
-                            <Text variant="caption-1" color="neutral-faded">MP3 only, up to 100 MB.{durationSeconds ? ` Length: ${formatDuration(durationSeconds)}` : ''}</Text>
+                            <Text variant="caption-1" color="neutral-faded">MP3 only, maximum {MAX_AUDIO_MB} MB.{durationSeconds ? ` Length: ${formatDuration(durationSeconds)}` : ''}</Text>
                             {errors.audio && <Text variant="caption-1" color="critical" attributes={{ role: 'alert' }}>{errors.audio[0]}</Text>}
                         </View>
                         <FormField label="Cover Image URL" name="cover_image_url" type="url" value={form.cover_image_url} onChange={set('cover_image_url')} error={errors.cover_image_url} />
