@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Badge, Button, Card, FormControl, Loader, Modal, Text, TextArea, TextField, View } from "reshaped";
+import { Badge, Button, Card, FormControl, Grid, Link, Loader, Modal, Text, TextArea, TextField, View } from "reshaped";
 import api from "../api/axios";
 import { useToast } from "../components/ToastContainer";
 import { Search, PlusCircle, Trash2, Edit } from "../components/icons";
@@ -176,33 +176,35 @@ export default function QAIndex() {
       ) : filteredQuestions.length === 0 ? (
         <EmptyState title="No questions found" description="Be the first one to ask a question!" />
       ) : (
-        <View gap={4}>
+        <Grid columns={{ s: 1, m: 2, l: 3, xl: 4 }} gap={4}>
           {filteredQuestions.map((q) => (
-            <Card key={q.id} padding={5}>
-              <View direction={{ s: "column", m: "row" }} justify="space-between" gap={4}>
-                <View gap={2} grow attributes={{ style: { minWidth: 0 } }}>
-                  <Button variant="ghost" color="primary" {...routerLink(`/dashboard/questions/${q.slug}`)}>{q.title}</Button>
-                  <Text variant="body-2" color="neutral-faded" maxLines={2}>{q.body}</Text>
+            <Card key={q.id} padding={5} height="100%">
+              <View gap={3} height="100%" justify="space-between">
+                <View gap={2} attributes={{ style: { minWidth: 0 } }}>
+                  <Link {...routerLink(`/dashboard/questions/${q.slug}`)} variant="plain">
+                    <Text variant="body-1" weight="bold" maxLines={2}>{q.title}</Text>
+                  </Link>
+                  <Text variant="body-2" color="neutral-faded" maxLines={3}>{q.body}</Text>
                   <View direction="row" gap={2} wrap>
                     {q.tags?.map((tag) => <Badge key={tag.id} variant="faded">{tag.tag_name}</Badge>)}
                   </View>
                 </View>
-                <View align={{ s: "start", m: "end" }} gap={2} shrink={false}>
-                  <View direction="row" align="center" gap={1}>
-                    <Text variant="caption-1" color="neutral-faded">{q.user?.name || "Anonymous"}</Text>
-                    {currentUser?.id === q.user_id && (
-                      <>
-                        <Button variant="ghost" size="small" icon={Edit} onClick={() => handleOpenModal(q)} attributes={{ "aria-label": "Edit question", title: "Edit Question" }} />
-                        <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDelete(q.slug)} attributes={{ "aria-label": "Delete question", title: "Delete Question" }} />
-                      </>
-                    )}
+                <View gap={2}>
+                  <View direction="row" align="center" justify="space-between" gap={2} borderTop paddingTop={3}>
+                    <Text variant="caption-1" color="neutral-faded" maxLines={1}>{q.user?.name || "Anonymous"}</Text>
+                    <Badge color="primary" variant="faded">{q.answers_count ?? q.answers?.length ?? 0} answers</Badge>
                   </View>
-                  <Badge color="primary" variant="faded">{q.answers_count ?? q.answers?.length ?? 0} answers</Badge>
+                  {currentUser?.id === q.user_id && (
+                    <View direction="row" gap={1}>
+                      <Button variant="ghost" size="small" icon={Edit} onClick={() => handleOpenModal(q)} attributes={{ "aria-label": "Edit question", title: "Edit Question" }} />
+                      <Button variant="ghost" size="small" color="critical" icon={Trash2} onClick={() => handleDelete(q.slug)} attributes={{ "aria-label": "Delete question", title: "Delete Question" }} />
+                    </View>
+                  )}
                 </View>
               </View>
             </Card>
           ))}
-        </View>
+        </Grid>
       )}
 
       <Modal active={isModalOpen} onClose={() => setIsModalOpen(false)} size="640px" padding={6}>
