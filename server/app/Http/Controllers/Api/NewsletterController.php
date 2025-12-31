@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\CommunityUpdate;
 use App\Models\Newsletter;
+use App\Models\NewsletterCampaign;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class NewsletterController extends Controller
 {
+    private const COHORTS = ['All', 'General', 'AI', 'Web Development', 'EdTech', 'Internet Governance'];
+
     public function subscribe(Request $request)
     {
         $validated = $request->validate([
@@ -38,7 +41,7 @@ class NewsletterController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string|max:150',
             'body' => 'required|string|min:10|max:10000',
-            'cohort' => ['nullable', Rule::in(['All', 'General', 'AI', 'Web Development', 'EdTech', 'Internet Governance'])],
+            'cohort' => ['nullable', Rule::in(self::COHORTS)],
         ]);
 
         $cohort = $validated['cohort'] ?? 'All';
@@ -55,6 +58,62 @@ class NewsletterController extends Controller
             'message' => 'Community update queued successfully.',
             'queued_recipients' => $subscribers->count(),
             'cohort' => $cohort,
+        ]);
+    }
+
+    public function campaigns()
+    {
+        return response()->json(NewsletterCampaign::with('creator')->latest()->get());
+    }
+
+    public function storeDraft(Request $request)
+    {
+        $validated = $this->campaignData($request);
+        $campaign = NewsletterCampaign::create([
+            ...$validated,
+            'created_by' => $request->user()->id,
+            'status' => 'Draft',
+        ]);
+
+        return response()->json(['message' => 'Campaign draft saved.', 'campaign' => $campaign], 201);
+    }
+
+    public function updateDraft(Request $request, NewsletterCampaign $campaign)
+    {
+        abort_if($campaign->status !== 'Draft', 422, 'Only draft campaigns can be edited.');
+        $campaign->update($this->campaignData($request));
+
+        return response()->json(['message' => 'Campaign draft updated.', 'campaign' => $campaign]);
+    }
+
+    public function sendDraft(NewsletterCampaign $campaign)
+    {
+        abort_if($campaign->status !== 'Draft', 422, 'This campaign has already been sent.');
+        $subscribers = Newsletter::where('is_active', true)
+            ->when($campaign->cohort !== 'All', fn ($query) => $query->where('cohort', $campaign->cohort))
+            ->get(['email']);
+        foreach ($subscribers as $subscriber) {
+            Mail::to($subscriber->email)->queue(new CommunityUpdate($campaign->subject, $campaign->body));
+        }
+        $campaign->update([
+            'status' => 'Sent',
+            'sent_at' => now(),
+            'queued_recipients' => $subscribers->count(),
+        ]);
+
+        return response()->json([
+            'message' => 'Campaign queued successfully.',
+            'campaign' => $campaign->fresh(),
+            'queued_recipients' => $subscribers->count(),
+        ]);
+    }
+
+    private function campaignData(Request $request): array
+    {
+        return $request->validate([
+            'subject' => 'required|string|max:150',
+            'body' => 'required|string|min:10|max:10000',
+            'cohort' => ['required', Rule::in(self::COHORTS)],
         ]);
     }
 }

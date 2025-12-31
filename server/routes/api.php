@@ -53,6 +53,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::patch('/opportunities/{opportunity}/status', [OpportunityController::class, 'moderate']);
         Route::get('/newsletter/subscribers', [NewsletterController::class, 'index']);
         Route::post('/newsletter/campaigns', [NewsletterController::class, 'broadcast']);
+        Route::get('/newsletter/campaigns', [NewsletterController::class, 'campaigns']);
+        Route::post('/newsletter/campaigns/drafts', [NewsletterController::class, 'storeDraft']);
+        Route::put('/newsletter/campaigns/{campaign}', [NewsletterController::class, 'updateDraft']);
+        Route::post('/newsletter/campaigns/{campaign}/send', [NewsletterController::class, 'sendDraft']);
         Route::get('/content-reports', [ContentReportController::class, 'index']);
         Route::patch('/content-reports/{report}', [ContentReportController::class, 'moderate']);
     });
