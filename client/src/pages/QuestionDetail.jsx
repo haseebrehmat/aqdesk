@@ -9,6 +9,11 @@ import { Page, EmptyState } from "../components/ui"
 import { formatDate } from "../utils/format";
 import { routerLink } from "../components/RouterLink";
 
+function voteErrorMessage(error) {
+  if (error.response?.status === 401) return "Please sign in to vote.";
+  return error.response?.data?.message || "Unable to record your vote.";
+}
+
 function VoteControl({ votes, current, onUp, onDown, label }) {
   return (
     <View direction="row" align="center" gap={1} borderRadius="medium" border paddingInline={1}>
@@ -61,7 +66,7 @@ export default function QuestionDetail() {
         user_vote: res.data.user_vote,
       });
     } catch (error) {
-      addToast(error.response?.data?.message || (error.response?.status === 401 ? "Please sign in to vote." : "Unable to record your vote."), "error");
+      addToast(voteErrorMessage(error), "error");
     }
   };
 
@@ -77,7 +82,7 @@ export default function QuestionDetail() {
         ),
       });
     } catch (error) {
-      addToast(error.response?.data?.message || (error.response?.status === 401 ? "Please sign in to vote." : "Unable to record your vote."), "error");
+      addToast(voteErrorMessage(error), "error");
     }
   };
 

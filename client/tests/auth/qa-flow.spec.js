@@ -36,12 +36,14 @@ const question = {
 
 let publicVoteCount;
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
   publicVoteCount = question.net_votes;
-  await page.addInitScript(({ user }) => {
-    localStorage.setItem('token', 'qa-test-token');
-    localStorage.setItem('user', JSON.stringify(user));
-  }, { user: signedInUser });
+  if (!testInfo.title.includes('guest voting')) {
+    await page.addInitScript(({ user }) => {
+      localStorage.setItem('token', 'qa-test-token');
+      localStorage.setItem('user', JSON.stringify(user));
+    }, { user: signedInUser });
+  }
 
   await page.route('**/api/**', async (route) => {
     const request = route.request();
@@ -56,11 +58,19 @@ test.beforeEach(async ({ page }) => {
       return;
     }
     if (request.method() === 'POST' && url.pathname === '/api/questions/api-testing/vote') {
+      if (!request.headers().authorization) {
+        await route.fulfill({ status: 401, json: { message: 'Unauthenticated.' } });
+        return;
+      }
       publicVoteCount = 4;
       await route.fulfill({ json: { net_votes: publicVoteCount, user_vote: 1 } });
       return;
     }
     if (request.method() === 'POST' && url.pathname === '/api/answers/20/vote') {
+      if (!request.headers().authorization) {
+        await route.fulfill({ status: 401, json: { message: 'Unauthenticated.' } });
+        return;
+      }
       await route.fulfill({ json: { net_votes: 2, user_vote: 1 } });
       return;
     }
@@ -115,4 +125,13 @@ test('public Q&A exposes counts, answers, voting, and answer posting', async ({ 
   await expect(page.getByText('4', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: /API Testing/ }).click();
   await expect(page).toHaveURL(/\/questions\/api-testing$/);
+});
+
+test('guest voting shows a friendly sign-in message', async ({ page }) => {
+  await page.goto('/questions/api-testing');
+
+  await page.getByRole('button', { name: 'Upvote question' }).click();
+
+  await expect(page.getByText('Please sign in to vote.')).toBeVisible();
+  await expect(page.getByText('Unauthenticated.')).toHaveCount(0);
 });
