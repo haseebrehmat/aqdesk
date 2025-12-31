@@ -1,21 +1,21 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\SocialAuthController;
-use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\ApplicationController;
-use App\Http\Controllers\Api\TagController;
-use App\Http\Controllers\Api\OpportunityController;
-use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ConsultationController;
 use App\Http\Controllers\Api\EventController;
-use App\Http\Controllers\Api\PodcastController;
-use App\Http\Controllers\Api\VoteController;
 use App\Http\Controllers\Api\NewsletterController;
+use App\Http\Controllers\Api\OpportunityController;
+use App\Http\Controllers\Api\PodcastController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\QuestionController;
+use App\Http\Controllers\Api\SocialAuthController;
+use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\VoteController;
+use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -62,7 +62,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/questions', [QuestionController::class, 'store']);
     Route::put('/questions/{slug}', [QuestionController::class, 'update']);
     Route::delete('/questions/{slug}', [QuestionController::class, 'destroy']);
-    
+
     Route::post('/questions/{slug}/answers', [AnswerController::class, 'store']);
     Route::patch('/answers/{id}/accept', [AnswerController::class, 'markAccepted']);
 
@@ -107,6 +107,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Events
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::delete('/events/{event}/register', [EventController::class, 'unregister']);
+    Route::get('/events/{event}/calendar', [EventController::class, 'calendar']);
 
     // Podcasts
     Route::delete('/podcasts/{podcast}', [PodcastController::class, 'destroy']);

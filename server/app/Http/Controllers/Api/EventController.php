@@ -73,4 +73,41 @@ class EventController extends Controller
 
         return response()->json(['message' => 'Successfully unregistered from the event.']);
     }
+
+    public function calendar(Request $request, Event $event)
+    {
+        abort_unless($event->attendees()->where('user_id', $request->user()->id)->exists(), 403);
+
+        $escape = static fn (?string $value): string => str_replace(
+            ['\\', ';', ',', "\r\n", "\n"],
+            ['\\\\', '\\;', '\\,', '\\n', '\\n'],
+            $value ?? ''
+        );
+        $startsAt = $event->scheduled_at->copy()->utc()->format('Ymd\THis\Z');
+        $endsAt = ($event->ends_at ?? $event->scheduled_at->copy()->addHour())->copy()->utc()->format('Ymd\THis\Z');
+        $calendar = implode("\r\n", [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//AQDesk//Events//EN',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VEVENT',
+            'UID:event-'.$event->id.'@aqdesk.local',
+            'DTSTAMP:'.now()->utc()->format('Ymd\THis\Z'),
+            'DTSTART:'.$startsAt,
+            'DTEND:'.$endsAt,
+            'SUMMARY:'.$escape($event->title),
+            'DESCRIPTION:'.$escape($event->description),
+            'LOCATION:'.$escape($event->webinar_url),
+            'URL:'.$escape($event->webinar_url),
+            'END:VEVENT',
+            'END:VCALENDAR',
+            '',
+        ]);
+
+        return response($calendar, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="aqdesk-event-'.$event->id.'.ics"',
+        ]);
+    }
 }

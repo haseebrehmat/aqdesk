@@ -75,4 +75,28 @@ class EventCapacityTest extends TestCase
             ->assertJsonPath('is_full', false)
             ->assertJsonPath('remaining_capacity', 1);
     }
+
+    public function test_registered_attendees_can_download_a_calendar_invitation(): void
+    {
+        $expert = $this->user('Expert', 'calendar-host@example.com');
+        $attendee = $this->user('Standard User', 'calendar-attendee@example.com');
+        $outsider = $this->user('Standard User', 'calendar-outsider@example.com');
+        $event = Event::create([
+            'creator_id' => $expert->id,
+            'title' => 'Architecture review webinar',
+            'description' => 'Review scalable application design.',
+            'webinar_url' => 'https://example.com/architecture',
+            'scheduled_at' => now()->addDay(),
+            'ends_at' => now()->addDay()->addHour(),
+        ]);
+        $event->attendees()->attach($attendee->id);
+
+        $this->actingAs($outsider, 'sanctum')->get('/api/events/'.$event->id.'/calendar')->assertForbidden();
+
+        $response = $this->actingAs($attendee, 'sanctum')->get('/api/events/'.$event->id.'/calendar');
+        $response->assertOk()->assertHeader('content-type', 'text/calendar; charset=utf-8');
+        $this->assertStringContainsString('BEGIN:VEVENT', $response->getContent());
+        $this->assertStringContainsString('SUMMARY:Architecture review webinar', $response->getContent());
+        $this->assertStringContainsString('URL:https://example.com/architecture', $response->getContent());
+    }
 }

@@ -38,6 +38,20 @@ export default function EventShow() {
         }
     };
 
+    const downloadCalendarInvite = async () => {
+        try {
+            const response = await api.get(`/events/${id}/calendar`, { responseType: 'blob' });
+            const url = URL.createObjectURL(response.data);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `aqdesk-event-${id}.ics`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            addToast('Unable to download the calendar invitation.', 'error');
+        }
+    };
+
     if (loading) return <div className="p-6 text-center text-white">Loading...</div>;
     if (!event) return <div className="p-6 text-center text-white">Event not found.</div>;
 
@@ -58,9 +72,14 @@ export default function EventShow() {
                 
                 <div className="flex space-x-4 pt-4 border-t border-gray-100">
                     {isRegistered ? (
-                        <button onClick={handleUnregister} className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded-md hover:bg-gray-300">
-                            Unregister
-                        </button>
+                        <>
+                            <button onClick={downloadCalendarInvite} className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
+                                Add to Calendar
+                            </button>
+                            <button onClick={handleUnregister} className="bg-gray-200 text-gray-800 text-sm px-4 py-2 rounded-md hover:bg-gray-300">
+                                Unregister
+                            </button>
+                        </>
                     ) : (
                         <button
                             onClick={handleRegister}
