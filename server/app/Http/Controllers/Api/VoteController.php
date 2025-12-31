@@ -28,10 +28,6 @@ class VoteController extends Controller
 
     private function handleVote($userId, $model, int $type)
     {
-        if ((int) $model->user_id === (int) $userId) {
-            return response()->json(['message' => 'You cannot vote on your own content.'], 422);
-        }
-
         DB::transaction(function () use ($model, $userId, $type) {
             $existingVote = $model->votes()->where('user_id', $userId)->lockForUpdate()->first();
 

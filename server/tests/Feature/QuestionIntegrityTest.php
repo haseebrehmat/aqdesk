@@ -27,7 +27,7 @@ class QuestionIntegrityTest extends TestCase
         ]);
     }
 
-    public function test_authors_cannot_vote_on_their_own_question_or_answer(): void
+    public function test_authors_can_vote_on_their_own_question_and_answer(): void
     {
         $author = $this->member();
         $question = Question::create([
@@ -44,11 +44,15 @@ class QuestionIntegrityTest extends TestCase
 
         $this->actingAs($author, 'sanctum')
             ->postJson('/api/questions/self-vote-question/vote', ['type' => 1])
-            ->assertUnprocessable();
+            ->assertOk()
+            ->assertJsonPath('net_votes', 1)
+            ->assertJsonPath('user_vote', 1);
         $this->actingAs($author, 'sanctum')
-            ->postJson('/api/answers/' . $answer->id . '/vote', ['type' => 1])
-            ->assertUnprocessable();
-        $this->assertDatabaseCount('votes', 0);
+            ->postJson('/api/answers/' . $answer->id . '/vote', ['type' => -1])
+            ->assertOk()
+            ->assertJsonPath('net_votes', -1)
+            ->assertJsonPath('user_vote', -1);
+        $this->assertDatabaseCount('votes', 2);
     }
 
     public function test_question_creation_rejects_more_than_five_tags(): void

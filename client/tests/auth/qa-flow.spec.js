@@ -10,7 +10,7 @@ const signedInUser = {
 
 const question = {
   id: 10,
-  user_id: 7,
+  user_id: 42,
   slug: 'api-testing',
   title: 'API Testing',
   body: 'How should this public API be tested?',
@@ -20,16 +20,16 @@ const question = {
   user_vote: 0,
   answers_count: 1,
   tags: [],
-  user: { id: 7, name: 'Question Author' },
+  user: signedInUser,
   answers: [
     {
       id: 20,
-      user_id: 8,
+      user_id: 42,
       body: 'Use an integration test against the public response.',
       net_votes: 1,
       user_vote: 0,
       is_accepted: false,
-      user: { id: 8, name: 'Answer Author' },
+      user: signedInUser,
     },
   ],
 };
@@ -40,7 +40,7 @@ test.beforeEach(async ({ page }) => {
     localStorage.setItem('user', JSON.stringify(user));
   }, { user: signedInUser });
 
-  await page.route('**/api/questions**', async (route) => {
+  await page.route('**/api/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
 
@@ -54,6 +54,10 @@ test.beforeEach(async ({ page }) => {
     }
     if (request.method() === 'POST' && url.pathname === '/api/questions/api-testing/vote') {
       await route.fulfill({ json: { net_votes: 4, user_vote: 1 } });
+      return;
+    }
+    if (request.method() === 'POST' && url.pathname === '/api/answers/20/vote') {
+      await route.fulfill({ json: { net_votes: 2, user_vote: 1 } });
       return;
     }
     if (request.method() === 'POST' && url.pathname === '/api/questions/api-testing/answers') {
@@ -88,6 +92,9 @@ test('public Q&A exposes counts, answers, voting, and answer posting', async ({ 
 
   await page.getByRole('button', { name: 'Upvote question' }).click();
   await expect(page.getByText('4', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Upvote answer' }).click();
+  await expect(page.getByText('2', { exact: true })).toBeVisible();
 
   await page.getByRole('textbox', { name: 'Your answer' }).fill('This answer was posted from the public detail page.');
   await page.getByRole('button', { name: 'Post Answer' }).click();

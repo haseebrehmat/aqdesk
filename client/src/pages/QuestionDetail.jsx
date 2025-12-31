@@ -9,15 +9,12 @@ import { Page, EmptyState } from "../components/ui"
 import { formatDate } from "../utils/format";
 import { routerLink } from "../components/RouterLink";
 
-function VoteControl({ votes, current, onUp, onDown, label, disabled = false, disabledReason = "" }) {
-  const upLabel = disabled ? disabledReason : `Upvote ${label}`;
-  const downLabel = disabled ? disabledReason : `Downvote ${label}`;
-
+function VoteControl({ votes, current, onUp, onDown, label }) {
   return (
     <View direction="row" align="center" gap={1} borderRadius="medium" border paddingInline={1}>
-      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="small" icon={VoteUp} onClick={onUp} disabled={disabled} attributes={{ "aria-label": upLabel, title: upLabel }} />
+      <Button variant={current === 1 ? "faded" : "ghost"} color={current === 1 ? "primary" : "neutral"} size="small" icon={VoteUp} onClick={onUp} attributes={{ "aria-label": `Upvote ${label}`, title: `Upvote ${label}` }} />
       <Text variant="body-2" weight="bold">{votes ?? 0}</Text>
-      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="small" icon={VoteDown} onClick={onDown} disabled={disabled} attributes={{ "aria-label": downLabel, title: downLabel }} />
+      <Button variant={current === -1 ? "faded" : "ghost"} color={current === -1 ? "critical" : "neutral"} size="small" icon={VoteDown} onClick={onDown} attributes={{ "aria-label": `Downvote ${label}`, title: `Downvote ${label}` }} />
     </View>
   );
 }
@@ -170,8 +167,6 @@ export default function QuestionDetail() {
                 onUp={() => handleVoteQuestion(1)}
                 onDown={() => handleVoteQuestion(-1)}
                 label="question"
-                disabled={isQuestionOwner}
-                disabledReason="You cannot vote on your own question"
               />
               <View direction="row" align="center" gap={1}><Eye size={14} aria-hidden="true" /><Text variant="caption-1" color="neutral-faded">{question.views} views</Text></View>
               <Text variant="caption-1" color="neutral-faded">{formatDate(question.created_at)}</Text>
@@ -205,8 +200,6 @@ export default function QuestionDetail() {
                   onUp={() => handleVoteAnswer(ans.id, 1)}
                   onDown={() => handleVoteAnswer(ans.id, -1)}
                   label="answer"
-                  disabled={Number(currentUser?.id) === Number(ans.user_id)}
-                  disabledReason="You cannot vote on your own answer"
                 />
                 {currentUser.id && Number(currentUser.id) !== Number(ans.user_id) && (
                   <Button variant="ghost" color="warning" size="small" icon={Flag} onClick={() => reportContent("answer", ans.id)}>Report</Button>
